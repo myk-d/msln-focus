@@ -1,6 +1,6 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
-const DB_NAME = 'vellofocus';
+const DB_NAME = 'mslnfocus';
 const DB_VERSION = 3;
 
 export const COLLECTION_STORES = ['lists', 'sections', 'tasks', 'pomodoroPresets', 'tags'] as const;

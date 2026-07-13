@@ -1,75 +1,40 @@
-# React + TypeScript + Vite
+# Focus
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A task manager and Pomodoro timer, built as a single-page React app with an original visual design. Tasks, lists, sections, tags, and Pomodoro presets all persist locally via IndexedDB (structured to mirror Firestore's collection/document shape, for an easy future migration).
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Tasks**
+- Manageable lists, each split into drag-and-drop sortable sections
+- Priority, due date, tags, subtasks, description, and pin-to-top per task
+- Right-side detail panel for full editing; "..." context menu for quick actions
+- Reusable, colored tags — create once, toggle on any task, or browse by tag from the sidebar (grouped by list)
+- Per-list **Group by** (sequence/date/creation time/tag/priority/none) and **Sort by** (+ modified time/name)
 
-## React Compiler
+**Pomodoro**
+- Configurable focus/break durations and session-before-long-break count
+- Named, reusable presets ("lists of pomodoros") — only one can run at a time
+- Daily/total stats, and Document Picture-in-Picture scoped to just the timer
+- Link a running session to a specific task from that task's menu
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Navigation**
+- Real URL routing (`/tasks`, `/pomodoro`) via `react-router-dom`, with a sidebar nav rail
 
-## Expanding the ESLint configuration
+## Tech stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 + TypeScript + Vite
+- Tailwind CSS v4 (`@theme` tokens in `src/index.css`)
+- IndexedDB via `idb` (per-collection object stores keyed by `id`)
+- `@dnd-kit` for drag-and-drop, `react-router-dom` for routing, `lucide-react` for icons, `dayjs` for the date picker
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev       # start the Vite dev server
+npm run build     # type-check + production build
+npm run lint      # ESLint
+npm run preview   # preview a production build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+See [CLAUDE.md](CLAUDE.md) for architecture notes and codebase conventions.
