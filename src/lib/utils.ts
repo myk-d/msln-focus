@@ -1,4 +1,8 @@
+import dayjs from 'dayjs';
+import 'dayjs/locale/uk';
 import type { Priority, PomodoroPhase, PomodoroStats, Task, TagColor, Tag, GroupBy, SortBy } from '../types';
+
+dayjs.locale('uk');
 
 export function genId(): string {
   return crypto.randomUUID();
@@ -167,4 +171,37 @@ export const TAG_COLOR_META: Record<TagColor, { bg: string; text: string; dot: s
 
 export function nextTagColor(existingCount: number): TagColor {
   return TAG_COLOR_ORDER[existingCount % TAG_COLOR_ORDER.length];
+}
+
+// Calendar: Sunday-first grids (matches the reference screenshots), all dates
+// as 'YYYY-MM-DD' keys — consistent with Task.dueDate/getLocalDateKey elsewhere.
+export const CALENDAR_WEEKDAYS = ['Нед', 'Пон', 'Вів', 'Сер', 'Чет', 'Птн', 'Суб'];
+export const HOUR_HEIGHT = 48; // px per hour in the week/day time grid
+export const SNAP_MINUTES = 15;
+
+export function getMonthGridDates(cursorDateKey: string): string[] {
+  const startOfMonth = dayjs(cursorDateKey).startOf('month');
+  const gridStart = startOfMonth.subtract(startOfMonth.day(), 'day');
+  return Array.from({ length: 42 }, (_, i) => gridStart.add(i, 'day').format('YYYY-MM-DD'));
+}
+
+export function getWeekDates(cursorDateKey: string): string[] {
+  const d = dayjs(cursorDateKey);
+  const weekStart = d.subtract(d.day(), 'day');
+  return Array.from({ length: 7 }, (_, i) => weekStart.add(i, 'day').format('YYYY-MM-DD'));
+}
+
+export function timeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+export function minutesToTime(minutes: number): string {
+  const clamped = Math.max(0, Math.min(24 * 60 - SNAP_MINUTES, minutes));
+  const snapped = Math.round(clamped / SNAP_MINUTES) * SNAP_MINUTES;
+  const h = Math.floor(snapped / 60)
+    .toString()
+    .padStart(2, '0');
+  const m = (snapped % 60).toString().padStart(2, '0');
+  return `${h}:${m}`;
 }

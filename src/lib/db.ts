@@ -1,9 +1,9 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 const DB_NAME = 'mslnfocus';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
-export const COLLECTION_STORES = ['lists', 'sections', 'tasks', 'pomodoroPresets', 'tags'] as const;
+export const COLLECTION_STORES = ['lists', 'sections', 'tasks', 'pomodoroPresets', 'tags', 'events'] as const;
 export type CollectionStoreName = (typeof COLLECTION_STORES)[number];
 
 let dbPromise: Promise<IDBPDatabase> | null = null;

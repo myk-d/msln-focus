@@ -51,6 +51,20 @@ export interface TaskList {
   sortBy: SortBy;
 }
 
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  allDay: boolean;
+  startTime: string;
+  endTime: string;
+  location: string;
+  color: TagColor;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export type PomodoroPhase = 'focus' | 'shortBreak' | 'longBreak';
 
 export interface PomodoroSettings {

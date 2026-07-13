@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom';
-import { ListTodo, Target, Timer } from 'lucide-react';
+import { CalendarDays, ListTodo, Target, Timer } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/tasks', label: 'Завдання', icon: ListTodo },
+  { to: '/calendar', label: 'Календар', icon: CalendarDays },
   { to: '/pomodoro', label: 'Помодоро', icon: Timer },
 ];
 
