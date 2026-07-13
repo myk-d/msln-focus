@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, Pencil, Play, Plus, Trash2, X } from 'lucide-react';
+import { useConfirm } from '../context/ConfirmContext';
 import { inputClass } from '../lib/ui';
 import type { PomodoroPreset } from '../types';
 
@@ -98,6 +99,13 @@ export function PomodoroPresetList({
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState<PresetFormValue>(EMPTY_FORM);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const confirm = useConfirm();
+
+  const handleDeleteClick = async (preset: PomodoroPreset) => {
+    if (await confirm({ title: `Видалити пресет «${preset.name}»?`, confirmLabel: 'Видалити' })) {
+      onDelete(preset.id);
+    }
+  };
 
   const startEdit = (preset: PomodoroPreset) => {
     setEditingId(preset.id);
@@ -199,7 +207,7 @@ export function PomodoroPresetList({
                       <Pencil size={14} />
                     </button>
                     <button
-                      onClick={() => onDelete(preset.id)}
+                      onClick={() => handleDeleteClick(preset)}
                       className="rounded-full p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-500"
                     >
                       <Trash2 size={14} />

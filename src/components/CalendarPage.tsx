@@ -84,7 +84,7 @@ export function CalendarPage() {
             onSelectEvent={openEdit}
             onSelectTask={setSelectedTaskId}
             onMoveEvent={(id, date, startTime, endTime) => updateEvent(id, { date, startTime, endTime })}
-            onResizeEvent={(id, endTime) => updateEvent(id, { endTime })}
+            onResizeEvent={(id, patch) => updateEvent(id, patch)}
             onCreateSlot={(date, startTime) => setDrawer({ mode: 'create', date, startTime })}
           />
         )}
@@ -97,7 +97,7 @@ export function CalendarPage() {
             onSelectEvent={openEdit}
             onSelectTask={setSelectedTaskId}
             onMoveEvent={(id, date, startTime, endTime) => updateEvent(id, { date, startTime, endTime })}
-            onResizeEvent={(id, endTime) => updateEvent(id, { endTime })}
+            onResizeEvent={(id, patch) => updateEvent(id, patch)}
             onCreateSlot={(date, startTime) => setDrawer({ mode: 'create', date, startTime })}
           />
         )}

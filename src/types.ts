@@ -61,6 +61,7 @@ export interface CalendarEvent {
   endTime: string;
   location: string;
   color: TagColor;
+  reminderMinutes: number | null;
   createdAt: number;
   updatedAt: number;
 }

@@ -18,6 +18,29 @@ body {
   @apply bg-canvas text-stone-800;
 }
 
+/* Hide scrollbars everywhere — scrolling itself stays fully functional
+   (wheel/touch/keyboard), only the visible track/thumb is suppressed. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS Safari auto-zooms the page when a focused input/textarea/select computes
+   to under 16px — several of our fields use text-sm/text-xs (14px/12px). Force
+   16px on mobile only (not :focus-scoped, so there's no size jump on focus/blur),
+   leaving desktop's smaller type untouched. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 @keyframes phase-flash {
   0% {
     box-shadow: 0 0 0 0 rgba(225, 85, 47, 0.45);
@@ -29,4 +52,58 @@ body {
 
 .animate-phase-flash {
   animation: phase-flash 900ms ease-out;
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-popover-in {
+  animation: popover-in 120ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 150ms ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 220ms ease-out;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 220ms ease-out;
 }

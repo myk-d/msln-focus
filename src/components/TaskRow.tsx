@@ -55,7 +55,7 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
     <div
       ref={setNodeRef}
       style={style}
-      className={`group rounded-xl border bg-white px-1 hover:border-stone-200 ${
+      className={`group rounded-xl border bg-white px-1 transition-colors hover:border-stone-200 ${
         isSelected ? 'border-brand-300 bg-brand-50/40' : 'border-transparent'
       }`}
     >

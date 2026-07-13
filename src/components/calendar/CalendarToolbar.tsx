@@ -21,7 +21,7 @@ interface CalendarToolbarProps {
 
 export function CalendarToolbar({ view, onSetView, title, onPrev, onNext, onToday, onAddEvent }: CalendarToolbarProps) {
   return (
-    <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <h1 className="text-xl font-bold capitalize text-stone-800">{title}</h1>
         <div className="flex items-center gap-1">
@@ -46,7 +46,7 @@ export function CalendarToolbar({ view, onSetView, title, onPrev, onNext, onToda
             <button
               key={option.value}
               onClick={() => onSetView(option.value)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+              className={`rounded-full px-3 py-1 text-xs font-medium transition ${option.value === 'week' ? 'hidden md:inline-flex' : ''} ${
                 view === option.value ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
               }`}
             >

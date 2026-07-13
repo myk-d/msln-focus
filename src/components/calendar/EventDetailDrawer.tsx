@@ -2,9 +2,20 @@ import { useState } from 'react';
 import { Trash2, X } from 'lucide-react';
 import { DatePicker } from '../ui/DatePicker';
 import { Switch } from '../ui/Switch';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { inputClass } from '../../lib/ui';
 import { TAG_COLOR_META, TAG_COLOR_ORDER, minutesToTime, timeToMinutes } from '../../lib/utils';
 import type { CalendarEvent, TagColor } from '../../types';
+
+const REMINDER_OPTIONS: { value: number | null; label: string }[] = [
+  { value: null, label: 'Без нагадування' },
+  { value: 5, label: 'За 5 хвилин' },
+  { value: 15, label: 'За 15 хвилин' },
+  { value: 30, label: 'За 30 хвилин' },
+  { value: 60, label: 'За 1 годину' },
+  { value: 1440, label: 'За 1 день' },
+];
 
 interface EventDetailDrawerProps {
   event: CalendarEvent | null;
@@ -35,7 +46,32 @@ export function EventDetailDrawer({
   const [endTime, setEndTime] = useState(event?.endTime ?? minutesToTime(timeToMinutes(initialStart) + 60));
   const [location, setLocation] = useState(event?.location ?? '');
   const [color, setColor] = useState<TagColor>(event?.color ?? 'sky');
+  const [reminderMinutes, setReminderMinutes] = useState<number | null>(event?.reminderMinutes ?? 15);
   const [error, setError] = useState('');
+  const confirm = useConfirm();
+  useBodyScrollLock(true);
+
+  const [initial] = useState({
+    title: event?.title ?? '',
+    description: event?.description ?? '',
+    date: event?.date ?? defaultDate,
+    allDay: event?.allDay ?? false,
+    startTime: initialStart,
+    endTime: event?.endTime ?? minutesToTime(timeToMinutes(initialStart) + 60),
+    location: event?.location ?? '',
+    color: event?.color ?? 'sky',
+    reminderMinutes: event?.reminderMinutes ?? 15,
+  });
+  const isDirty =
+    title !== initial.title ||
+    description !== initial.description ||
+    date !== initial.date ||
+    allDay !== initial.allDay ||
+    startTime !== initial.startTime ||
+    endTime !== initial.endTime ||
+    location !== initial.location ||
+    color !== initial.color ||
+    reminderMinutes !== initial.reminderMinutes;
 
   const handleSave = () => {
     const trimmedTitle = title.trim();
@@ -47,14 +83,43 @@ export function EventDetailDrawer({
       setError('Час завершення має бути пізніше часу початку');
       return;
     }
-    const payload = { title: trimmedTitle, description, date, allDay, startTime, endTime, location, color };
+    const payload = { title: trimmedTitle, description, date, allDay, startTime, endTime, location, color, reminderMinutes };
     if (event) onUpdate(event.id, payload);
     else onCreate(payload);
     onClose();
   };
 
+  const handleClose = async () => {
+    if (
+      !isDirty ||
+      (await confirm({
+        title: 'Закрити без збереження?',
+        message: 'У вас є незбережені зміни, які буде втрачено.',
+        confirmLabel: 'Закрити',
+        cancelLabel: 'Продовжити редагування',
+      }))
+    ) {
+      onClose();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!event) return;
+    if (
+      await confirm({
+        title: `Видалити подію «${event.title}»?`,
+        confirmLabel: 'Видалити',
+      })
+    ) {
+      onDelete(event.id);
+      onClose();
+    }
+  };
+
   return (
-    <aside className="flex h-full w-[400px] shrink-0 flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6">
+    <>
+      <div onClick={handleClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-100">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">
           {event ? 'Подія' : 'Нова подія'}
@@ -62,17 +127,14 @@ export function EventDetailDrawer({
         <div className="flex items-center gap-1">
           {event && (
             <button
-              onClick={() => {
-                onDelete(event.id);
-                onClose();
-              }}
+              onClick={handleDelete}
               className="rounded p-1 text-stone-400 hover:bg-red-50 hover:text-red-500"
               aria-label="Видалити подію"
             >
               <Trash2 size={16} />
             </button>
           )}
-          <button onClick={onClose} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+          <button onClick={handleClose} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
             <X size={18} />
           </button>
         </div>
@@ -142,6 +204,21 @@ export function EventDetailDrawer({
         </div>
 
         <div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Нагадування</div>
+          <select
+            value={reminderMinutes ?? ''}
+            onChange={(e) => setReminderMinutes(e.target.value === '' ? null : Number(e.target.value))}
+            className={`${inputClass} w-full`}
+          >
+            {REMINDER_OPTIONS.map((opt) => (
+              <option key={opt.label} value={opt.value ?? ''}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Опис</div>
           <textarea
             value={description}
@@ -161,6 +238,7 @@ export function EventDetailDrawer({
           {event ? 'Зберегти' : 'Створити'}
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

@@ -8,10 +8,10 @@ interface DayViewProps {
   onSelectEvent: (id: string) => void;
   onSelectTask: (id: string) => void;
   onMoveEvent: (id: string, date: string, startTime: string, endTime: string) => void;
-  onResizeEvent: (id: string, endTime: string) => void;
+  onResizeEvent: (id: string, patch: { startTime?: string; endTime?: string }) => void;
   onCreateSlot: (date: string, startTime: string) => void;
 }
 
 export function DayView({ dateKey, ...gridProps }: DayViewProps) {
-  return <TimeGrid days={[dateKey]} {...gridProps} />;
+  return <TimeGrid days={[dateKey]} fixedWidthColumns={false} {...gridProps} />;
 }

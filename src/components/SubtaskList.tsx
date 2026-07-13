@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { Checkbox } from './ui/Checkbox';
 import type { Subtask } from '../types';
 
@@ -12,10 +13,17 @@ interface SubtaskListProps {
 export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
   const { addSubtask, toggleSubtask, deleteSubtask } = useTaskStoreContext();
   const [newSubtask, setNewSubtask] = useState('');
+  const confirm = useConfirm();
 
   const commitNewSubtask = () => {
     if (newSubtask.trim()) addSubtask(taskId, newSubtask.trim());
     setNewSubtask('');
+  };
+
+  const handleDelete = async (subtask: Subtask) => {
+    if (await confirm({ title: `Видалити підзавдання «${subtask.text}»?`, confirmLabel: 'Видалити' })) {
+      deleteSubtask(taskId, subtask.id);
+    }
   };
 
   return (
@@ -27,7 +35,7 @@ export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
             {st.text}
           </span>
           <button
-            onClick={() => deleteSubtask(taskId, st.id)}
+            onClick={() => handleDelete(st)}
             className="hidden text-stone-300 hover:text-red-500 group-hover:block"
           >
             <X size={13} />

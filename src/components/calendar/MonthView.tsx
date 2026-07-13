@@ -77,7 +77,7 @@ function DayCell({
   return (
     <div
       ref={setNodeRef}
-      className={`relative flex min-h-[110px] flex-col gap-1 border-b border-r border-stone-100 p-1.5 ${
+      className={`relative flex min-h-17.5 flex-col gap-1 border-b border-r border-stone-100 p-1 md:min-h-27.5 md:p-1.5 ${
         isOver ? 'bg-brand-50' : isCurrentMonth ? 'bg-white' : 'bg-stone-50/50'
       }`}
     >

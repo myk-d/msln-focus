@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Check, Search, Tag as TagIcon, Trash2, X } from 'lucide-react';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { useConfirm } from '../../context/ConfirmContext';
 import { TAG_COLOR_META } from '../../lib/utils';
 import { popoverClass, menuItemClass } from '../../lib/ui';
 import type { Tag } from '../../types';
@@ -18,6 +19,7 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
   const [query, setQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, () => setOpen(false));
+  const confirm = useConfirm();
 
   const selectedTags = allTags.filter((t) => selectedTagIds.includes(t.id));
   const normalizedQuery = query.trim().toLowerCase();
@@ -28,6 +30,18 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
     if (!query.trim() || exactMatch) return;
     onCreate(query.trim());
     setQuery('');
+  };
+
+  const handleDeleteTag = async (tag: Tag) => {
+    if (
+      await confirm({
+        title: `Видалити мітку «${tag.name}»?`,
+        message: 'Мітку буде знято з усіх завдань, які нею позначені.',
+        confirmLabel: 'Видалити',
+      })
+    ) {
+      onDeleteTag(tag.id);
+    }
   };
 
   return (
@@ -103,7 +117,7 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
                 </button>
                 <button
                   type="button"
-                  onClick={() => onDeleteTag(tag.id)}
+                  onClick={() => handleDeleteTag(tag)}
                   className="hidden shrink-0 rounded p-1.5 text-stone-300 hover:bg-red-50 hover:text-red-500 group-hover:block"
                   aria-label="Видалити мітку"
                 >

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Copy, FolderInput, ListChecks, Pin, PinOff, Target, Trash2 } from 'lucide-react';
 import { useClickOutside } from '../hooks/useClickOutside';
+import { useConfirm } from '../context/ConfirmContext';
 import { PriorityPicker } from './ui/PriorityPicker';
 import { TagPicker } from './ui/TagPicker';
 import { DatePicker } from './ui/DatePicker';
@@ -47,6 +48,18 @@ export function TaskContextMenu({
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, onClose);
   const [showMoveTo, setShowMoveTo] = useState(false);
+  const confirm = useConfirm();
+
+  const handleDelete = async () => {
+    if (
+      await confirm({
+        title: `Видалити завдання «${task.text}»?`,
+        confirmLabel: 'Видалити',
+      })
+    ) {
+      onDelete();
+    }
+  };
 
   return (
     <div ref={ref} className={`${popoverClass} absolute right-0 top-8 z-20 w-64 p-2 text-sm`}>
@@ -115,7 +128,7 @@ export function TaskContextMenu({
 
       <div className="my-1 border-t border-stone-100" />
 
-      <button onClick={onDelete} className={`${menuItemClass} text-red-500 hover:bg-red-50`}>
+      <button onClick={handleDelete} className={`${menuItemClass} text-red-500 hover:bg-red-50`}>
         <Trash2 size={15} /> Видалити
       </button>
     </div>

@@ -8,13 +8,17 @@ interface EventBlockProps {
   event: CalendarEvent;
   overlapIndex: number;
   onSelect: () => void;
-  onResize: (endTime: string) => void;
+  onResize: (patch: { startTime?: string; endTime?: string }) => void;
 }
+
+const resizeHandleClass =
+  'absolute left-1/2 h-3 w-3 -translate-x-1/2 cursor-ns-resize rounded-full border-2 border-white bg-stone-700/80 shadow';
 
 // Drag (move) goes through @dnd-kit like the rest of the app's drag-and-drop.
 // Resize is a raw pointer listener instead — dnd-kit models drag-to-a-droppable,
-// not elastic resize, so the bottom-edge handle stops propagation (never reaches
-// the draggable's own listeners) and tracks the pointer directly.
+// not elastic resize. Each edge handle is a small circular grip (not a full-width
+// strip) so it stays a deliberate, precise target that doesn't swallow ordinary
+// touch-scroll gestures happening elsewhere on the event.
 export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlockProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: `event:${event.id}` });
 
@@ -23,15 +27,20 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
   const top = (startMinutes / 60) * HOUR_HEIGHT;
   const height = Math.max(((endMinutes - startMinutes) / 60) * HOUR_HEIGHT, 18);
 
-  const handleResizeStart = (downEvent: ReactPointerEvent) => {
+  const makeResizeHandler = (edge: 'start' | 'end') => (downEvent: ReactPointerEvent) => {
     downEvent.stopPropagation();
     downEvent.preventDefault();
     const startY = downEvent.clientY;
 
     const handleMove = (moveEvent: PointerEvent) => {
       const deltaMinutes = ((moveEvent.clientY - startY) / HOUR_HEIGHT) * 60;
-      const nextEndMinutes = Math.max(startMinutes + SNAP_MINUTES, endMinutes + deltaMinutes);
-      onResize(minutesToTime(nextEndMinutes));
+      if (edge === 'start') {
+        const nextStart = Math.max(0, Math.min(endMinutes - SNAP_MINUTES, startMinutes + deltaMinutes));
+        onResize({ startTime: minutesToTime(nextStart) });
+      } else {
+        const nextEnd = Math.max(startMinutes + SNAP_MINUTES, endMinutes + deltaMinutes);
+        onResize({ endTime: minutesToTime(nextEnd) });
+      }
     };
     const handleUp = () => {
       window.removeEventListener('pointermove', handleMove);
@@ -56,15 +65,30 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
       {...attributes}
       {...listeners}
       onClick={onSelect}
-      className={`absolute cursor-grab overflow-hidden rounded-lg border border-black/5 px-1.5 py-0.5 text-left text-[11px] shadow-sm active:cursor-grabbing ${TAG_COLOR_META[event.color].bg} ${TAG_COLOR_META[event.color].text}`}
+      className={`absolute cursor-grab rounded-lg border border-black/5 shadow-sm active:cursor-grabbing ${TAG_COLOR_META[event.color].bg} ${TAG_COLOR_META[event.color].text}`}
     >
-      <div className="truncate font-semibold">{event.title}</div>
+      <div className="h-full overflow-hidden px-1.5 py-0.5 text-left text-[11px]">
+        <div className="truncate font-semibold">{event.title}</div>
+        {!event.allDay && (
+          <div className="truncate opacity-70">
+            {event.startTime}–{event.endTime}
+          </div>
+        )}
+      </div>
       {!event.allDay && (
-        <div className="truncate opacity-70">
-          {event.startTime}–{event.endTime}
-        </div>
+        <>
+          <div
+            onPointerDown={makeResizeHandler('start')}
+            onClick={(e) => e.stopPropagation()}
+            className={`${resizeHandleClass} -top-1.5`}
+          />
+          <div
+            onPointerDown={makeResizeHandler('end')}
+            onClick={(e) => e.stopPropagation()}
+            className={`${resizeHandleClass} -bottom-1.5`}
+          />
+        </>
       )}
-      <div onPointerDown={handleResizeStart} className="absolute inset-x-0 bottom-0 h-2 cursor-ns-resize" />
     </div>
   );
 }

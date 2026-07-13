@@ -37,7 +37,7 @@ export function PomodoroPage() {
 
       {pipWindow &&
         createPortal(
-          <div className="flex h-screen items-center justify-center p-3">
+          <div className="flex h-dvh items-center justify-center p-3">
             <PomodoroTimer variant="pip" />
           </div>,
           pipWindow.document.body

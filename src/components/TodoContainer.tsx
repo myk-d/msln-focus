@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Eye, EyeOff, Plus } from 'lucide-react';
+import { Eye, EyeOff, Menu, Plus } from 'lucide-react';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { TaskSection } from './TaskSection';
 import { GroupedTaskList } from './GroupedTaskList';
@@ -11,9 +11,10 @@ import { groupTasksBy, sortTasksBy } from '../lib/utils';
 interface TodoContainerProps {
   selectedTaskId: string | null;
   onSelectTask: (taskId: string) => void;
+  onOpenSidebar: () => void;
 }
 
-export function TodoContainer({ selectedTaskId, onSelectTask }: TodoContainerProps) {
+export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: TodoContainerProps) {
   const { lists, sections, tasks, tags, activeListId, addSection, addTask, moveTask, reorderSection, setListGroupBy, setListSortBy } =
     useTaskStoreContext();
   const [hideCompleted, setHideCompleted] = useState(false);
@@ -58,9 +59,18 @@ export function TodoContainer({ selectedTaskId, onSelectTask }: TodoContainerPro
 
   return (
     <section className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto px-6 py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-stone-800">{activeList.name}</h1>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenSidebar}
+            className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600 md:hidden"
+            aria-label="Списки"
+          >
+            <Menu size={18} />
+          </button>
+          <h1 className="text-xl font-bold text-stone-800">{activeList.name}</h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setHideCompleted((v) => !v)}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${

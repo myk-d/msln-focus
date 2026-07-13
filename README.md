@@ -1,4 +1,4 @@
-# Focus
+# Focus-Pocus
 
 A task manager and Pomodoro timer, built as a single-page React app with an original visual design. Tasks, lists, sections, tags, and Pomodoro presets all persist locally via IndexedDB (structured to mirror Firestore's collection/document shape, for an easy future migration).
 

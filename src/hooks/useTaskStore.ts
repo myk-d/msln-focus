@@ -89,6 +89,12 @@ export function useTaskStore() {
     setLists((prev) => prev.map((l) => (l.id === id ? { ...l, sortBy } : l)));
   };
 
+  // Exactly one list is ever `isDefault` — that's the one `deleteList` refuses
+  // to remove, so reassigning it is what unlocks deleting the previous default.
+  const setDefaultList = (id: string) => {
+    setLists((prev) => prev.map((l) => ({ ...l, isDefault: l.id === id })));
+  };
+
   const deleteList = (id: string) => {
     const list = lists.find((l) => l.id === id);
     if (!list || list.isDefault) return;
@@ -326,6 +332,7 @@ export function useTaskStore() {
     renameList,
     setListGroupBy,
     setListSortBy,
+    setDefaultList,
     deleteList,
     addSection,
     insertSection,

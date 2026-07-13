@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, Pin, PinOff, X } from 'lucide-react';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { usePomodoroContext } from '../context/PomodoroContext';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { Checkbox } from './ui/Checkbox';
 import { PriorityPicker } from './ui/PriorityPicker';
 import { TagPicker } from './ui/TagPicker';
@@ -37,6 +38,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   const { startForTask } = usePomodoroContext();
   const navigate = useNavigate();
   const currentListId = sections.find((s) => s.id === task.sectionId)?.listId ?? '';
+  useBodyScrollLock(true);
 
   const [titleDraft, setTitleDraft] = useState(task.text);
   const [descriptionDraft, setDescriptionDraft] = useState(task.description);
@@ -51,7 +53,9 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   const commitDescription = () => updateTask(task.id, { description: descriptionDraft });
 
   return (
-    <aside className="flex h-full w-[400px] shrink-0 flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6">
+    <>
+      <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-100">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button onClick={() => togglePin(task.id)} className="text-stone-400 hover:text-stone-600" aria-label="Закріпити">
@@ -162,6 +166,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
           />
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

@@ -1,9 +1,23 @@
+import { useMemo } from 'react';
 import { useIndexedDBCollection } from './useIndexedDBCollection';
 import { genId } from '../lib/utils';
 import type { CalendarEvent } from '../types';
 
+// Backfills fields added to the CalendarEvent shape after some records were
+// already persisted to IndexedDB, so older rows don't crash consumers expecting them.
+function normalizeEvent(event: CalendarEvent): CalendarEvent {
+  return {
+    ...event,
+    reminderMinutes: event.reminderMinutes === undefined ? 15 : event.reminderMinutes,
+  };
+}
+
 export function useEventStore() {
-  const [events, setEvents] = useIndexedDBCollection<CalendarEvent>('events', []);
+  const [rawEvents, setRawEvents] = useIndexedDBCollection<CalendarEvent>('events', []);
+  const events = useMemo(() => rawEvents.map(normalizeEvent), [rawEvents]);
+  const setEvents = (updater: (prev: CalendarEvent[]) => CalendarEvent[]) => {
+    setRawEvents((prev) => updater(prev.map(normalizeEvent)));
+  };
 
   const addEvent = (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>): string => {
     const id = genId();

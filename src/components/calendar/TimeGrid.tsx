@@ -13,8 +13,12 @@ interface TimeGridProps {
   onSelectEvent: (id: string) => void;
   onSelectTask: (id: string) => void;
   onMoveEvent: (id: string, date: string, startTime: string, endTime: string) => void;
-  onResizeEvent: (id: string, endTime: string) => void;
+  onResizeEvent: (id: string, patch: { startTime?: string; endTime?: string }) => void;
   onCreateSlot: (date: string, startTime: string) => void;
+  // Week view forces a fixed per-day width on mobile (so it scrolls horizontally
+  // instead of squishing 7 columns unreadably); Day view has only one column and
+  // should always fill the available width instead.
+  fixedWidthColumns: boolean;
 }
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
@@ -43,12 +47,14 @@ function DayColumn({
   onSelectEvent,
   onResizeEvent,
   onCreateSlot,
+  fixedWidth,
 }: {
   dateKey: string;
   events: CalendarEvent[];
   onSelectEvent: (id: string) => void;
-  onResizeEvent: (id: string, endTime: string) => void;
+  onResizeEvent: (id: string, patch: { startTime?: string; endTime?: string }) => void;
   onCreateSlot: (date: string, startTime: string) => void;
+  fixedWidth: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col:${dateKey}` });
   const timedEvents = events.filter((e) => e.date === dateKey && !e.allDay);
@@ -65,11 +71,11 @@ function DayColumn({
     <div
       ref={setNodeRef}
       onClick={handleGridClick}
-      className={`relative flex-1 border-r border-stone-100 ${isOver ? 'bg-brand-50' : ''}`}
+      className={`relative border-r border-stone-100 ${fixedWidth ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'} ${isOver ? 'bg-brand-50' : ''}`}
       style={{ height: 24 * HOUR_HEIGHT }}
     >
       {HOURS.map((h) => (
-        <div key={h} className="pointer-events-none border-b border-stone-100" style={{ height: HOUR_HEIGHT }} />
+        <div key={h} className="pointer-events-none border-b border-stone-200" style={{ height: HOUR_HEIGHT }} />
       ))}
       {timedEvents.map((event) => (
         <EventBlock
@@ -77,14 +83,24 @@ function DayColumn({
           event={event}
           overlapIndex={overlapIndices.get(event.id) ?? 0}
           onSelect={() => onSelectEvent(event.id)}
-          onResize={(endTime) => onResizeEvent(event.id, endTime)}
+          onResize={(patch) => onResizeEvent(event.id, patch)}
         />
       ))}
     </div>
   );
 }
 
-export function TimeGrid({ days, events, tasks, onSelectEvent, onSelectTask, onMoveEvent, onResizeEvent, onCreateSlot }: TimeGridProps) {
+export function TimeGrid({
+  days,
+  events,
+  tasks,
+  onSelectEvent,
+  onSelectTask,
+  onMoveEvent,
+  onResizeEvent,
+  onCreateSlot,
+  fixedWidthColumns,
+}: TimeGridProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const todayKey = dayjs().format('YYYY-MM-DD');
 
@@ -107,65 +123,77 @@ export function TimeGrid({ days, events, tasks, onSelectEvent, onSelectTask, onM
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-stone-100">
-      <div className="flex border-b border-stone-100">
-        <div className="w-14 shrink-0" />
-        {days.map((dateKey) => {
-          const allDayItems = [
-            ...events.filter((e) => e.date === dateKey && e.allDay),
-            ...tasks.filter((t) => t.dueDate === dateKey),
-          ];
-          return (
-            <div key={dateKey} className="flex-1 border-l border-stone-100 px-1.5 py-1.5">
-              <div className="mb-1 text-center text-xs font-medium text-stone-500">
-                {dayjs(dateKey).format('dd').toUpperCase()}{' '}
-                <span
-                  className={`ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold ${
-                    dateKey === todayKey ? 'bg-brand-600 text-white' : 'text-stone-700'
-                  }`}
-                >
-                  {dayjs(dateKey).date()}
-                </span>
+      {/* Single horizontal-scroll container spanning header+body keeps the day
+          columns aligned while swiping sideways on narrow (multi-day) screens. */}
+      <div className="flex flex-1 flex-col overflow-x-auto">
+        <div className="flex border-b border-stone-100">
+          <div className="w-14 shrink-0" />
+          {days.map((dateKey) => {
+            const allDayItems = [
+              ...events.filter((e) => e.date === dateKey && e.allDay),
+              ...tasks.filter((t) => t.dueDate === dateKey),
+            ];
+            return (
+              <div
+                key={dateKey}
+                className={`border-l border-stone-100 px-1.5 py-1.5 ${fixedWidthColumns ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'}`}
+              >
+                <div className="mb-1 text-center text-xs font-medium text-stone-500">
+                  {dayjs(dateKey).format('dd').toUpperCase()}{' '}
+                  <span
+                    className={`ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold ${
+                      dateKey === todayKey ? 'bg-brand-600 text-white' : 'text-stone-700'
+                    }`}
+                  >
+                    {dayjs(dateKey).date()}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  {allDayItems.map((item) =>
+                    'title' in item ? (
+                      <EventChip
+                        key={item.id}
+                        label={item.title}
+                        color={item.color}
+                        onClick={() => onSelectEvent(item.id)}
+                      />
+                    ) : (
+                      <EventChip key={item.id} label={item.text} onClick={() => onSelectTask(item.id)} />
+                    )
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col gap-0.5">
-                {allDayItems.map((item) =>
-                  'title' in item ? (
-                    <EventChip
-                      key={item.id}
-                      label={item.title}
-                      color={item.color}
-                      onClick={() => onSelectEvent(item.id)}
-                    />
-                  ) : (
-                    <EventChip key={item.id} label={item.text} onClick={() => onSelectTask(item.id)} />
-                  )
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="flex flex-1 overflow-y-auto">
-          <div className="w-14 shrink-0">
-            {HOURS.map((h) => (
-              <div key={h} className="pr-1.5 text-right text-[11px] text-stone-400" style={{ height: HOUR_HEIGHT }}>
-                {h.toString().padStart(2, '0')}:00
-              </div>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="flex flex-1 overflow-y-auto">
+            <div className="w-14 shrink-0">
+              {HOURS.map((h) => (
+                <div
+                  key={h}
+                  className="border-b border-stone-200 pr-1.5 text-right text-[11px] text-stone-400"
+                  style={{ height: HOUR_HEIGHT }}
+                >
+                  {h.toString().padStart(2, '0')}:00
+                </div>
+              ))}
+            </div>
+            {days.map((dateKey) => (
+              <DayColumn
+                key={dateKey}
+                dateKey={dateKey}
+                events={events}
+                onSelectEvent={onSelectEvent}
+                onResizeEvent={onResizeEvent}
+                onCreateSlot={onCreateSlot}
+                fixedWidth={fixedWidthColumns}
+              />
             ))}
           </div>
-          {days.map((dateKey) => (
-            <DayColumn
-              key={dateKey}
-              dateKey={dateKey}
-              events={events}
-              onSelectEvent={onSelectEvent}
-              onResizeEvent={onResizeEvent}
-              onCreateSlot={onCreateSlot}
-            />
-          ))}
-        </div>
-      </DndContext>
+        </DndContext>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { CalendarDays, ListTodo, Target, Timer } from 'lucide-react';
+import { Bell, BellOff, CalendarDays, ListTodo, Target, Timer } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/tasks', label: 'Завдання', icon: ListTodo },
@@ -7,26 +8,84 @@ const NAV_ITEMS = [
   { to: '/pomodoro', label: 'Помодоро', icon: Timer },
 ];
 
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium transition ${
+    isActive ? 'bg-brand-100 text-brand-700' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
+  }`;
+
+function useNotificationPermission() {
+  const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>(() =>
+    typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
+  );
+
+  const request = () => {
+    if (permission !== 'default') return;
+    Notification.requestPermission().then(setPermission);
+  };
+
+  // Ask once up front rather than waiting for the bell click — the button
+  // still works as a manual retry if the browser mutes an un-gestured prompt.
+  // `request` itself already no-ops when unsupported or already decided.
+  useEffect(() => {
+    request();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount only
+  }, []);
+
+  return { permission, request };
+}
+
+function NotificationToggle({ variant }: { variant: 'rail' | 'bar' }) {
+  const { permission, request } = useNotificationPermission();
+  if (permission === 'unsupported') return null;
+
+  const title =
+    permission === 'granted'
+      ? 'Сповіщення увімкнено'
+      : permission === 'denied'
+        ? 'Сповіщення заблоковано в браузері'
+        : 'Дозволити сповіщення';
+
+  return (
+    <button
+      onClick={request}
+      title={title}
+      className={`${variant === 'rail' ? 'mt-auto ' : ''}flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium transition ${
+        permission === 'granted' ? 'text-brand-600' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
+      }`}
+    >
+      {permission === 'denied' ? <BellOff size={19} /> : <Bell size={19} />}
+      Сповіщення
+    </button>
+  );
+}
+
 export function NavRail() {
   return (
-    <nav className="flex h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-stone-200 bg-white py-4">
-      <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
-        <Target size={18} />
-      </div>
-      {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium transition ${
-              isActive ? 'bg-brand-100 text-brand-700' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
-            }`
-          }
-        >
-          <Icon size={19} />
-          {label}
-        </NavLink>
-      ))}
-    </nav>
+    <>
+      {/* Desktop: vertical icon rail */}
+      <nav className="hidden h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-stone-200 bg-white py-4 md:flex">
+        <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
+          <Target size={18} />
+        </div>
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          <NavLink key={to} to={to} className={navLinkClass}>
+            <Icon size={19} />
+            {label}
+          </NavLink>
+        ))}
+        <NotificationToggle variant="rail" />
+      </nav>
+
+      {/* Mobile: bottom tab bar */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-stone-200 bg-white py-1 md:hidden">
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          <NavLink key={to} to={to} className={navLinkClass}>
+            <Icon size={19} />
+            {label}
+          </NavLink>
+        ))}
+        <NotificationToggle variant="bar" />
+      </nav>
+    </>
   );
 }

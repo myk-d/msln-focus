@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
+import { useConfirm } from '../context/ConfirmContext';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { TagSidebarRow } from './TagSidebarRow';
+import { ListSidebarRow } from './ListSidebarRow';
 
 interface ListSidebarProps {
   activeTagId: string | null;
   onSelectTag: (tagId: string) => void;
   onSelectList: () => void;
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
 }
 
-export function ListSidebar({ activeTagId, onSelectTag, onSelectList }: ListSidebarProps) {
+export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen, onCloseMobile }: ListSidebarProps) {
   const {
     lists,
     sections,
@@ -19,12 +24,13 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList }: ListSide
     setActiveListId,
     addList,
     renameList,
+    setDefaultList,
     deleteList,
     updateTag,
     deleteTag,
   } = useTaskStoreContext();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState('');
+  const confirm = useConfirm();
+  useBodyScrollLock(mobileOpen);
   const [isAdding, setIsAdding] = useState(false);
   const [newListName, setNewListName] = useState('');
 
@@ -33,9 +39,28 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList }: ListSide
     return tasks.filter((t) => sectionIds.has(t.sectionId) && !t.completed).length;
   };
 
-  const commitRename = () => {
-    if (editingId && draft.trim()) renameList(editingId, draft.trim());
-    setEditingId(null);
+  const handleDeleteList = async (list: (typeof lists)[number]) => {
+    if (
+      await confirm({
+        title: `Видалити список «${list.name}»?`,
+        message: 'Усі секції та завдання в цьому списку будуть видалені назавжди.',
+        confirmLabel: 'Видалити',
+      })
+    ) {
+      deleteList(list.id);
+    }
+  };
+
+  const handleDeleteTag = async (tagId: string, tagName: string) => {
+    if (
+      await confirm({
+        title: `Видалити мітку «${tagName}»?`,
+        message: 'Мітку буде знято з усіх завдань, які нею позначені.',
+        confirmLabel: 'Видалити',
+      })
+    ) {
+      deleteTag(tagId);
+    }
   };
 
   const commitAdd = () => {
@@ -45,56 +70,38 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList }: ListSide
   };
 
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-stone-200 px-3 py-6">
-      <h2 className="px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400">Списки</h2>
-      {lists.map((list) => (
-        <div
-          key={list.id}
-          className={`group flex items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
-            !activeTagId && activeListId === list.id
-              ? 'bg-brand-100 text-brand-800 font-medium'
-              : 'text-stone-600 hover:bg-stone-100'
-          }`}
-        >
-          {editingId === list.id ? (
-            <input
-              autoFocus
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commitRename}
-              onKeyDown={(e) => e.key === 'Enter' && commitRename()}
-              className="w-full rounded bg-white px-1 text-sm outline-none ring-1 ring-brand-400"
-            />
-          ) : (
-            <button
-              onClick={() => {
-                setActiveListId(list.id);
-                onSelectList();
-              }}
-              onDoubleClick={() => {
-                setEditingId(list.id);
-                setDraft(list.name);
-              }}
-              className="flex-1 truncate text-left"
-            >
-              {list.name}
-            </button>
-          )}
-          <div className="flex items-center gap-1">
-            {taskCount(list.id) > 0 && (
-              <span className="text-xs text-stone-400 group-hover:hidden">{taskCount(list.id)}</span>
-            )}
-            {!list.isDefault && (
-              <button
-                onClick={() => deleteList(list.id)}
-                className="hidden text-stone-400 hover:text-red-500 group-hover:block"
-                aria-label="Видалити список"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
+    <>
+      {mobileOpen && (
+        <div onClick={onCloseMobile} className="animate-fade-in fixed inset-0 z-20 bg-black/30 md:hidden" />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 w-72 shrink-0 flex-col gap-1 overflow-y-auto border-r border-stone-200 bg-white px-3 py-6 md:static md:z-auto md:flex md:w-56 ${
+          mobileOpen ? 'animate-slide-in-left flex' : 'hidden'
+        }`}
+      >
+        <div className="mb-1 flex items-center justify-between md:hidden">
+          <h2 className="px-2 text-xs font-semibold uppercase tracking-wider text-stone-400">Списки</h2>
+          <button onClick={onCloseMobile} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+            <X size={18} />
+          </button>
         </div>
+        <h2 className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400 md:block">Списки</h2>
+      {lists.map((list) => (
+        <ListSidebarRow
+          key={list.id}
+          list={list}
+          isActive={!activeTagId && activeListId === list.id}
+          taskCount={taskCount(list.id)}
+          canDelete={!list.isDefault}
+          onSelect={() => {
+            setActiveListId(list.id);
+            onSelectList();
+            onCloseMobile();
+          }}
+          onRename={(name) => renameList(list.id, name)}
+          onSetDefault={() => setDefaultList(list.id)}
+          onDelete={() => handleDeleteList(list)}
+        />
       ))}
 
       {isAdding ? (
@@ -124,14 +131,18 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList }: ListSide
               key={tag.id}
               tag={tag}
               isActive={activeTagId === tag.id}
-              onSelect={() => onSelectTag(tag.id)}
+              onSelect={() => {
+                onSelectTag(tag.id);
+                onCloseMobile();
+              }}
               onRename={(name) => updateTag(tag.id, { name })}
               onRecolor={(color) => updateTag(tag.id, { color })}
-              onDelete={() => deleteTag(tag.id)}
+              onDelete={() => handleDeleteTag(tag.id, tag.name)}
             />
           ))}
         </>
       )}
     </aside>
+    </>
   );
 }

@@ -15,7 +15,7 @@ There is no test suite. After any change, run `npx tsc --noEmit -p tsconfig.app.
 
 ## Architecture
 
-Focus is a task manager + Pomodoro timer (React 19 + TypeScript + Vite + Tailwind v4). Single page, real routing via `react-router-dom` (`/tasks`, `/pomodoro`), composed in `App.tsx` → `FocusDashboard.tsx` (nav rail + `<Routes>`).
+Focus-Pocus is a task manager + Pomodoro timer (React 19 + TypeScript + Vite + Tailwind v4). Single page, real routing via `react-router-dom` (`/tasks`, `/calendar`, `/pomodoro`), composed in `App.tsx` → `FocusDashboard.tsx` (nav rail + `<Routes>`).
 
 ### State: two contexts, IndexedDB-backed
 

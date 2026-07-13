@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { ArrowDownToLine, ArrowUpToLine, FolderInput, Pencil, Trash2 } from 'lucide-react';
 import { useClickOutside } from '../hooks/useClickOutside';
+import { useConfirm } from '../context/ConfirmContext';
 import { menuItemClass, popoverClass } from '../lib/ui';
 import type { TaskList } from '../types';
 
@@ -31,6 +32,19 @@ export function SectionMenu({
   useClickOutside(ref, onClose);
   const [showMoveTo, setShowMoveTo] = useState(false);
   const otherLists = lists.filter((l) => l.id !== currentListId);
+  const confirm = useConfirm();
+
+  const handleDelete = async () => {
+    if (
+      await confirm({
+        title: 'Видалити секцію?',
+        message: 'Завдання із цієї секції буде перенесено до іншої секції списку.',
+        confirmLabel: 'Видалити',
+      })
+    ) {
+      onDelete();
+    }
+  };
 
   return (
     <div ref={ref} className={`${popoverClass} absolute right-0 top-8 z-20 w-56 p-1 text-sm`}>
@@ -67,7 +81,7 @@ export function SectionMenu({
       <div className="my-1 border-t border-stone-100" />
 
       <button
-        onClick={onDelete}
+        onClick={handleDelete}
         disabled={!canDelete}
         className={`${menuItemClass} text-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-stone-300 disabled:hover:bg-transparent`}
       >
