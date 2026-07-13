@@ -55,8 +55,12 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-100">
-      <div className="mb-4 flex items-center justify-between">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-stone-200 bg-white md:w-100">
+      {/* Header sits outside the scrolling body so its "..." popover menu can't
+          get clipped — a scrollable ancestor clips absolutely-positioned
+          descendants regardless of z-index, since setting overflow-y non-visible
+          forces overflow-x to clip too. */}
+      <div className="flex items-center justify-between px-5 pt-6">
         <div className="flex items-center gap-2">
           <button onClick={() => togglePin(task.id)} className="text-stone-400 hover:text-stone-600" aria-label="Закріпити">
             {task.pinned ? <PinOff size={16} className="text-brand-600" /> : <Pin size={16} />}
@@ -112,6 +116,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
         </button>
       </div>
 
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
       <div className="mb-4 flex items-start gap-3">
         <div className="mt-1.5">
           <Checkbox checked={task.completed} onChange={() => toggleTaskCompleted(task.id)} />
@@ -165,6 +170,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
             className={`${inputClass} w-full resize-none`}
           />
         </div>
+      </div>
       </div>
       </aside>
     </>

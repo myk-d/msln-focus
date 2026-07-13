@@ -2,21 +2,50 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isOwnerField() {
-      return request.auth != null &&
-        (resource == null || resource.data.userId == request.auth.uid) &&
-        (request.resource == null || request.resource.data.userId == request.auth.uid);
+    function isSignedIn() {
+      return request.auth != null;
     }
     function isOwnerDoc(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return isSignedIn() && request.auth.uid == uid;
     }
 
-    match /lists/{id} { allow read, write: if isOwnerField(); }
-    match /sections/{id} { allow read, write: if isOwnerField(); }
-    match /tasks/{id} { allow read, write: if isOwnerField(); }
-    match /tags/{id} { allow read, write: if isOwnerField(); }
-    match /events/{id} { allow read, write: if isOwnerField(); }
-    match /pomodoroPresets/{id} { allow read, write: if isOwnerField(); }
+    // Each verb gets its own simple, directly-provable condition rather than
+    // one compound read+write rule — Firestore can only validate a `list`
+    // query against a rule it can statically prove matches the query's
+    // filter, and a single OR-branching condition covering both the
+    // "doc doesn't exist yet" create case and the read case isn't provable,
+    // so it silently rejects every list() call even though each individual
+    // document would actually pass.
+    match /lists/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    match /sections/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    match /tasks/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    match /tags/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    match /events/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    match /pomodoroPresets/{id} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
 
     match /pomodoroSettings/{uid} { allow read, write: if isOwnerDoc(uid); }
     match /pomodoroStats/{uid} { allow read, write: if isOwnerDoc(uid); }

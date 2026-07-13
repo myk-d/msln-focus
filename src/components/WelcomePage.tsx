@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, ListTodo, Timer } from 'lucide-react';
+import { CalendarDays, ListTodo, LoaderCircle, Timer } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const FEATURES = [
@@ -23,6 +23,7 @@ const FEATURES = [
 export function WelcomePage() {
   const { signInWithGoogle } = useAuth();
   const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     document.title = 'Focus-Pocus — фокус, завдання та час в одному додатку';
@@ -30,10 +31,13 @@ export function WelcomePage() {
 
   const handleSignIn = async () => {
     setError('');
+    setPending(true);
     try {
       await signInWithGoogle();
     } catch {
       setError('Не вдалося увійти. Спробуйте ще раз.');
+    } finally {
+      setPending(false);
     }
   };
 
@@ -48,9 +52,11 @@ export function WelcomePage() {
       </p>
 
       <button
-        onClick={handleSignIn}
-        className="mt-8 flex items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-700"
+        onClick={() => void handleSignIn()}
+        disabled={pending}
+        className="mt-8 flex items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {pending && <LoaderCircle size={16} className="animate-spin" />}
         Увійти через Google
       </button>
       {error && <p className="mt-3 text-xs text-red-500">{error}</p>}

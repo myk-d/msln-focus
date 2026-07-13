@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/uk';
-import type { Priority, PomodoroPhase, PomodoroStats, Task, TagColor, Tag, GroupBy, SortBy } from '../types';
+import type { CalendarEvent, Priority, PomodoroPhase, PomodoroStats, Task, TagColor, Tag, GroupBy, SortBy } from '../types';
 
 dayjs.locale('uk');
 
@@ -160,13 +160,16 @@ export const PHASE_META: Record<PomodoroPhase, { label: string; ring: string; te
 
 export const TAG_COLOR_ORDER: TagColor[] = ['rose', 'amber', 'emerald', 'sky', 'violet', 'stone'];
 
-export const TAG_COLOR_META: Record<TagColor, { bg: string; text: string; dot: string }> = {
-  rose: { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-500' },
-  amber: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-  emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  sky: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500' },
-  violet: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500' },
-  stone: { bg: 'bg-stone-100', text: 'text-stone-600', dot: 'bg-stone-400' },
+// `wash` is a ~10%-opacity tint of the same hue — used for all-day events
+// specifically (chip and full cell/column background), distinct from the
+// muted `bg` swatch regular timed-event chips use.
+export const TAG_COLOR_META: Record<TagColor, { bg: string; text: string; dot: string; wash: string }> = {
+  rose: { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-500', wash: 'bg-rose-500/10' },
+  amber: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', wash: 'bg-amber-500/10' },
+  emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', wash: 'bg-emerald-500/10' },
+  sky: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500', wash: 'bg-sky-500/10' },
+  violet: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500', wash: 'bg-violet-500/10' },
+  stone: { bg: 'bg-stone-100', text: 'text-stone-600', dot: 'bg-stone-400', wash: 'bg-stone-500/10' },
 };
 
 export function nextTagColor(existingCount: number): TagColor {
@@ -194,6 +197,14 @@ export function getWeekDates(cursorDateKey: string): string[] {
 export function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
+}
+
+// All-day events first (regardless of their placeholder startTime), then
+// timed events ascending by start — shared by Month and Agenda views so a
+// day's events read in the same order everywhere.
+export function compareEventsForDisplay(a: CalendarEvent, b: CalendarEvent): number {
+  if (a.allDay !== b.allDay) return a.allDay ? -1 : 1;
+  return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
 }
 
 export function minutesToTime(minutes: number): string {

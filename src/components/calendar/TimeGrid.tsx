@@ -1,7 +1,7 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { DndContext, PointerSensor, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import dayjs from 'dayjs';
-import { HOUR_HEIGHT, minutesToTime, timeToMinutes } from '../../lib/utils';
+import { HOUR_HEIGHT, TAG_COLOR_META, minutesToTime, timeToMinutes } from '../../lib/utils';
 import { EventChip } from './EventChip';
 import { EventBlock } from './EventBlock';
 import type { CalendarEvent, Task } from '../../types';
@@ -59,6 +59,7 @@ function DayColumn({
   const { setNodeRef, isOver } = useDroppable({ id: `col:${dateKey}` });
   const timedEvents = events.filter((e) => e.date === dateKey && !e.allDay);
   const overlapIndices = computeOverlapIndices(timedEvents);
+  const allDayEvent = events.find((e) => e.date === dateKey && e.allDay);
 
   const handleGridClick = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget) return;
@@ -71,7 +72,9 @@ function DayColumn({
     <div
       ref={setNodeRef}
       onClick={handleGridClick}
-      className={`relative border-r border-stone-100 ${fixedWidth ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'} ${isOver ? 'bg-brand-50' : ''}`}
+      className={`relative border-r border-stone-200 ${fixedWidth ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'} ${
+        isOver ? 'bg-brand-50' : allDayEvent ? TAG_COLOR_META[allDayEvent.color].wash : ''
+      }`}
       style={{ height: 24 * HOUR_HEIGHT }}
     >
       {HOURS.map((h) => (
@@ -136,7 +139,7 @@ export function TimeGrid({
             return (
               <div
                 key={dateKey}
-                className={`border-l border-stone-100 px-1.5 py-1.5 ${fixedWidthColumns ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'}`}
+                className={`border-l border-stone-200 px-1.5 py-1.5 ${fixedWidthColumns ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'}`}
               >
                 <div className="mb-1 text-center text-xs font-medium text-stone-500">
                   {dayjs(dateKey).format('dd').toUpperCase()}{' '}
@@ -155,6 +158,7 @@ export function TimeGrid({
                         key={item.id}
                         label={item.title}
                         color={item.color}
+                        allDay
                         onClick={() => onSelectEvent(item.id)}
                       />
                     ) : (

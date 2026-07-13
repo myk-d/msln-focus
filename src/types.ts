@@ -83,6 +83,7 @@ export interface PomodoroPreset {
   shortBreakMinutes: number;
   longBreakMinutes: number;
   sessionsBeforeLongBreak: number;
+  autoStartNext: boolean;
   createdAt: number;
 }
 

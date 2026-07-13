@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Pencil, Play, Plus, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmContext';
+import { Switch } from './ui/Switch';
 import { inputClass } from '../lib/ui';
 import type { PomodoroPreset } from '../types';
 
@@ -20,6 +21,7 @@ interface PresetFormValue {
   shortBreakMinutes: number;
   longBreakMinutes: number;
   sessionsBeforeLongBreak: number;
+  autoStartNext: boolean;
 }
 
 const EMPTY_FORM: PresetFormValue = {
@@ -28,6 +30,7 @@ const EMPTY_FORM: PresetFormValue = {
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   sessionsBeforeLongBreak: 4,
+  autoStartNext: true,
 };
 
 function PresetForm({
@@ -41,7 +44,7 @@ function PresetForm({
   onSave: () => void;
   onCancel: () => void;
 }) {
-  const numberField = (label: string, key: keyof Omit<PresetFormValue, 'name'>, min: number, max: number) => (
+  const numberField = (label: string, key: keyof Omit<PresetFormValue, 'name' | 'autoStartNext'>, min: number, max: number) => (
     <label className="flex items-center justify-between gap-2 text-xs text-stone-500">
       {label}
       <input
@@ -69,6 +72,10 @@ function PresetForm({
         {numberField('Коротка перерва, хв', 'shortBreakMinutes', 1, 60)}
         {numberField('Довга перерва, хв', 'longBreakMinutes', 1, 60)}
         {numberField('Сесій до довгої', 'sessionsBeforeLongBreak', 1, 12)}
+      </div>
+      <div className="flex items-center justify-between gap-2 border-t border-stone-200 pt-2 text-xs text-stone-500">
+        Автостарт наступної фази
+        <Switch checked={value.autoStartNext} onChange={(v) => onChange({ ...value, autoStartNext: v })} />
       </div>
       <div className="flex justify-end gap-2 pt-1">
         <button onClick={onCancel} className="rounded-full px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200">
@@ -116,6 +123,7 @@ export function PomodoroPresetList({
       shortBreakMinutes: preset.shortBreakMinutes,
       longBreakMinutes: preset.longBreakMinutes,
       sessionsBeforeLongBreak: preset.sessionsBeforeLongBreak,
+      autoStartNext: preset.autoStartNext,
     });
   };
 

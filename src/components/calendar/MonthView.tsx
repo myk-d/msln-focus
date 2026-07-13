@@ -11,7 +11,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import dayjs from 'dayjs';
 import { useClickOutside } from '../../hooks/useClickOutside';
-import { CALENDAR_WEEKDAYS } from '../../lib/utils';
+import { CALENDAR_WEEKDAYS, TAG_COLOR_META, compareEventsForDisplay } from '../../lib/utils';
 import { popoverClass } from '../../lib/ui';
 import { EventChip } from './EventChip';
 import type { CalendarEvent, Task } from '../../types';
@@ -21,6 +21,7 @@ interface MonthItem {
   label: string;
   time?: string;
   color?: CalendarEvent['color'];
+  allDay?: boolean;
   onClick: () => void;
   draggableId?: string;
 }
@@ -45,7 +46,7 @@ function DraggableChip({ item }: { item: MonthItem }) {
   const style = { transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 };
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <EventChip label={item.label} time={item.time} color={item.color} onClick={item.onClick} />
+      <EventChip label={item.label} time={item.time} color={item.color} allDay={item.allDay} onClick={item.onClick} />
     </div>
   );
 }
@@ -73,12 +74,19 @@ function DayCell({
 
   const visible = items.slice(0, MAX_VISIBLE);
   const hidden = items.slice(MAX_VISIBLE);
+  const allDayItem = items.find((i) => i.allDay && i.color);
 
   return (
     <div
       ref={setNodeRef}
       className={`relative flex min-h-17.5 flex-col gap-1 border-b border-r border-stone-100 p-1 md:min-h-27.5 md:p-1.5 ${
-        isOver ? 'bg-brand-50' : isCurrentMonth ? 'bg-white' : 'bg-stone-50/50'
+        isOver
+          ? 'bg-brand-50'
+          : allDayItem?.color
+            ? TAG_COLOR_META[allDayItem.color].wash
+            : isCurrentMonth
+              ? 'bg-white'
+              : 'bg-stone-50/50'
       }`}
     >
       <span
@@ -112,7 +120,14 @@ function DayCell({
         <div ref={overflowRef} className={`${popoverClass} absolute left-1 top-full z-30 mt-1 w-52 p-1.5`}>
           <div className="flex flex-col gap-1">
             {items.map((item) => (
-              <EventChip key={item.key} label={item.label} time={item.time} color={item.color} onClick={item.onClick} />
+              <EventChip
+                key={item.key}
+                label={item.label}
+                time={item.time}
+                color={item.color}
+                allDay={item.allDay}
+                onClick={item.onClick}
+              />
             ))}
           </div>
         </div>
@@ -138,11 +153,13 @@ export function MonthView({ monthDates, cursorDateKey, events, tasks, onSelectEv
   const itemsForDate = (dateKey: string): MonthItem[] => {
     const dayEvents: MonthItem[] = events
       .filter((e) => e.date === dateKey)
+      .sort(compareEventsForDisplay)
       .map((e) => ({
         key: `event-${e.id}`,
         label: e.title,
         time: e.allDay ? undefined : e.startTime,
         color: e.color,
+        allDay: e.allDay,
         onClick: () => onSelectEvent(e.id),
         draggableId: `event:${e.id}`,
       }));

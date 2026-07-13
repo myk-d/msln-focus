@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFirestoreValue } from './useFirestoreValue';
 import { useFirestoreCollection } from './useFirestoreCollection';
 import { FirebaseFactory } from '../config/firebase.factory';
@@ -15,6 +15,7 @@ const SEED_PRESETS: PomodoroPreset[] = [
     shortBreakMinutes: 5,
     longBreakMinutes: 15,
     sessionsBeforeLongBreak: 4,
+    autoStartNext: true,
     createdAt: 0,
   },
   {
@@ -24,6 +25,7 @@ const SEED_PRESETS: PomodoroPreset[] = [
     shortBreakMinutes: 10,
     longBreakMinutes: 20,
     sessionsBeforeLongBreak: 3,
+    autoStartNext: true,
     createdAt: 0,
   },
 ];
@@ -33,8 +35,13 @@ const DEFAULT_SETTINGS: PomodoroSettings = {
   shortBreakMinutes: 5,
   longBreakMinutes: 15,
   sessionsBeforeLongBreak: 4,
-  autoStartNext: false,
+  autoStartNext: true,
 };
+
+// Backfills `autoStartNext` for presets persisted before the field existed.
+function normalizePreset(preset: PomodoroPreset): PomodoroPreset {
+  return { ...preset, autoStartNext: preset.autoStartNext ?? true };
+}
 
 const DEFAULT_STATS: PomodoroStats = {
   todayDate: '',
@@ -96,7 +103,11 @@ export function usePomodoro() {
   const [sessionsInCycle, setSessionsInCycle] = useState(0);
   const [flashKey, setFlashKey] = useState(0);
   const [activeTaskId, setActiveTask] = useState<string | null>(null);
-  const [presets, setPresets] = useFirestoreCollection<PomodoroPreset>(firebaseCollections.pomodoroPresets, SEED_PRESETS);
+  const [rawPresets, setPresets] = useFirestoreCollection<PomodoroPreset>(
+    firebaseCollections.pomodoroPresets,
+    SEED_PRESETS
+  );
+  const presets = useMemo(() => rawPresets.map(normalizePreset), [rawPresets]);
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -179,7 +190,7 @@ export function usePomodoro() {
       shortBreakMinutes: preset.shortBreakMinutes,
       longBreakMinutes: preset.longBreakMinutes,
       sessionsBeforeLongBreak: preset.sessionsBeforeLongBreak,
-      autoStartNext: settings.autoStartNext,
+      autoStartNext: preset.autoStartNext,
     };
     setSettings(nextSettings);
     setPhase('focus');

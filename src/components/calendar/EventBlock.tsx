@@ -38,6 +38,13 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
   const top = (startMinutes / 60) * HOUR_HEIGHT;
   const height = Math.max(((endMinutes - startMinutes) / 60) * HOUR_HEIGHT, 18);
 
+  // Live preview of the new start/end while dragging, mirroring the same
+  // pixel-to-minutes math TimeGrid's onDragEnd applies on drop — otherwise the
+  // block visually moves but its time label stays frozen until you let go.
+  const dragOffsetMinutes = isDragging ? ((transform?.y ?? 0) / HOUR_HEIGHT) * 60 : 0;
+  const displayStartTime = isDragging ? minutesToTime(startMinutes + dragOffsetMinutes) : event.startTime;
+  const displayEndTime = isDragging ? minutesToTime(endMinutes + dragOffsetMinutes) : event.endTime;
+
   // Mouse users get the handles on hover before they ever click, so this always
   // opens the detail drawer for them (unchanged from before). Touch users have
   // no hover: their first tap only reveals the handles, and a second tap on the
@@ -96,7 +103,7 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
         <div className="truncate font-semibold">{event.title}</div>
         {!event.allDay && (
           <div className="truncate opacity-70">
-            {event.startTime}–{event.endTime}
+            {displayStartTime}–{displayEndTime}
           </div>
         )}
       </div>

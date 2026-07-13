@@ -37,7 +37,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
   const { tasks } = useTaskStoreContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const meta = PHASE_META[phase];
-  const size = variant === 'pip' ? 168 : 208;
+  const size = variant === 'pip' ? 120 : 208;
   const linkedTask = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : undefined;
   const activePreset = activePresetId ? presets.find((p) => p.id === activePresetId) : undefined;
 
@@ -61,8 +61,8 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
   return (
     <div
       key={flashKey}
-      className={`flex flex-col items-center gap-4 rounded-3xl border border-stone-200 bg-white shadow-sm animate-phase-flash ${
-        variant === 'pip' ? 'p-4' : 'p-6'
+      className={`flex flex-col items-center rounded-3xl border border-stone-200 bg-white shadow-sm animate-phase-flash ${
+        variant === 'pip' ? 'gap-2 p-3' : 'gap-4 p-6'
       }`}
     >
       <div className="flex w-full items-center justify-between">
@@ -117,7 +117,9 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
             strokeDashoffset={CIRCUMFERENCE * progress}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center font-mono text-3xl font-bold text-stone-800">
+        <div
+          className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-stone-800 ${variant === 'pip' ? 'text-xl' : 'text-3xl'}`}
+        >
           {formatTime(timeLeft)}
         </div>
       </div>
@@ -132,25 +134,31 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
         })()}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center ${variant === 'pip' ? 'gap-1.5' : 'gap-2'}`}>
         <button
           onClick={toggle}
-          className="flex items-center gap-1.5 rounded-full bg-brand-600 px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-95"
+          className={`flex items-center gap-1.5 rounded-full bg-brand-600 font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-95 ${
+            variant === 'pip' ? 'p-2.5 text-sm' : 'px-6 py-2 text-sm'
+          }`}
         >
           {isActive ? <Pause size={15} fill="currentColor" /> : <Play size={15} fill="currentColor" />}
-          {isActive ? 'Пауза' : 'Старт'}
+          {variant !== 'pip' && (isActive ? 'Пауза' : 'Старт')}
         </button>
         <button
           onClick={reset}
-          className="flex items-center gap-1.5 rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-200"
+          className={`flex items-center gap-1.5 rounded-full bg-stone-100 font-medium text-stone-600 hover:bg-stone-200 ${
+            variant === 'pip' ? 'p-2.5 text-sm' : 'px-4 py-2 text-sm'
+          }`}
         >
-          <RotateCcw size={15} /> Скинути
+          <RotateCcw size={15} /> {variant !== 'pip' && 'Скинути'}
         </button>
         <button
           onClick={skip}
-          className="flex items-center gap-1.5 rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-200"
+          className={`flex items-center gap-1.5 rounded-full bg-stone-100 font-medium text-stone-600 hover:bg-stone-200 ${
+            variant === 'pip' ? 'p-2.5 text-sm' : 'px-4 py-2 text-sm'
+          }`}
         >
-          <SkipForward size={15} /> Далі
+          <SkipForward size={15} /> {variant !== 'pip' && 'Далі'}
         </button>
       </div>
 

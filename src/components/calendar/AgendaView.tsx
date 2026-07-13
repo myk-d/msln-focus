@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { TAG_COLOR_META, timeToMinutes } from '../../lib/utils';
+import { TAG_COLOR_META, compareEventsForDisplay } from '../../lib/utils';
 import type { CalendarEvent, Task } from '../../types';
 
 interface AgendaViewProps {
@@ -21,9 +21,7 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
       {nonEmptyDays.map((dateKey) => {
-        const dayEvents = [...events.filter((e) => e.date === dateKey)].sort(
-          (a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
-        );
+        const dayEvents = [...events.filter((e) => e.date === dateKey)].sort(compareEventsForDisplay);
         const dayTasks = tasks.filter((t) => t.dueDate === dateKey);
         return (
           <div key={dateKey}>
@@ -44,7 +42,9 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
                 <button
                   key={event.id}
                   onClick={() => onSelectEvent(event.id)}
-                  className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm ${TAG_COLOR_META[event.color].bg} ${TAG_COLOR_META[event.color].text}`}
+                  className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm ${
+                    event.allDay ? TAG_COLOR_META[event.color].wash : TAG_COLOR_META[event.color].bg
+                  } ${TAG_COLOR_META[event.color].text}`}
                 >
                   <span className="w-12 shrink-0 text-xs opacity-70">{event.allDay ? 'Увесь день' : event.startTime}</span>
                   <span className="truncate font-medium">{event.title}</span>
