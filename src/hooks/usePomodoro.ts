@@ -4,31 +4,38 @@ import { useFirestoreCollection } from './useFirestoreCollection';
 import { FirebaseFactory } from '../config/firebase.factory';
 import { firebaseCollections, firestoreDb } from '../config/firebase.config';
 import { useAuth } from '../context/AuthContext';
+import i18n from '../i18n';
 import { normalizeStatsForToday, genId } from '../lib/utils';
 import type { PomodoroPhase, PomodoroPreset, PomodoroSettings, PomodoroStats } from '../types';
 
-const SEED_PRESETS: PomodoroPreset[] = [
-  {
-    id: 'preset-classic',
-    name: 'Класичний Помодоро',
-    focusMinutes: 25,
-    shortBreakMinutes: 5,
-    longBreakMinutes: 15,
-    sessionsBeforeLongBreak: 4,
-    autoStartNext: true,
-    createdAt: 0,
-  },
-  {
-    id: 'preset-deep-work',
-    name: 'Глибока робота',
-    focusMinutes: 50,
-    shortBreakMinutes: 10,
-    longBreakMinutes: 20,
-    sessionsBeforeLongBreak: 3,
-    autoStartNext: true,
-    createdAt: 0,
-  },
-];
+// A function (not a static constant) so the seed names reflect whichever
+// language is active the first time a new account hydrates with no presets
+// yet — like seedData() in useTaskStore.ts, this only ever runs once per
+// account; afterward the presets are ordinary Firestore-backed user data.
+function seedPresets(): PomodoroPreset[] {
+  return [
+    {
+      id: 'preset-classic',
+      name: i18n.t('pomodoro.classicPresetName'),
+      focusMinutes: 25,
+      shortBreakMinutes: 5,
+      longBreakMinutes: 15,
+      sessionsBeforeLongBreak: 4,
+      autoStartNext: true,
+      createdAt: 0,
+    },
+    {
+      id: 'preset-deep-work',
+      name: i18n.t('pomodoro.deepWorkPresetName'),
+      focusMinutes: 50,
+      shortBreakMinutes: 10,
+      longBreakMinutes: 20,
+      sessionsBeforeLongBreak: 3,
+      autoStartNext: true,
+      createdAt: 0,
+    },
+  ];
+}
 
 const DEFAULT_SETTINGS: PomodoroSettings = {
   focusMinutes: 25,
@@ -103,9 +110,10 @@ export function usePomodoro() {
   const [sessionsInCycle, setSessionsInCycle] = useState(0);
   const [flashKey, setFlashKey] = useState(0);
   const [activeTaskId, setActiveTask] = useState<string | null>(null);
+  const seedPresetsValue = useMemo(() => seedPresets(), []);
   const [rawPresets, setPresets] = useFirestoreCollection<PomodoroPreset>(
     firebaseCollections.pomodoroPresets,
-    SEED_PRESETS
+    seedPresetsValue
   );
   const presets = useMemo(() => rawPresets.map(normalizePreset), [rawPresets]);
   const [activePresetId, setActivePresetId] = useState<string | null>(null);

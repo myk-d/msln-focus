@@ -1,4 +1,5 @@
 import { Menu, Tag as TagIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { TaskRow } from './TaskRow';
 import { sortTasksForDisplay, TAG_COLOR_META } from '../lib/utils';
@@ -11,6 +12,7 @@ interface TagTasksViewProps {
 }
 
 export function TagTasksView({ tagId, selectedTaskId, onSelectTask, onOpenSidebar }: TagTasksViewProps) {
+  const { t } = useTranslation();
   const { tags, tasks, sections, lists } = useTaskStoreContext();
   const tag = tags.find((t) => t.id === tagId);
   const taggedTasks = sortTasksForDisplay(tasks.filter((t) => t.tagIds.includes(tagId)));
@@ -30,7 +32,7 @@ export function TagTasksView({ tagId, selectedTaskId, onSelectTask, onOpenSideba
         <button
           onClick={onOpenSidebar}
           className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600 md:hidden"
-          aria-label="Списки"
+          aria-label={t('tasks.listsAria')}
         >
           <Menu size={18} />
         </button>
@@ -39,7 +41,7 @@ export function TagTasksView({ tagId, selectedTaskId, onSelectTask, onOpenSideba
       </div>
 
       {groups.length === 0 ? (
-        <p className="mt-4 text-sm text-stone-400">Немає завдань з цією міткою.</p>
+        <p className="mt-4 text-sm text-stone-400">{t('tasks.noTasksForTag')}</p>
       ) : (
         groups.map(({ list, tasks: listTasks }) => (
           <div key={list.id} className="mb-3">

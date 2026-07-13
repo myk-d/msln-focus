@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ChevronDown, MoreHorizontal } from 'lucide-react';
+import { Check, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { TaskRow } from './TaskRow';
 import { SectionMenu } from './SectionMenu';
@@ -17,6 +18,7 @@ interface TaskSectionProps {
 }
 
 export function TaskSection({ section, tasks, lists, hideCompleted, selectedTaskId, onSelectTask }: TaskSectionProps) {
+  const { t } = useTranslation();
   const { renameSection, deleteSection, insertSection, moveSectionToList, addTask, sections } = useTaskStoreContext();
   const [collapsed, setCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,7 +35,7 @@ export function TaskSection({ section, tasks, lists, hideCompleted, selectedTask
   const canDelete = sections.filter((s) => s.listId === section.listId).length > 1;
 
   const commitName = () => {
-    renameSection(section.id, nameDraft.trim() || 'Без назви');
+    renameSection(section.id, nameDraft.trim() || t('tasks.untitledSection'));
     setIsEditingName(false);
   };
 
@@ -49,22 +51,27 @@ export function TaskSection({ section, tasks, lists, hideCompleted, selectedTask
           <ChevronDown size={16} className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
         </button>
         {isEditingName ? (
-          <input
-            autoFocus
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            onBlur={commitName}
-            onKeyDown={(e) => e.key === 'Enter' && commitName()}
-            placeholder="Без назви"
-            className="rounded bg-stone-50 px-1 text-sm font-semibold outline-none ring-1 ring-brand-400"
-          />
+          <div className="flex items-center gap-1">
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={(e) => e.key === 'Enter' && commitName()}
+              placeholder={t('tasks.untitledSection')}
+              className="rounded bg-stone-50 px-1 text-sm font-semibold outline-none ring-1 ring-brand-400"
+            />
+            <button onClick={commitName} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+              <Check size={14} />
+            </button>
+          </div>
         ) : (
           <button onClick={() => setIsEditingName(true)} className="text-sm font-semibold text-stone-700 hover:text-stone-900">
-            {section.name || 'Без назви'}
+            {section.name || t('tasks.untitledSection')}
           </button>
         )}
         <span className="text-xs text-stone-400">{tasks.length}</span>
-        <div className="relative ml-auto opacity-0 group-hover:opacity-100">
+        <div className="relative ml-auto opacity-100 md:opacity-0 md:group-hover:opacity-100">
           <button onClick={() => setMenuOpen((v) => !v)} className="rounded px-1.5 py-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
             <MoreHorizontal size={16} />
           </button>
@@ -117,14 +124,19 @@ export function TaskSection({ section, tasks, lists, hideCompleted, selectedTask
               />
             ))}
           </SortableContext>
-          <input
-            value={newTaskText}
-            onChange={(e) => setNewTaskText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && commitNewTask()}
-            onBlur={commitNewTask}
-            placeholder="+ Додати завдання"
-            className="mt-1 rounded-lg bg-transparent px-2 py-1.5 text-sm text-stone-500 outline-none placeholder:text-stone-400 hover:bg-stone-50 focus:bg-stone-50"
-          />
+          <div className="mt-1 flex items-center gap-1">
+            <input
+              value={newTaskText}
+              onChange={(e) => setNewTaskText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && commitNewTask()}
+              onBlur={commitNewTask}
+              placeholder={t('tasks.addTaskPlaceholder')}
+              className="flex-1 rounded-lg bg-transparent px-2 py-1.5 text-sm text-stone-500 outline-none placeholder:text-stone-400 hover:bg-stone-50 focus:bg-stone-50"
+            />
+            <button onClick={commitNewTask} className="shrink-0 rounded-full p-1.5 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+              <Plus size={14} />
+            </button>
+          </div>
         </div>
       )}
     </div>

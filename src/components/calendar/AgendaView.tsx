@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { TAG_COLOR_META, compareEventsForDisplay } from '../../lib/utils';
 import type { CalendarEvent, Task } from '../../types';
 
@@ -11,11 +12,12 @@ interface AgendaViewProps {
 }
 
 export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }: AgendaViewProps) {
+  const { t } = useTranslation();
   const todayKey = dayjs().format('YYYY-MM-DD');
   const nonEmptyDays = days.filter((d) => events.some((e) => e.date === d) || tasks.some((t) => t.dueDate === d));
 
   if (nonEmptyDays.length === 0) {
-    return <p className="mt-4 text-sm text-stone-400">Немає подій у цьому періоді.</p>;
+    return <p className="mt-4 text-sm text-stone-400">{t('calendar.noEventsInPeriod')}</p>;
   }
 
   return (
@@ -46,7 +48,7 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
                     event.allDay ? TAG_COLOR_META[event.color].wash : TAG_COLOR_META[event.color].bg
                   } ${TAG_COLOR_META[event.color].text}`}
                 >
-                  <span className="w-12 shrink-0 text-xs opacity-70">{event.allDay ? 'Увесь день' : event.startTime}</span>
+                  <span className="w-12 shrink-0 text-xs opacity-70">{event.allDay ? t('calendar.allDay') : event.startTime}</span>
                   <span className="truncate font-medium">{event.title}</span>
                 </button>
               ))}
@@ -56,7 +58,7 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
                   onClick={() => onSelectTask(task.id)}
                   className="flex items-center gap-2 rounded-lg bg-stone-100 px-2 py-1.5 text-left text-sm text-stone-600"
                 >
-                  <span className="w-12 shrink-0 text-xs opacity-70">Задача</span>
+                  <span className="w-12 shrink-0 text-xs opacity-70">{t('calendar.task')}</span>
                   <span className="truncate">{task.text}</span>
                 </button>
               ))}

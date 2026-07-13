@@ -1,8 +1,24 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/uk';
-import type { CalendarEvent, Priority, PomodoroPhase, PomodoroStats, Task, TagColor, Tag, GroupBy, SortBy } from '../types';
+import i18n from '../i18n';
+import type {
+  CalendarEvent,
+  Priority,
+  PomodoroPhase,
+  PomodoroStats,
+  RecurrenceFreq,
+  RecurrenceRule,
+  Task,
+  TagColor,
+  Tag,
+  GroupBy,
+  SortBy,
+} from '../types';
 
-dayjs.locale('uk');
+// Keeps dayjs's own month/weekday formatting in step with the active i18next
+// language, for every component that formats dates via dayjs directly.
+dayjs.locale(i18n.language);
+i18n.on('languageChanged', (lng) => dayjs.locale(lng));
 
 export function genId(): string {
   return crypto.randomUUID();
@@ -27,9 +43,9 @@ export function formatDueDate(dueDate: string): string {
   const todayKey = getLocalDateKey(new Date());
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (dueDate === todayKey) return 'Сьогодні';
-  if (dueDate === getLocalDateKey(tomorrow)) return 'Завтра';
-  return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
+  if (dueDate === todayKey) return i18n.t('tasks.today');
+  if (dueDate === getLocalDateKey(tomorrow)) return i18n.t('tasks.tomorrow');
+  return date.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'uk-UA', { day: 'numeric', month: 'short' });
 }
 
 export function isOverdue(dueDate: string): boolean {
@@ -47,8 +63,8 @@ export function sortTasksBy(tasks: Task[], sortBy: SortBy, tags: Tag[]): Task[] 
     date: (a, b) => (a.dueDate ?? '9999-99-99').localeCompare(b.dueDate ?? '9999-99-99'),
     createdAt: (a, b) => b.createdAt - a.createdAt,
     updatedAt: (a, b) => b.updatedAt - a.updatedAt,
-    name: (a, b) => a.text.localeCompare(b.text, 'uk'),
-    tag: (a, b) => tagLabel(a).localeCompare(tagLabel(b), 'uk'),
+    name: (a, b) => a.text.localeCompare(b.text, i18n.language),
+    tag: (a, b) => tagLabel(a).localeCompare(tagLabel(b), i18n.language),
     priority: (a, b) => PRIORITY_ORDER.indexOf(a.priority) - PRIORITY_ORDER.indexOf(b.priority),
   };
   return [...tasks].sort((a, b) => Number(b.pinned) - Number(a.pinned) || compare[sortBy](a, b));
@@ -61,17 +77,17 @@ export interface TaskGroup {
 }
 
 function dateBucket(dueDate: string | null): { key: string; label: string; rank: number } {
-  if (!dueDate) return { key: 'none', label: 'Без дати', rank: 5 };
+  if (!dueDate) return { key: 'none', label: i18n.t('tasks.bucketNoDate'), rank: 5 };
   const todayKey = getLocalDateKey(new Date());
-  if (dueDate < todayKey) return { key: 'overdue', label: 'Прострочено', rank: 0 };
-  if (dueDate === todayKey) return { key: 'today', label: 'Сьогодні', rank: 1 };
+  if (dueDate < todayKey) return { key: 'overdue', label: i18n.t('tasks.bucketOverdue'), rank: 0 };
+  if (dueDate === todayKey) return { key: 'today', label: i18n.t('tasks.today'), rank: 1 };
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (dueDate === getLocalDateKey(tomorrow)) return { key: 'tomorrow', label: 'Завтра', rank: 2 };
+  if (dueDate === getLocalDateKey(tomorrow)) return { key: 'tomorrow', label: i18n.t('tasks.tomorrow'), rank: 2 };
   const weekAhead = new Date();
   weekAhead.setDate(weekAhead.getDate() + 7);
-  if (dueDate <= getLocalDateKey(weekAhead)) return { key: 'week', label: 'Найближчим часом', rank: 3 };
-  return { key: 'later', label: 'Пізніше', rank: 4 };
+  if (dueDate <= getLocalDateKey(weekAhead)) return { key: 'week', label: i18n.t('tasks.bucketWeek'), rank: 3 };
+  return { key: 'later', label: i18n.t('tasks.bucketLater'), rank: 4 };
 }
 
 export function groupTasksBy(tasks: Task[], groupBy: GroupBy, tags: Tag[]): TaskGroup[] {
@@ -82,7 +98,7 @@ export function groupTasksBy(tasks: Task[], groupBy: GroupBy, tags: Tag[]): Task
   if (groupBy === 'priority') {
     return PRIORITY_ORDER.map((p) => ({
       key: p,
-      label: PRIORITY_META[p].label,
+      label: i18n.t(PRIORITY_META[p].labelKey),
       tasks: tasks.filter((t) => t.priority === p),
     })).filter((g) => g.tasks.length > 0);
   }
@@ -92,7 +108,7 @@ export function groupTasksBy(tasks: Task[], groupBy: GroupBy, tags: Tag[]): Task
       .map((tag) => ({ key: tag.id, label: tag.name, tasks: tasks.filter((t) => t.tagIds.includes(tag.id)) }))
       .filter((g) => g.tasks.length > 0);
     const untagged = tasks.filter((t) => t.tagIds.length === 0);
-    return untagged.length > 0 ? [...tagGroups, { key: 'none', label: 'Без міток', tasks: untagged }] : tagGroups;
+    return untagged.length > 0 ? [...tagGroups, { key: 'none', label: i18n.t('tasks.untagged'), tasks: untagged }] : tagGroups;
   }
 
   if (groupBy === 'date') {
@@ -118,23 +134,26 @@ export function groupTasksBy(tasks: Task[], groupBy: GroupBy, tags: Tag[]): Task
 export const GROUP_BY_ORDER: GroupBy[] = ['sequence', 'date', 'createdAt', 'tag', 'priority', 'none'];
 export const SORT_BY_ORDER: SortBy[] = ['sequence', 'date', 'createdAt', 'updatedAt', 'name', 'tag', 'priority'];
 
-export const GROUP_BY_META: Record<GroupBy, { label: string }> = {
-  sequence: { label: 'Послідовність' },
-  date: { label: 'Дата' },
-  createdAt: { label: 'Час створення' },
-  tag: { label: 'Мітка' },
-  priority: { label: 'Пріоритет' },
-  none: { label: 'Немає' },
+// `labelKey` (not a pre-resolved `label`) so consumers translate it themselves
+// via `t(meta.labelKey)` — these are module-level constants and can't react
+// to a language switch on their own.
+export const GROUP_BY_META: Record<GroupBy, { labelKey: string }> = {
+  sequence: { labelKey: 'groupBy.sequence' },
+  date: { labelKey: 'groupBy.date' },
+  createdAt: { labelKey: 'groupBy.createdAt' },
+  tag: { labelKey: 'groupBy.tag' },
+  priority: { labelKey: 'groupBy.priority' },
+  none: { labelKey: 'groupBy.none' },
 };
 
-export const SORT_BY_META: Record<SortBy, { label: string }> = {
-  sequence: { label: 'Послідовність' },
-  date: { label: 'Дата' },
-  createdAt: { label: 'Час створення' },
-  updatedAt: { label: 'Час зміни' },
-  name: { label: 'Назва' },
-  tag: { label: 'Мітка' },
-  priority: { label: 'Пріоритет' },
+export const SORT_BY_META: Record<SortBy, { labelKey: string }> = {
+  sequence: { labelKey: 'sortBy.sequence' },
+  date: { labelKey: 'sortBy.date' },
+  createdAt: { labelKey: 'sortBy.createdAt' },
+  updatedAt: { labelKey: 'sortBy.updatedAt' },
+  name: { labelKey: 'sortBy.name' },
+  tag: { labelKey: 'sortBy.tag' },
+  priority: { labelKey: 'sortBy.priority' },
 };
 
 export function formatTime(totalSeconds: number): string {
@@ -143,19 +162,19 @@ export function formatTime(totalSeconds: number): string {
   return `${mins}:${secs}`;
 }
 
-export const PRIORITY_META: Record<Priority, { label: string; colorClass: string; dotClass: string }> = {
-  high: { label: 'Високий', colorClass: 'text-red-500', dotClass: 'bg-red-500' },
-  medium: { label: 'Середній', colorClass: 'text-amber-500', dotClass: 'bg-amber-500' },
-  low: { label: 'Низький', colorClass: 'text-blue-500', dotClass: 'bg-blue-500' },
-  none: { label: 'Без пріоритету', colorClass: 'text-stone-400', dotClass: 'bg-stone-300' },
+export const PRIORITY_META: Record<Priority, { labelKey: string; colorClass: string; dotClass: string }> = {
+  high: { labelKey: 'priority.high', colorClass: 'text-red-500', dotClass: 'bg-red-500' },
+  medium: { labelKey: 'priority.medium', colorClass: 'text-amber-500', dotClass: 'bg-amber-500' },
+  low: { labelKey: 'priority.low', colorClass: 'text-blue-500', dotClass: 'bg-blue-500' },
+  none: { labelKey: 'priority.none', colorClass: 'text-stone-400', dotClass: 'bg-stone-300' },
 };
 
 export const PRIORITY_ORDER: Priority[] = ['high', 'medium', 'low', 'none'];
 
-export const PHASE_META: Record<PomodoroPhase, { label: string; ring: string; text: string; soft: string }> = {
-  focus: { label: 'Фокус', ring: 'stroke-brand-500', text: 'text-brand-700', soft: 'bg-brand-50' },
-  shortBreak: { label: 'Коротка перерва', ring: 'stroke-emerald-500', text: 'text-emerald-700', soft: 'bg-emerald-50' },
-  longBreak: { label: 'Довга перерва', ring: 'stroke-indigo-500', text: 'text-indigo-700', soft: 'bg-indigo-50' },
+export const PHASE_META: Record<PomodoroPhase, { labelKey: string; ring: string; text: string; soft: string }> = {
+  focus: { labelKey: 'pomodoro.focus', ring: 'stroke-brand-500', text: 'text-brand-700', soft: 'bg-brand-50' },
+  shortBreak: { labelKey: 'pomodoro.shortBreak', ring: 'stroke-emerald-500', text: 'text-emerald-700', soft: 'bg-emerald-50' },
+  longBreak: { labelKey: 'pomodoro.longBreak', ring: 'stroke-indigo-500', text: 'text-indigo-700', soft: 'bg-indigo-50' },
 };
 
 export const TAG_COLOR_ORDER: TagColor[] = ['rose', 'amber', 'emerald', 'sky', 'violet', 'stone'];
@@ -176,22 +195,129 @@ export function nextTagColor(existingCount: number): TagColor {
   return TAG_COLOR_ORDER[existingCount % TAG_COLOR_ORDER.length];
 }
 
-// Calendar: Sunday-first grids (matches the reference screenshots), all dates
-// as 'YYYY-MM-DD' keys — consistent with Task.dueDate/getLocalDateKey elsewhere.
-export const CALENDAR_WEEKDAYS = ['Нед', 'Пон', 'Вів', 'Сер', 'Чет', 'Птн', 'Суб'];
+// Calendar: Monday-first grids, all dates as 'YYYY-MM-DD' keys — consistent
+// with Task.dueDate/getLocalDateKey elsewhere. `.day()` is always Sunday=0
+// regardless of locale, so `(day() + 6) % 7` (matching DatePicker.tsx) is used
+// to offset to a Monday-first week instead. The weekday header labels
+// themselves are translated via `t()` inside MonthView (a plain array here
+// couldn't react to a language switch).
 export const HOUR_HEIGHT = 48; // px per hour in the week/day time grid
 export const SNAP_MINUTES = 15;
 
 export function getMonthGridDates(cursorDateKey: string): string[] {
   const startOfMonth = dayjs(cursorDateKey).startOf('month');
-  const gridStart = startOfMonth.subtract(startOfMonth.day(), 'day');
+  const gridStart = startOfMonth.subtract((startOfMonth.day() + 6) % 7, 'day');
   return Array.from({ length: 42 }, (_, i) => gridStart.add(i, 'day').format('YYYY-MM-DD'));
 }
 
 export function getWeekDates(cursorDateKey: string): string[] {
   const d = dayjs(cursorDateKey);
-  const weekStart = d.subtract(d.day(), 'day');
+  const weekStart = d.subtract((d.day() + 6) % 7, 'day');
   return Array.from({ length: 7 }, (_, i) => weekStart.add(i, 'day').format('YYYY-MM-DD'));
+}
+
+export const RECURRENCE_FREQ_ORDER: RecurrenceFreq[] = ['daily', 'weekly', 'monthly', 'yearly'];
+
+export const RECURRENCE_FREQ_META: Record<RecurrenceFreq, { labelKey: string; unitLabelKey: string }> = {
+  daily: { labelKey: 'recurrence.daily', unitLabelKey: 'recurrence.unitDays' },
+  weekly: { labelKey: 'recurrence.weekly', unitLabelKey: 'recurrence.unitWeeks' },
+  monthly: { labelKey: 'recurrence.monthly', unitLabelKey: 'recurrence.unitMonths' },
+  yearly: { labelKey: 'recurrence.yearly', unitLabelKey: 'recurrence.unitYears' },
+};
+
+// Monday-first dayjs `.day()` values (0=Sun..6=Sat), for the weekday-toggle UI
+// — pairs positionally with the existing datePicker.mon..sun i18n keys.
+export const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+const RECURRENCE_MAX_ITERATIONS = 3660; // ~10 years of days — a safety cap, not an expected horizon
+
+// Day-by-day predicate: does `dateKey` land on an occurrence of `rule`,
+// anchored at `anchorDateKey`? Doesn't consider `rule.count` — callers that
+// care about a occurrence-count cutoff track that themselves while walking
+// forward in date order (see computeNextOccurrenceDate/expandEventsForRange).
+function matchesRecurrence(dateKey: string, anchorDateKey: string, rule: RecurrenceRule): boolean {
+  const date = dayjs(dateKey);
+  const anchor = dayjs(anchorDateKey);
+  if (date.isBefore(anchor, 'day')) return false;
+  if (rule.endDate && dateKey > rule.endDate) return false;
+
+  if (rule.freq === 'daily') {
+    return date.diff(anchor, 'day') % rule.interval === 0;
+  }
+  if (rule.freq === 'weekly') {
+    const weekdays = rule.byWeekday && rule.byWeekday.length > 0 ? rule.byWeekday : [anchor.day()];
+    if (!weekdays.includes(date.day())) return false;
+    const anchorWeekStart = anchor.subtract((anchor.day() + 6) % 7, 'day');
+    const dateWeekStart = date.subtract((date.day() + 6) % 7, 'day');
+    const weekDiff = dateWeekStart.diff(anchorWeekStart, 'day') / 7;
+    return weekDiff % rule.interval === 0;
+  }
+  if (rule.freq === 'monthly') {
+    if (date.date() !== anchor.date()) return false;
+    const monthDiff = (date.year() - anchor.year()) * 12 + (date.month() - anchor.month());
+    return monthDiff % rule.interval === 0;
+  }
+  // yearly
+  if (date.date() !== anchor.date() || date.month() !== anchor.month()) return false;
+  return (date.year() - anchor.year()) % rule.interval === 0;
+}
+
+// Counts occurrences of `rule` from `anchorDateKey` through `throughDateKey`
+// (inclusive of both ends), used to check a `count`-limited rule for
+// exhaustion. Bounded by the same safety cap as the walks below.
+function countOccurrencesThrough(throughDateKey: string, anchorDateKey: string, rule: RecurrenceRule): number {
+  let cursor = dayjs(anchorDateKey);
+  let count = 0;
+  for (let i = 0; i < RECURRENCE_MAX_ITERATIONS && cursor.format('YYYY-MM-DD') <= throughDateKey; i++) {
+    if (matchesRecurrence(cursor.format('YYYY-MM-DD'), anchorDateKey, rule)) count++;
+    cursor = cursor.add(1, 'day');
+  }
+  return count;
+}
+
+// Walks forward day-by-day from `fromDateKey` (exclusive) and returns the
+// first date matching `rule`, or null once `rule.endDate`/`count` is exhausted.
+export function computeNextOccurrenceDate(fromDateKey: string, anchorDateKey: string, rule: RecurrenceRule): string | null {
+  if (rule.count && countOccurrencesThrough(fromDateKey, anchorDateKey, rule) >= rule.count) return null;
+  let cursor = dayjs(fromDateKey).add(1, 'day');
+  for (let i = 0; i < RECURRENCE_MAX_ITERATIONS; i++) {
+    const dateKey = cursor.format('YYYY-MM-DD');
+    if (rule.endDate && dateKey > rule.endDate) return null;
+    if (matchesRecurrence(dateKey, anchorDateKey, rule)) return dateKey;
+    cursor = cursor.add(1, 'day');
+  }
+  return null;
+}
+
+// Expands every recurring CalendarEvent into virtual per-occurrence copies
+// within [rangeStart, rangeEnd] (inclusive 'YYYY-MM-DD' keys), so every
+// existing `.filter(e => e.date === dateKey)` call site in the calendar views
+// keeps working unmodified against the returned list. Non-recurring events
+// (including single-occurrence overrides) pass through unchanged.
+export function expandEventsForRange(events: CalendarEvent[], rangeStart: string, rangeEnd: string): CalendarEvent[] {
+  const result: CalendarEvent[] = [];
+  for (const event of events) {
+    if (!event.recurrence) {
+      result.push(event);
+      continue;
+    }
+    const rule = event.recurrence;
+    let cursor = dayjs(event.date);
+    let occurrenceCount = 0;
+    for (let i = 0; i < RECURRENCE_MAX_ITERATIONS && cursor.format('YYYY-MM-DD') <= rangeEnd; i++) {
+      const dateKey = cursor.format('YYYY-MM-DD');
+      if (rule.endDate && dateKey > rule.endDate) break;
+      if (matchesRecurrence(dateKey, event.date, rule)) {
+        occurrenceCount++;
+        if (rule.count && occurrenceCount > rule.count) break;
+        if (dateKey >= rangeStart && !event.recurrenceExceptions.includes(dateKey)) {
+          result.push({ ...event, id: `${event.id}::${dateKey}`, date: dateKey, recurrenceMasterId: event.id });
+        }
+      }
+      cursor = cursor.add(1, 'day');
+    }
+  }
+  return result;
 }
 
 export function timeToMinutes(time: string): number {

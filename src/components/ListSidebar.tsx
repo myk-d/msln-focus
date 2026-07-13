@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
@@ -29,6 +30,7 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
     updateTag,
     deleteTag,
   } = useTaskStoreContext();
+  const { t } = useTranslation();
   const confirm = useConfirm();
   useBodyScrollLock(mobileOpen);
   const [isAdding, setIsAdding] = useState(false);
@@ -42,9 +44,9 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
   const handleDeleteList = async (list: (typeof lists)[number]) => {
     if (
       await confirm({
-        title: `Видалити список «${list.name}»?`,
-        message: 'Усі секції та завдання в цьому списку будуть видалені назавжди.',
-        confirmLabel: 'Видалити',
+        title: t('confirm.deleteListTitle', { name: list.name }),
+        message: t('confirm.deleteListMessage'),
+        confirmLabel: t('tasks.delete'),
       })
     ) {
       deleteList(list.id);
@@ -54,9 +56,9 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
   const handleDeleteTag = async (tagId: string, tagName: string) => {
     if (
       await confirm({
-        title: `Видалити мітку «${tagName}»?`,
-        message: 'Мітку буде знято з усіх завдань, які нею позначені.',
-        confirmLabel: 'Видалити',
+        title: t('confirm.deleteTagTitle', { name: tagName }),
+        message: t('confirm.deleteTagMessage'),
+        confirmLabel: t('tasks.delete'),
       })
     ) {
       deleteTag(tagId);
@@ -80,12 +82,12 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
         }`}
       >
         <div className="mb-1 flex items-center justify-between md:hidden">
-          <h2 className="px-2 text-xs font-semibold uppercase tracking-wider text-stone-400">Списки</h2>
+          <h2 className="px-2 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.lists')}</h2>
           <button onClick={onCloseMobile} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
             <X size={18} />
           </button>
         </div>
-        <h2 className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400 md:block">Списки</h2>
+        <h2 className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400 md:block">{t('tasks.lists')}</h2>
       {lists.map((list) => (
         <ListSidebarRow
           key={list.id}
@@ -105,27 +107,32 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
       ))}
 
       {isAdding ? (
-        <input
-          autoFocus
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-          onBlur={commitAdd}
-          onKeyDown={(e) => e.key === 'Enter' && commitAdd()}
-          placeholder="Назва списку"
-          className="mx-2 mt-1 rounded-lg border border-stone-200 px-2 py-1 text-sm outline-none focus:border-brand-400"
-        />
+        <div className="mx-2 mt-1 flex items-center gap-1">
+          <input
+            autoFocus
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+            onBlur={commitAdd}
+            onKeyDown={(e) => e.key === 'Enter' && commitAdd()}
+            placeholder={t('tasks.newListPlaceholder')}
+            className="flex-1 rounded-lg border border-stone-200 px-2 py-1 text-sm outline-none focus:border-brand-400"
+          />
+          <button onClick={commitAdd} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+            <Plus size={14} />
+          </button>
+        </div>
       ) : (
         <button
           onClick={() => setIsAdding(true)}
           className="mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2 text-left text-sm text-stone-400 hover:bg-stone-100 hover:text-stone-600"
         >
-          <Plus size={14} /> Новий список
+          <Plus size={14} /> {t('tasks.newList')}
         </button>
       )}
 
       {tags.length > 0 && (
         <>
-          <h2 className="mt-4 px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400">Мітки</h2>
+          <h2 className="mt-4 px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.tags')}</h2>
           {tags.map((tag) => (
             <TagSidebarRow
               key={tag.id}

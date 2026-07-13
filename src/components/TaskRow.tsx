@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Flag, GripVertical, MoreHorizontal, Pin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { usePomodoroContext } from '../context/PomodoroContext';
 import { Checkbox } from './ui/Checkbox';
@@ -19,6 +20,7 @@ interface TaskRowProps {
 }
 
 export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: TaskRowProps) {
+  const { t } = useTranslation();
   const {
     tags,
     toggleTaskCompleted,
@@ -27,6 +29,7 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
     moveTaskToList,
     setPriority,
     setDueDate,
+    setTaskRecurrence,
     createTag,
     deleteTag,
     toggleTaskTag,
@@ -63,8 +66,9 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
         <button
           {...attributes}
           {...listeners}
+          style={{ touchAction: 'none' }}
           className="cursor-grab text-stone-300 hover:text-stone-500 active:cursor-grabbing"
-          aria-label="Перетягнути"
+          aria-label={t('tasks.dragAria')}
         >
           <GripVertical size={15} />
         </button>
@@ -114,7 +118,7 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="rounded px-1.5 py-1 text-stone-400 opacity-0 hover:bg-stone-100 hover:text-stone-600 group-hover:opacity-100 focus:opacity-100"
+            className="rounded px-1.5 py-1 text-stone-400 opacity-100 hover:bg-stone-100 hover:text-stone-600 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
           >
             <MoreHorizontal size={16} />
           </button>
@@ -127,6 +131,7 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
               onClose={() => setMenuOpen(false)}
               onSetPriority={(p) => setPriority(task.id, p)}
               onSetDueDate={(d) => setDueDate(task.id, d)}
+              onSetRecurrence={(rule) => setTaskRecurrence(task.id, rule)}
               onToggleTag={(tagId) => toggleTaskTag(task.id, tagId)}
               onCreateTag={(name) => toggleTaskTag(task.id, createTag(name))}
               onDeleteTag={deleteTag}

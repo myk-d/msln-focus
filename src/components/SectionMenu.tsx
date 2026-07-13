@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { ArrowDownToLine, ArrowUpToLine, FolderInput, Pencil, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { useConfirm } from '../context/ConfirmContext';
 import { menuItemClass, popoverClass } from '../lib/ui';
@@ -28,6 +29,7 @@ export function SectionMenu({
   onMoveToList,
   onDelete,
 }: SectionMenuProps) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, onClose);
   const [showMoveTo, setShowMoveTo] = useState(false);
@@ -37,9 +39,9 @@ export function SectionMenu({
   const handleDelete = async () => {
     if (
       await confirm({
-        title: 'Видалити секцію?',
-        message: 'Завдання із цієї секції буде перенесено до іншої секції списку.',
-        confirmLabel: 'Видалити',
+        title: t('confirm.deleteSectionTitle'),
+        message: t('confirm.deleteSectionMessage'),
+        confirmLabel: t('tasks.delete'),
       })
     ) {
       onDelete();
@@ -49,25 +51,25 @@ export function SectionMenu({
   return (
     <div ref={ref} className={`${popoverClass} absolute right-0 top-8 z-20 w-56 p-1 text-sm`}>
       <button onClick={onRename} className={menuItemClass}>
-        <Pencil size={15} /> Перейменувати
+        <Pencil size={15} /> {t('tasks.rename')}
       </button>
       <button onClick={onInsertAbove} className={menuItemClass}>
-        <ArrowUpToLine size={15} /> Вставити секцію вище
+        <ArrowUpToLine size={15} /> {t('tasks.insertAbove')}
       </button>
       <button onClick={onInsertBelow} className={menuItemClass}>
-        <ArrowDownToLine size={15} /> Вставити секцію нижче
+        <ArrowDownToLine size={15} /> {t('tasks.insertBelow')}
       </button>
 
       {otherLists.length > 0 && (
         <div className="relative">
           <button onClick={() => setShowMoveTo((v) => !v)} className={`${menuItemClass} justify-between`}>
             <span className="flex items-center gap-2">
-              <FolderInput size={15} /> Перейти до
+              <FolderInput size={15} /> {t('tasks.moveTo')}
             </span>
             <span className="text-stone-400">›</span>
           </button>
           {showMoveTo && (
-            <div className={`${popoverClass} absolute right-full top-0 mr-1 w-44 p-1`}>
+            <div className={`${popoverClass} absolute left-0 top-full mt-1 w-44 p-1`}>
               {otherLists.map((list) => (
                 <button key={list.id} onClick={() => onMoveToList(list.id)} className={menuItemClass}>
                   {list.name}
@@ -85,7 +87,7 @@ export function SectionMenu({
         disabled={!canDelete}
         className={`${menuItemClass} text-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-stone-300 disabled:hover:bg-transparent`}
       >
-        <Trash2 size={15} /> Видалити секцію
+        <Trash2 size={15} /> {t('tasks.deleteSection')}
       </button>
     </div>
   );

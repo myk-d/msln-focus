@@ -10,8 +10,9 @@ import {
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../../hooks/useClickOutside';
-import { CALENDAR_WEEKDAYS, TAG_COLOR_META, compareEventsForDisplay } from '../../lib/utils';
+import { TAG_COLOR_META, compareEventsForDisplay } from '../../lib/utils';
 import { popoverClass } from '../../lib/ui';
 import { EventChip } from './EventChip';
 import type { CalendarEvent, Task } from '../../types';
@@ -68,6 +69,7 @@ function DayCell({
   onToggleOverflow: () => void;
   onCloseOverflow: () => void;
 }) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: `day:${dateKey}` });
   const overflowRef = useRef<HTMLDivElement>(null);
   useClickOutside(overflowRef, onCloseOverflow);
@@ -112,7 +114,7 @@ function DayCell({
           onClick={onToggleOverflow}
           className="mt-0.5 text-left text-[11px] font-medium text-stone-400 hover:text-stone-600"
         >
-          ще {hidden.length}
+          {t('calendar.more', { count: hidden.length })}
         </button>
       )}
 
@@ -137,6 +139,16 @@ function DayCell({
 }
 
 export function MonthView({ monthDates, cursorDateKey, events, tasks, onSelectEvent, onSelectTask, onMoveEvent }: MonthViewProps) {
+  const { t } = useTranslation();
+  const weekdays = [
+    t('calendar.weekdayMon'),
+    t('calendar.weekdayTue'),
+    t('calendar.weekdayWed'),
+    t('calendar.weekdayThu'),
+    t('calendar.weekdayFri'),
+    t('calendar.weekdaySat'),
+    t('calendar.weekdaySun'),
+  ];
   const [overflowDate, setOverflowDate] = useState<string | null>(null);
   const cursorMonth = dayjs(cursorDateKey).month();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -176,7 +188,7 @@ export function MonthView({ monthDates, cursorDateKey, events, tasks, onSelectEv
   return (
     <div className="flex flex-1 flex-col overflow-hidden rounded-xl border-l border-t border-stone-100">
       <div className="grid grid-cols-7 border-b border-stone-100 bg-stone-50/50">
-        {CALENDAR_WEEKDAYS.map((day) => (
+        {weekdays.map((day) => (
           <div key={day} className="px-2 py-1.5 text-center text-xs font-semibold text-stone-400">
             {day}
           </div>

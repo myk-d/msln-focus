@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { MoreHorizontal, Pencil, Tag as TagIcon, Trash2 } from 'lucide-react';
+import { Check, MoreHorizontal, Pencil, Tag as TagIcon, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { TAG_COLOR_META, TAG_COLOR_ORDER } from '../lib/utils';
 import { menuItemClass, popoverClass } from '../lib/ui';
@@ -15,6 +16,7 @@ interface TagSidebarRowProps {
 }
 
 export function TagSidebarRow({ tag, isActive, onSelect, onRename, onRecolor, onDelete }: TagSidebarRowProps) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [draft, setDraft] = useState(tag.name);
@@ -39,13 +41,18 @@ export function TagSidebarRow({ tag, isActive, onSelect, onRename, onRecolor, on
   if (editing) {
     return (
       <div ref={editRef} className="rounded-xl px-3 py-2">
-        <input
-          autoFocus
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && commitRename()}
-          className="w-full rounded bg-stone-50 px-1 text-sm outline-none ring-1 ring-brand-400"
-        />
+        <div className="flex items-center gap-1">
+          <input
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && commitRename()}
+            className="w-full flex-1 rounded bg-stone-50 px-1 text-sm outline-none ring-1 ring-brand-400"
+          />
+          <button onClick={commitRename} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+            <Check size={14} />
+          </button>
+        </div>
         <div className="mt-1.5 flex items-center gap-1.5">
           {TAG_COLOR_ORDER.map((color) => (
             <button
@@ -73,11 +80,11 @@ export function TagSidebarRow({ tag, isActive, onSelect, onRename, onRecolor, on
         <span className="truncate">{tag.name}</span>
       </button>
       <div className="relative flex items-center gap-1">
-        <span className={`h-2 w-2 shrink-0 rounded-full ${TAG_COLOR_META[tag.color].dot} group-hover:hidden`} />
+        <span className={`h-2 w-2 shrink-0 rounded-full ${TAG_COLOR_META[tag.color].dot} md:group-hover:hidden`} />
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="hidden rounded p-0.5 text-stone-400 hover:bg-stone-200 hover:text-stone-600 group-hover:block"
-          aria-label="Меню мітки"
+          className="rounded p-0.5 text-stone-400 hover:bg-stone-200 hover:text-stone-600 md:hidden md:group-hover:block"
+          aria-label={t('tasks.tagMenuAria')}
         >
           <MoreHorizontal size={14} />
         </button>
@@ -91,7 +98,7 @@ export function TagSidebarRow({ tag, isActive, onSelect, onRename, onRecolor, on
               }}
               className={menuItemClass}
             >
-              <Pencil size={14} /> Редагувати
+              <Pencil size={14} /> {t('tasks.edit')}
             </button>
             <button
               onClick={() => {
@@ -100,7 +107,7 @@ export function TagSidebarRow({ tag, isActive, onSelect, onRename, onRecolor, on
               }}
               className={`${menuItemClass} text-red-500 hover:bg-red-50`}
             >
-              <Trash2 size={14} /> Видалити
+              <Trash2 size={14} /> {t('tasks.delete')}
             </button>
           </div>
         )}

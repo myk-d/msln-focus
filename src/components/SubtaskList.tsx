@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { Checkbox } from './ui/Checkbox';
@@ -11,6 +12,7 @@ interface SubtaskListProps {
 }
 
 export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
+  const { t } = useTranslation();
   const { addSubtask, toggleSubtask, deleteSubtask } = useTaskStoreContext();
   const [newSubtask, setNewSubtask] = useState('');
   const confirm = useConfirm();
@@ -21,7 +23,7 @@ export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
   };
 
   const handleDelete = async (subtask: Subtask) => {
-    if (await confirm({ title: `Видалити підзавдання «${subtask.text}»?`, confirmLabel: 'Видалити' })) {
+    if (await confirm({ title: t('confirm.deleteSubtaskTitle', { name: subtask.text }), confirmLabel: t('tasks.delete') })) {
       deleteSubtask(taskId, subtask.id);
     }
   };
@@ -36,20 +38,25 @@ export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
           </span>
           <button
             onClick={() => handleDelete(st)}
-            className="hidden text-stone-300 hover:text-red-500 group-hover:block"
+            className="text-stone-300 hover:text-red-500 md:hidden md:group-hover:block"
           >
             <X size={13} />
           </button>
         </div>
       ))}
-      <input
-        value={newSubtask}
-        onChange={(e) => setNewSubtask(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && commitNewSubtask()}
-        onBlur={commitNewSubtask}
-        placeholder="+ підзавдання"
-        className="rounded bg-stone-50 px-1.5 py-1 text-sm outline-none placeholder:text-stone-400"
-      />
+      <div className="flex items-center gap-1">
+        <input
+          value={newSubtask}
+          onChange={(e) => setNewSubtask(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && commitNewSubtask()}
+          onBlur={commitNewSubtask}
+          placeholder={t('tasks.addSubtaskPlaceholder')}
+          className="flex-1 rounded bg-stone-50 px-1.5 py-1 text-sm outline-none placeholder:text-stone-400"
+        />
+        <button onClick={commitNewSubtask} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+          <Plus size={14} />
+        </button>
+      </div>
     </div>
   );
 }

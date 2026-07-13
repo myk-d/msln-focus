@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { NavRail } from './NavRail';
 import { TasksPage } from './TasksPage';
 import { CalendarPage } from './CalendarPage';
@@ -8,22 +9,22 @@ import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { useEventStoreContext } from '../context/EventStoreContext';
 import { useNotificationReminders } from '../hooks/useNotificationReminders';
 
-const PAGE_TITLES: Record<string, string> = {
-  '/tasks': 'Завдання',
-  '/calendar': 'Календар',
-  '/pomodoro': 'Помодоро',
-};
-
 export function FocusDashboard() {
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const { tasks } = useTaskStoreContext();
   const { events } = useEventStoreContext();
   useNotificationReminders(tasks, events);
 
   useEffect(() => {
-    const pageTitle = PAGE_TITLES[location.pathname];
+    const pageTitles: Record<string, string> = {
+      '/tasks': t('nav.tasks'),
+      '/calendar': t('nav.calendar'),
+      '/pomodoro': t('nav.pomodoro'),
+    };
+    const pageTitle = pageTitles[location.pathname];
     document.title = pageTitle ? `${pageTitle} · Focus-Pocus` : 'Focus-Pocus';
-  }, [location.pathname]);
+  }, [location.pathname, t, i18n.language]);
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-canvas">

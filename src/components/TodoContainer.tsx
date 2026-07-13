@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Eye, EyeOff, Menu, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { TaskSection } from './TaskSection';
 import { GroupedTaskList } from './GroupedTaskList';
@@ -15,6 +16,7 @@ interface TodoContainerProps {
 }
 
 export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: TodoContainerProps) {
+  const { t } = useTranslation();
   const { lists, sections, tasks, tags, activeListId, addSection, addTask, moveTask, reorderSection, setListGroupBy, setListSortBy } =
     useTaskStoreContext();
   const [hideCompleted, setHideCompleted] = useState(false);
@@ -64,7 +66,7 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
           <button
             onClick={onOpenSidebar}
             className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600 md:hidden"
-            aria-label="Списки"
+            aria-label={t('tasks.listsAria')}
           >
             <Menu size={18} />
           </button>
@@ -78,14 +80,14 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
             }`}
           >
             {hideCompleted ? <EyeOff size={13} /> : <Eye size={13} />}
-            {hideCompleted ? 'Виконані приховано' : 'Показати виконані'}
+            {hideCompleted ? t('tasks.hideCompleted') : t('tasks.showCompleted')}
           </button>
           {!isGrouped && (
             <button
               onClick={() => addSection(activeListId)}
               className="flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200"
             >
-              <Plus size={13} /> Секція
+              <Plus size={13} /> {t('tasks.addSection')}
             </button>
           )}
           <FilterMenu
@@ -99,14 +101,19 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
 
       {isGrouped ? (
         <>
-          <input
-            value={quickAddText}
-            onChange={(e) => setQuickAddText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && commitQuickAdd()}
-            onBlur={commitQuickAdd}
-            placeholder="+ Додати завдання"
-            className="mb-3 rounded-lg bg-transparent px-2 py-1.5 text-sm text-stone-500 outline-none placeholder:text-stone-400 hover:bg-stone-50 focus:bg-stone-50"
-          />
+          <div className="mb-3 flex items-center gap-1">
+            <input
+              value={quickAddText}
+              onChange={(e) => setQuickAddText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && commitQuickAdd()}
+              onBlur={commitQuickAdd}
+              placeholder={t('tasks.addTaskPlaceholder')}
+              className="flex-1 rounded-lg bg-transparent px-2 py-1.5 text-sm text-stone-500 outline-none placeholder:text-stone-400 hover:bg-stone-50 focus:bg-stone-50"
+            />
+            <button onClick={commitQuickAdd} className="shrink-0 rounded-full p-1.5 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+              <Plus size={15} />
+            </button>
+          </div>
           <GroupedTaskList
             groups={groupTasksBy(
               hideCompleted ? listTasks.filter((t) => !t.completed) : listTasks,

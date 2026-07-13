@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MoreHorizontal, Pin, PinOff, X } from 'lucide-react';
+import { Check, MoreHorizontal, Pin, PinOff, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { usePomodoroContext } from '../context/PomodoroContext';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
@@ -8,6 +9,8 @@ import { Checkbox } from './ui/Checkbox';
 import { PriorityPicker } from './ui/PriorityPicker';
 import { TagPicker } from './ui/TagPicker';
 import { DatePicker } from './ui/DatePicker';
+import { RecurrencePicker } from './ui/RecurrencePicker';
+import { Switch } from './ui/Switch';
 import { SubtaskList } from './SubtaskList';
 import { TaskContextMenu } from './TaskContextMenu';
 import { inputClass } from '../lib/ui';
@@ -20,6 +23,7 @@ interface TaskDetailPanelProps {
 }
 
 export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) {
+  const { t } = useTranslation();
   const {
     sections,
     tags,
@@ -30,6 +34,8 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
     moveTaskToList,
     setPriority,
     setDueDate,
+    setTaskRecurrence,
+    setAutoCompleteWithSubtasks,
     createTag,
     deleteTag,
     toggleTaskTag,
@@ -62,7 +68,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
           forces overflow-x to clip too. */}
       <div className="flex items-center justify-between px-5 pt-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => togglePin(task.id)} className="text-stone-400 hover:text-stone-600" aria-label="Закріпити">
+          <button onClick={() => togglePin(task.id)} className="text-stone-400 hover:text-stone-600" aria-label={t('tasks.pinAria')}>
             {task.pinned ? <PinOff size={16} className="text-brand-600" /> : <Pin size={16} />}
           </button>
           <div className="relative">
@@ -81,6 +87,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
                 onClose={() => setMenuOpen(false)}
                 onSetPriority={(p) => setPriority(task.id, p)}
                 onSetDueDate={(d) => setDueDate(task.id, d)}
+                onSetRecurrence={(rule) => setTaskRecurrence(task.id, rule)}
                 onToggleTag={(tagId) => toggleTaskTag(task.id, tagId)}
                 onCreateTag={(name) => toggleTaskTag(task.id, createTag(name))}
                 onDeleteTag={deleteTag}
@@ -130,21 +137,35 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
             task.completed ? 'text-stone-400 line-through' : ''
           }`}
         />
+        <button
+          onClick={commitTitle}
+          className="mt-1 shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50"
+          aria-label={t('tasks.save')}
+        >
+          <Check size={16} />
+        </button>
       </div>
 
       <div className="flex flex-col gap-4">
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Пріоритет</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.priority')}</div>
           <PriorityPicker value={task.priority} onChange={(p) => setPriority(task.id, p)} />
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Дата</div>
-          <DatePicker value={task.dueDate} onChange={(d) => setDueDate(task.id, d)} />
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.date')}</div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <DatePicker value={task.dueDate} onChange={(d) => setDueDate(task.id, d)} />
+            <RecurrencePicker
+              value={task.recurrence}
+              anchorDate={task.dueDate}
+              onChange={(rule) => setTaskRecurrence(task.id, rule)}
+            />
+          </div>
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Мітки</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.tags')}</div>
           <TagPicker
             selectedTagIds={task.tagIds}
             allTags={tags}
@@ -155,17 +176,28 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Підзавдання</div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <div className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.subtasks')}</div>
+            {task.subtasks.length > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-stone-500">{t('tasks.autoCompleteWithSubtasks')}</span>
+                <Switch
+                  checked={task.autoCompleteWithSubtasks}
+                  onChange={(v) => setAutoCompleteWithSubtasks(task.id, v)}
+                />
+              </div>
+            )}
+          </div>
           <SubtaskList taskId={task.id} subtasks={task.subtasks} />
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Опис</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.description')}</div>
           <textarea
             value={descriptionDraft}
             onChange={(e) => setDescriptionDraft(e.target.value)}
             onBlur={commitDescription}
-            placeholder="Додати опис..."
+            placeholder={t('tasks.descriptionPlaceholder')}
             rows={5}
             className={`${inputClass} w-full resize-none`}
           />

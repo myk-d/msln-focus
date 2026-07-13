@@ -1,11 +1,19 @@
 import { useMemo, useState } from 'react';
 import { useFirestoreCollection } from './useFirestoreCollection';
 import { firebaseCollections } from '../config/firebase.config';
-import { genId, nextTagColor } from '../lib/utils';
-import type { Task, TaskList, Section, Priority, Tag } from '../types';
+import i18n from '../i18n';
+import { computeNextOccurrenceDate, genId, nextTagColor } from '../lib/utils';
+import type { Task, TaskList, Section, Priority, RecurrenceRule, Subtask, Tag } from '../types';
 
 function nextOrder(items: { order: number }[]): number {
   return items.length === 0 ? 0 : Math.max(...items.map((i) => i.order)) + 1;
+}
+
+// With auto-complete-with-subtasks on, `completed` tracks "every subtask is
+// done" — a task with zero subtasks is left alone (the feature only applies
+// once there's at least one to track).
+function deriveCompleted(autoComplete: boolean, subtasks: Subtask[], fallback: boolean): boolean {
+  return autoComplete && subtasks.length > 0 ? subtasks.every((s) => s.completed) : fallback;
 }
 
 function seedData(): { lists: TaskList[]; sections: Section[]; tasks: Task[] } {
@@ -13,8 +21,10 @@ function seedData(): { lists: TaskList[]; sections: Section[]; tasks: Task[] } {
   const sectionId = genId();
   const now = Date.now();
   return {
-    lists: [{ id: listId, name: 'Вхідні', isDefault: true, createdAt: now, groupBy: 'sequence', sortBy: 'sequence' }],
-    sections: [{ id: sectionId, listId, name: 'Список', order: 0, createdAt: now }],
+    lists: [
+      { id: listId, name: i18n.t('tasks.defaultListName'), isDefault: true, createdAt: now, groupBy: 'sequence', sortBy: 'sequence' },
+    ],
+    sections: [{ id: sectionId, listId, name: i18n.t('tasks.defaultSectionName'), order: 0, createdAt: now }],
     tasks: [],
   };
 }
@@ -28,6 +38,9 @@ function normalizeTask(task: Task): Task {
     pinned: task.pinned ?? false,
     tagIds: task.tagIds ?? [],
     subtasks: task.subtasks ?? [],
+    recurrence: task.recurrence ?? null,
+    recurrenceAnchorDate: task.recurrenceAnchorDate ?? null,
+    autoCompleteWithSubtasks: task.autoCompleteWithSubtasks ?? false,
     updatedAt: task.updatedAt ?? task.createdAt,
   };
 }
@@ -70,7 +83,7 @@ export function useTaskStore() {
     const sectionId = genId();
     const now = Date.now();
     setLists((prev) => [...prev, { id: listId, name, createdAt: now, groupBy: 'sequence', sortBy: 'sequence' }]);
-    setSections((prev) => [...prev, { id: sectionId, listId, name: 'Список', order: 0, createdAt: now }]);
+    setSections((prev) => [...prev, { id: sectionId, listId, name: i18n.t('tasks.defaultSectionName'), order: 0, createdAt: now }]);
     setActiveListId(listId);
   };
 
@@ -161,6 +174,9 @@ export function useTaskStore() {
         pinned: false,
         priority: 'none',
         dueDate: null,
+        recurrence: null,
+        recurrenceAnchorDate: null,
+        autoCompleteWithSubtasks: false,
         tagIds: [],
         subtasks: [],
         order: nextOrder(siblings),
@@ -174,8 +190,23 @@ export function useTaskStore() {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: Date.now() } : t)));
   };
 
+  // Completing a recurring task advances it to its next occurrence in place
+  // instead of marking it done — the row instantly represents the next
+  // occurrence, with no lingering checked state (matches Todoist/Things).
+  // Once the rule's endDate/count is exhausted, it falls through to a normal
+  // completion and the recurrence ends for good.
   const toggleTaskCompleted = (id: string) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed, updatedAt: Date.now() } : t)));
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        if (!t.completed && t.recurrence && t.dueDate && t.recurrenceAnchorDate) {
+          const next = computeNextOccurrenceDate(t.dueDate, t.recurrenceAnchorDate, t.recurrence);
+          if (next) return { ...t, dueDate: next, updatedAt: Date.now() };
+          return { ...t, completed: true, recurrence: null, recurrenceAnchorDate: null, updatedAt: Date.now() };
+        }
+        return { ...t, completed: !t.completed, updatedAt: Date.now() };
+      })
+    );
   };
 
   const deleteTask = (id: string) => {
@@ -254,38 +285,70 @@ export function useTaskStore() {
     const trimmed = text.trim();
     if (!trimmed) return;
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? { ...t, subtasks: [...t.subtasks, { id: genId(), text: trimmed, completed: false }], updatedAt: Date.now() }
-          : t
-      )
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const subtasks = [...t.subtasks, { id: genId(), text: trimmed, completed: false }];
+        return { ...t, subtasks, completed: deriveCompleted(t.autoCompleteWithSubtasks, subtasks, t.completed), updatedAt: Date.now() };
+      })
     );
   };
 
   const toggleSubtask = (taskId: string, subtaskId: string) => {
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, completed: !st.completed } : st)),
-              updatedAt: Date.now(),
-            }
-          : t
-      )
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const subtasks = t.subtasks.map((st) => (st.id === subtaskId ? { ...st, completed: !st.completed } : st));
+        return { ...t, subtasks, completed: deriveCompleted(t.autoCompleteWithSubtasks, subtasks, t.completed), updatedAt: Date.now() };
+      })
     );
   };
 
   const deleteSubtask = (taskId: string, subtaskId: string) => {
     setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const subtasks = t.subtasks.filter((st) => st.id !== subtaskId);
+        return { ...t, subtasks, completed: deriveCompleted(t.autoCompleteWithSubtasks, subtasks, t.completed), updatedAt: Date.now() };
+      })
+    );
+  };
+
+  // Toggling the switch on immediately syncs `completed` to the subtasks'
+  // current state too, not just future changes.
+  const setAutoCompleteWithSubtasks = (taskId: string, value: boolean) => {
+    setTasks((prev) =>
       prev.map((t) =>
-        t.id === taskId ? { ...t, subtasks: t.subtasks.filter((st) => st.id !== subtaskId), updatedAt: Date.now() } : t
+        t.id === taskId
+          ? { ...t, autoCompleteWithSubtasks: value, completed: deriveCompleted(value, t.subtasks, t.completed), updatedAt: Date.now() }
+          : t
       )
     );
   };
 
   const setPriority = (taskId: string, priority: Priority) => updateTask(taskId, { priority });
-  const setDueDate = (taskId: string, dueDate: string | null) => updateTask(taskId, { dueDate });
+
+  // Manually rescheduling a recurring task re-anchors its interval/weekday
+  // math to the new date, rather than leaving it pinned to whenever
+  // recurrence was first turned on.
+  const setDueDate = (taskId: string, dueDate: string | null) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? { ...t, dueDate, recurrenceAnchorDate: t.recurrence ? dueDate : t.recurrenceAnchorDate, updatedAt: Date.now() }
+          : t
+      )
+    );
+  };
+
+  const setTaskRecurrence = (taskId: string, rule: RecurrenceRule | null) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? { ...t, recurrence: rule, recurrenceAnchorDate: rule ? t.dueDate : null, updatedAt: Date.now() }
+          : t
+      )
+    );
+  };
 
   const createTag = (name: string): string => {
     const id = genId();
@@ -348,8 +411,10 @@ export function useTaskStore() {
     addSubtask,
     toggleSubtask,
     deleteSubtask,
+    setAutoCompleteWithSubtasks,
     setPriority,
     setDueDate,
+    setTaskRecurrence,
     createTag,
     updateTag,
     deleteTag,

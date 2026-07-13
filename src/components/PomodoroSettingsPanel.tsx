@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { Switch } from './ui/Switch';
 import { inputClass, popoverClass } from '../lib/ui';
@@ -11,6 +12,7 @@ interface PomodoroSettingsPanelProps {
 }
 
 export function PomodoroSettingsPanel({ settings, onUpdate, onClose }: PomodoroSettingsPanelProps) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, onClose);
 
@@ -30,13 +32,13 @@ export function PomodoroSettingsPanel({ settings, onUpdate, onClose }: PomodoroS
 
   return (
     <div ref={ref} className={`${popoverClass} absolute right-0 top-10 z-30 w-64 p-3`}>
-      <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-stone-400">Тривалість (хв)</div>
-      {field('Фокус', 'focusMinutes', 1, 120)}
-      {field('Коротка перерва', 'shortBreakMinutes', 1, 60)}
-      {field('Довга перерва', 'longBreakMinutes', 1, 60)}
-      {field('Сесій до довгої перерви', 'sessionsBeforeLongBreak', 1, 12)}
+      <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('pomodoro.durationMinutes')}</div>
+      {field(t('pomodoro.focus'), 'focusMinutes', 1, 120)}
+      {field(t('pomodoro.shortBreak'), 'shortBreakMinutes', 1, 60)}
+      {field(t('pomodoro.longBreak'), 'longBreakMinutes', 1, 60)}
+      {field(t('pomodoro.sessionsBeforeLong'), 'sessionsBeforeLongBreak', 1, 12)}
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-stone-100 pt-2 text-sm text-stone-600">
-        Автостарт наступної фази
+        {t('pomodoro.autoStartNext')}
         <Switch checked={settings.autoStartNext} onChange={(v) => onUpdate({ autoStartNext: v })} />
       </div>
     </div>

@@ -1,18 +1,20 @@
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { useDocumentPiP } from '../hooks/useDocumentPiP';
 import { usePomodoroContext } from '../context/PomodoroContext';
 import { PomodoroTimer } from './PomodoroTimer';
 import { PomodoroPresetList } from './PomodoroPresetList';
 
 export function PomodoroPage() {
+  const { t } = useTranslation();
   const { pipWindow, isSupported, openPiP, closePiP } = useDocumentPiP();
   const { presets, activePresetId, isActive, runPreset, addPreset, updatePreset, deletePreset } = usePomodoroContext();
 
   return (
     <div className="flex h-full flex-col items-center overflow-y-auto px-6 py-10">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-black tracking-tight text-stone-900">Помодоро</h1>
-        <p className="mt-1 text-sm text-stone-500">Фокусуйтесь на одній задачі за раз</p>
+        <h1 className="text-2xl font-black tracking-tight text-stone-900">{t('pomodoro.heading')}</h1>
+        <p className="mt-1 text-sm text-stone-500">{t('pomodoro.subheading')}</p>
       </div>
 
       <div className="flex w-full max-w-4xl flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { useEventStoreContext } from '../context/EventStoreContext';
 import { TaskDetailPanel } from './TaskDetailPanel';
@@ -9,31 +10,45 @@ import { WeekView } from './calendar/WeekView';
 import { DayView } from './calendar/DayView';
 import { AgendaView } from './calendar/AgendaView';
 import { EventDetailDrawer } from './calendar/EventDetailDrawer';
-import { getMonthGridDates, getWeekDates } from '../lib/utils';
+import { expandEventsForRange, getMonthGridDates, getWeekDates } from '../lib/utils';
 
 type DrawerState = { mode: 'create'; date: string; startTime?: string } | { mode: 'edit'; eventId: string } | null;
 
 const AGENDA_WINDOW_DAYS = 14;
 
 export function CalendarPage() {
+  // Not used directly below, but subscribes this component to i18next's
+  // language-change event so dayjs-formatted `title` recomputes on switch
+  // (dayjs's own locale follows the language globally — see lib/utils.ts).
+  useTranslation();
   const { tasks, lists } = useTaskStoreContext();
-  const { events, addEvent, updateEvent, deleteEvent } = useEventStoreContext();
+  const { events, addEvent, updateEventOccurrence, deleteEventOccurrence } = useEventStoreContext();
   const [view, setView] = useState<CalendarViewType>('month');
   const [cursorDateKey, setCursorDateKey] = useState(() => dayjs().format('YYYY-MM-DD'));
   const [drawer, setDrawer] = useState<DrawerState>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-
-  // Derived, not stored: an edit-mode drawer auto-closes if the event is
-  // deleted elsewhere, and a due-date task's panel closes the same way.
-  const selectedTask = selectedTaskId ? (tasks.find((t) => t.id === selectedTaskId) ?? null) : null;
-  const selectedEvent = drawer?.mode === 'edit' ? (events.find((e) => e.id === drawer.eventId) ?? null) : null;
-  const drawerVisible = drawer?.mode === 'create' || (drawer?.mode === 'edit' && selectedEvent !== null);
 
   const monthDates = getMonthGridDates(cursorDateKey);
   const weekDates = getWeekDates(cursorDateKey);
   const agendaDates = Array.from({ length: AGENDA_WINDOW_DAYS }, (_, i) =>
     dayjs(cursorDateKey).add(i, 'day').format('YYYY-MM-DD')
   );
+
+  // Expand recurring events into virtual per-occurrence copies over the
+  // widest range any of the four views could currently need, so every view's
+  // existing `.filter(e => e.date === dateKey)` logic keeps working unmodified.
+  const rangeEvents = useMemo(() => {
+    const allVisibleDates = [...monthDates, ...weekDates, ...agendaDates];
+    const rangeStart = allVisibleDates.reduce((a, b) => (a < b ? a : b));
+    const rangeEnd = allVisibleDates.reduce((a, b) => (a > b ? a : b));
+    return expandEventsForRange(events, rangeStart, rangeEnd);
+  }, [events, monthDates, weekDates, agendaDates]);
+
+  // Derived, not stored: an edit-mode drawer auto-closes if the event is
+  // deleted elsewhere, and a due-date task's panel closes the same way.
+  const selectedTask = selectedTaskId ? (tasks.find((t) => t.id === selectedTaskId) ?? null) : null;
+  const selectedEvent = drawer?.mode === 'edit' ? (rangeEvents.find((e) => e.id === drawer.eventId) ?? null) : null;
+  const drawerVisible = drawer?.mode === 'create' || (drawer?.mode === 'edit' && selectedEvent !== null);
 
   const title = (() => {
     if (view === 'month') return dayjs(cursorDateKey).format('MMMM YYYY');
@@ -68,23 +83,23 @@ export function CalendarPage() {
           <MonthView
             monthDates={monthDates}
             cursorDateKey={cursorDateKey}
-            events={events}
+            events={rangeEvents}
             tasks={tasks}
             onSelectEvent={openEdit}
             onSelectTask={setSelectedTaskId}
-            onMoveEvent={(id, date) => updateEvent(id, { date })}
+            onMoveEvent={(id, date) => updateEventOccurrence(id, { date }, 'this')}
           />
         )}
 
         {view === 'week' && (
           <WeekView
             weekDates={weekDates}
-            events={events}
+            events={rangeEvents}
             tasks={tasks}
             onSelectEvent={openEdit}
             onSelectTask={setSelectedTaskId}
-            onMoveEvent={(id, date, startTime, endTime) => updateEvent(id, { date, startTime, endTime })}
-            onResizeEvent={(id, patch) => updateEvent(id, patch)}
+            onMoveEvent={(id, date, startTime, endTime) => updateEventOccurrence(id, { date, startTime, endTime }, 'this')}
+            onResizeEvent={(id, patch) => updateEventOccurrence(id, patch, 'this')}
             onCreateSlot={(date, startTime) => setDrawer({ mode: 'create', date, startTime })}
           />
         )}
@@ -92,18 +107,18 @@ export function CalendarPage() {
         {view === 'day' && (
           <DayView
             dateKey={cursorDateKey}
-            events={events}
+            events={rangeEvents}
             tasks={tasks}
             onSelectEvent={openEdit}
             onSelectTask={setSelectedTaskId}
-            onMoveEvent={(id, date, startTime, endTime) => updateEvent(id, { date, startTime, endTime })}
-            onResizeEvent={(id, patch) => updateEvent(id, patch)}
+            onMoveEvent={(id, date, startTime, endTime) => updateEventOccurrence(id, { date, startTime, endTime }, 'this')}
+            onResizeEvent={(id, patch) => updateEventOccurrence(id, patch, 'this')}
             onCreateSlot={(date, startTime) => setDrawer({ mode: 'create', date, startTime })}
           />
         )}
 
         {view === 'agenda' && (
-          <AgendaView days={agendaDates} events={events} tasks={tasks} onSelectEvent={openEdit} onSelectTask={setSelectedTaskId} />
+          <AgendaView days={agendaDates} events={rangeEvents} tasks={tasks} onSelectEvent={openEdit} onSelectTask={setSelectedTaskId} />
         )}
       </section>
 
@@ -113,8 +128,8 @@ export function CalendarPage() {
           defaultDate={drawer?.mode === 'create' ? drawer.date : cursorDateKey}
           defaultStartTime={drawer?.mode === 'create' ? drawer.startTime : undefined}
           onCreate={(event) => addEvent(event)}
-          onUpdate={(id, patch) => updateEvent(id, patch)}
-          onDelete={(id) => deleteEvent(id)}
+          onUpdate={(id, patch, scope) => updateEventOccurrence(id, patch, scope)}
+          onDelete={(id, scope) => deleteEventOccurrence(id, scope)}
           onClose={() => setDrawer(null)}
         />
       )}

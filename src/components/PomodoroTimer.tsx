@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pause, PictureInPicture2, Play, RotateCcw, Settings, SkipForward, Target, Undo2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePomodoroContext } from '../context/PomodoroContext';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { PomodoroSettingsPanel } from './PomodoroSettingsPanel';
@@ -16,6 +17,7 @@ const RADIUS = 54;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: PomodoroTimerProps) {
+  const { t } = useTranslation();
   const {
     phase,
     timeLeft,
@@ -45,14 +47,14 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
     return (
       <div className={`flex items-center justify-between rounded-2xl border border-stone-200 p-4 ${meta.soft}`}>
         <div>
-          <div className={`text-xs font-medium ${meta.text}`}>{meta.label}</div>
+          <div className={`text-xs font-medium ${meta.text}`}>{t(meta.labelKey)}</div>
           <div className="font-mono text-2xl font-bold text-stone-800">{formatTime(timeLeft)}</div>
         </div>
         <button
           onClick={onClosePiP}
           className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm hover:bg-stone-50"
         >
-          <Undo2 size={13} /> Повернути на сторінку
+          <Undo2 size={13} /> {t('pomodoro.returnToPage')}
         </button>
       </div>
     );
@@ -67,7 +69,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
     >
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${meta.soft} ${meta.text}`}>{meta.label}</span>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${meta.soft} ${meta.text}`}>{t(meta.labelKey)}</span>
           {activePreset && variant !== 'pip' && (
             <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-500">
               {activePreset.name}
@@ -79,7 +81,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
             <button
               onClick={() => setSettingsOpen((v) => !v)}
               className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
-              aria-label="Налаштування"
+              aria-label={t('pomodoro.settingsAria')}
             >
               <Settings size={16} />
             </button>
@@ -142,7 +144,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           }`}
         >
           {isActive ? <Pause size={15} fill="currentColor" /> : <Play size={15} fill="currentColor" />}
-          {variant !== 'pip' && (isActive ? 'Пауза' : 'Старт')}
+          {variant !== 'pip' && (isActive ? t('pomodoro.pause') : t('pomodoro.start'))}
         </button>
         <button
           onClick={reset}
@@ -150,7 +152,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
             variant === 'pip' ? 'p-2.5 text-sm' : 'px-4 py-2 text-sm'
           }`}
         >
-          <RotateCcw size={15} /> {variant !== 'pip' && 'Скинути'}
+          <RotateCcw size={15} /> {variant !== 'pip' && t('pomodoro.reset')}
         </button>
         <button
           onClick={skip}
@@ -158,7 +160,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
             variant === 'pip' ? 'p-2.5 text-sm' : 'px-4 py-2 text-sm'
           }`}
         >
-          <SkipForward size={15} /> {variant !== 'pip' && 'Далі'}
+          <SkipForward size={15} /> {variant !== 'pip' && t('pomodoro.next')}
         </button>
       </div>
 
@@ -167,19 +169,23 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           <div className="grid w-full grid-cols-2 gap-2 border-t border-stone-100 pt-4 text-center">
             <div>
               <div className="text-lg font-bold text-stone-800">{stats.todaySessions}</div>
-              <div className="text-xs text-stone-400">Сьогодні сесій</div>
+              <div className="text-xs text-stone-400">{t('pomodoro.todaySessions')}</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-stone-800">{stats.todayFocusMinutes} хв</div>
-              <div className="text-xs text-stone-400">Сьогодні у фокусі</div>
+              <div className="text-lg font-bold text-stone-800">
+                {stats.todayFocusMinutes} {t('pomodoro.minutesSuffix')}
+              </div>
+              <div className="text-xs text-stone-400">{t('pomodoro.todayFocusMinutes')}</div>
             </div>
             <div>
               <div className="text-lg font-bold text-stone-800">{stats.totalSessions}</div>
-              <div className="text-xs text-stone-400">Всього сесій</div>
+              <div className="text-xs text-stone-400">{t('pomodoro.totalSessions')}</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-stone-800">{stats.totalFocusMinutes} хв</div>
-              <div className="text-xs text-stone-400">Всього у фокусі</div>
+              <div className="text-lg font-bold text-stone-800">
+                {stats.totalFocusMinutes} {t('pomodoro.minutesSuffix')}
+              </div>
+              <div className="text-xs text-stone-400">{t('pomodoro.totalFocusMinutes')}</div>
             </div>
           </div>
           {pipSupported && (
@@ -187,7 +193,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
               onClick={onOpenPiP}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-stone-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-900 active:scale-[0.98]"
             >
-              <PictureInPicture2 size={16} /> Плаваюче вікно таймера
+              <PictureInPicture2 size={16} /> {t('pomodoro.openPip')}
             </button>
           )}
         </>

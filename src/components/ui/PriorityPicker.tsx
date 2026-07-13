@@ -1,4 +1,5 @@
 import { Flag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { PRIORITY_META, PRIORITY_ORDER } from '../../lib/utils';
 import type { Priority } from '../../types';
 
@@ -8,6 +9,7 @@ interface PriorityPickerProps {
 }
 
 export function PriorityPicker({ value, onChange }: PriorityPickerProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex gap-1">
       {PRIORITY_ORDER.map((p) => (
@@ -15,7 +17,7 @@ export function PriorityPicker({ value, onChange }: PriorityPickerProps) {
           key={p}
           type="button"
           onClick={() => onChange(p)}
-          title={PRIORITY_META[p].label}
+          title={t(PRIORITY_META[p].labelKey)}
           className={`flex h-7 w-7 items-center justify-center rounded-full border transition ${
             value === p ? 'border-brand-400 bg-brand-50' : 'border-transparent hover:bg-stone-100'
           }`}

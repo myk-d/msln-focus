@@ -1,19 +1,15 @@
 import { useRef, useState } from 'react';
 import dayjs, { type Dayjs } from 'dayjs';
-import 'dayjs/locale/uk';
+import { useTranslation } from 'react-i18next';
 import { CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { formatDueDate } from '../../lib/utils';
 import { popoverClass } from '../../lib/ui';
 
-dayjs.locale('uk');
-
 interface DatePickerProps {
   value: string | null;
   onChange: (value: string | null) => void;
 }
-
-const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
 
 function buildCalendarGrid(viewMonth: Dayjs): Dayjs[] {
   const startOfMonth = viewMonth.startOf('month');
@@ -28,10 +24,21 @@ function buildCalendarGrid(viewMonth: Dayjs): Dayjs[] {
 }
 
 export function DatePicker({ value, onChange }: DatePickerProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => (value ? dayjs(value) : dayjs()).startOf('month'));
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, () => setOpen(false));
+
+  const weekdays = [
+    t('datePicker.mon'),
+    t('datePicker.tue'),
+    t('datePicker.wed'),
+    t('datePicker.thu'),
+    t('datePicker.fri'),
+    t('datePicker.sat'),
+    t('datePicker.sun'),
+  ];
 
   const today = dayjs().format('YYYY-MM-DD');
   const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
@@ -55,7 +62,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
         }`}
       >
         <CalendarDays size={13} />
-        {value ? formatDueDate(value) : 'Дата'}
+        {value ? formatDueDate(value) : t('datePicker.datePlaceholder')}
         {value && (
           <span
             role="button"
@@ -79,14 +86,14 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
               onClick={() => pick(dayjs(today))}
               className="rounded-full bg-stone-100 px-2 py-1 text-xs hover:bg-stone-200"
             >
-              Сьогодні
+              {t('tasks.today')}
             </button>
             <button
               type="button"
               onClick={() => pick(dayjs(tomorrow))}
               className="rounded-full bg-stone-100 px-2 py-1 text-xs hover:bg-stone-200"
             >
-              Завтра
+              {t('tasks.tomorrow')}
             </button>
           </div>
 
@@ -109,7 +116,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           </div>
 
           <div className="grid grid-cols-7 gap-y-1 text-center">
-            {WEEKDAYS.map((w) => (
+            {weekdays.map((w) => (
               <span key={w} className="text-[11px] font-medium text-stone-400">
                 {w}
               </span>

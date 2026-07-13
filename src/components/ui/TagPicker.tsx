@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Check, Search, Tag as TagIcon, Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useConfirm } from '../../context/ConfirmContext';
 import { TAG_COLOR_META } from '../../lib/utils';
@@ -15,6 +16,7 @@ interface TagPickerProps {
 }
 
 export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDeleteTag }: TagPickerProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
@@ -35,9 +37,9 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
   const handleDeleteTag = async (tag: Tag) => {
     if (
       await confirm({
-        title: `Видалити мітку «${tag.name}»?`,
-        message: 'Мітку буде знято з усіх завдань, які нею позначені.',
-        confirmLabel: 'Видалити',
+        title: t('confirm.deleteTagTitle', { name: tag.name }),
+        message: t('confirm.deleteTagMessage'),
+        confirmLabel: t('tasks.delete'),
       })
     ) {
       onDeleteTag(tag.id);
@@ -53,7 +55,7 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
       >
         {selectedTags.length === 0 ? (
           <span className="flex items-center gap-1.5 text-xs text-stone-400">
-            <TagIcon size={13} /> Додати мітки
+            <TagIcon size={13} /> {t('tasks.addTags')}
           </span>
         ) : (
           selectedTags.map((tag) => (
@@ -87,22 +89,22 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              placeholder="Введіть тег"
-              className="min-w-[60px] flex-1 bg-transparent text-xs outline-none placeholder:text-stone-400"
+              placeholder={t('tasks.enterTag')}
+              className="min-w-15 flex-1 bg-transparent text-xs outline-none placeholder:text-stone-400"
             />
           </div>
 
           <div className="max-h-48 overflow-y-auto">
             {query.trim() && !exactMatch && (
               <button type="button" onClick={handleCreate} className={menuItemClass}>
-                <TagIcon size={14} /> Створити тег «{query.trim()}»
+                <TagIcon size={14} /> {t('tasks.createTag', { name: query.trim() })}
               </button>
             )}
 
             {filtered.length === 0 && !query.trim() && (
               <div className="flex flex-col items-center gap-2 px-2 py-6 text-center text-xs text-stone-400">
                 <TagIcon size={28} className="text-stone-200" />
-                Немає тегів
+                {t('tasks.noTags')}
               </div>
             )}
 
@@ -118,8 +120,8 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
                 <button
                   type="button"
                   onClick={() => handleDeleteTag(tag)}
-                  className="hidden shrink-0 rounded p-1.5 text-stone-300 hover:bg-red-50 hover:text-red-500 group-hover:block"
-                  aria-label="Видалити мітку"
+                  className="shrink-0 rounded p-1.5 text-stone-300 hover:bg-red-50 hover:text-red-500 md:hidden md:group-hover:block"
+                  aria-label={t('tasks.deleteTagAria')}
                 >
                   <Trash2 size={13} />
                 </button>
@@ -133,14 +135,14 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
               onClick={() => setOpen(false)}
               className="rounded-full px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-100"
             >
-              Скасувати
+              {t('tasks.cancel')}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white hover:bg-brand-700"
             >
-              OK
+              {t('tasks.ok')}
             </button>
           </div>
         </div>

@@ -1,29 +1,24 @@
 import { useState } from 'react';
 import { Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { DatePicker } from '../ui/DatePicker';
+import { RecurrencePicker } from '../ui/RecurrencePicker';
 import { Switch } from '../ui/Switch';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { inputClass } from '../../lib/ui';
 import { TAG_COLOR_META, TAG_COLOR_ORDER, minutesToTime, timeToMinutes } from '../../lib/utils';
-import type { CalendarEvent, TagColor } from '../../types';
+import type { CalendarEvent, RecurrenceRule, TagColor } from '../../types';
 
-const REMINDER_OPTIONS: { value: number | null; label: string }[] = [
-  { value: null, label: 'Без нагадування' },
-  { value: 5, label: 'За 5 хвилин' },
-  { value: 15, label: 'За 15 хвилин' },
-  { value: 30, label: 'За 30 хвилин' },
-  { value: 60, label: 'За 1 годину' },
-  { value: 1440, label: 'За 1 день' },
-];
+type RecurrenceScope = 'this' | 'all';
 
 interface EventDetailDrawerProps {
   event: CalendarEvent | null;
   defaultDate: string;
   defaultStartTime?: string;
   onCreate: (event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  onUpdate: (id: string, patch: Partial<Omit<CalendarEvent, 'id' | 'createdAt'>>) => void;
-  onDelete: (id: string) => void;
+  onUpdate: (id: string, patch: Partial<Omit<CalendarEvent, 'id' | 'createdAt'>>, scope: RecurrenceScope) => void;
+  onDelete: (id: string, scope: RecurrenceScope) => void;
   onClose: () => void;
 }
 
@@ -37,6 +32,15 @@ export function EventDetailDrawer({
   onDelete,
   onClose,
 }: EventDetailDrawerProps) {
+  const { t } = useTranslation();
+  const REMINDER_OPTIONS: { value: number | null; label: string }[] = [
+    { value: null, label: t('calendar.reminderNone') },
+    { value: 5, label: t('calendar.reminder5') },
+    { value: 15, label: t('calendar.reminder15') },
+    { value: 30, label: t('calendar.reminder30') },
+    { value: 60, label: t('calendar.reminder60') },
+    { value: 1440, label: t('calendar.reminder1440') },
+  ];
   const initialStart = event?.startTime ?? defaultStartTime ?? '09:00';
   const [title, setTitle] = useState(event?.title ?? '');
   const [description, setDescription] = useState(event?.description ?? '');
@@ -47,9 +51,20 @@ export function EventDetailDrawer({
   const [location, setLocation] = useState(event?.location ?? '');
   const [color, setColor] = useState<TagColor>(event?.color ?? 'sky');
   const [reminderMinutes, setReminderMinutes] = useState<number | null>(event?.reminderMinutes ?? 15);
+  const [recurrence, setRecurrence] = useState<RecurrenceRule | null>(event?.recurrence ?? null);
+  // Recurring events/occurrences default to editing just this one instance —
+  // the safer, less-surprising choice — rather than silently rewriting the
+  // whole series.
+  const [scope, setScope] = useState<RecurrenceScope>('this');
   const [error, setError] = useState('');
   const confirm = useConfirm();
   useBodyScrollLock(true);
+
+  // True for a series master (opened via a virtual occurrence, which carries
+  // the master's `recurrence` along) or a standalone single-occurrence
+  // override (`recurrenceMasterId` set) — either way, edits/deletes need a
+  // this-occurrence-vs-whole-series scope choice.
+  const isSeriesRelated = !!(event?.recurrence || event?.recurrenceMasterId);
 
   const [initial] = useState({
     title: event?.title ?? '',
@@ -61,6 +76,7 @@ export function EventDetailDrawer({
     location: event?.location ?? '',
     color: event?.color ?? 'sky',
     reminderMinutes: event?.reminderMinutes ?? 15,
+    recurrence: event?.recurrence ?? null,
   });
   const isDirty =
     title !== initial.title ||
@@ -71,21 +87,69 @@ export function EventDetailDrawer({
     endTime !== initial.endTime ||
     location !== initial.location ||
     color !== initial.color ||
-    reminderMinutes !== initial.reminderMinutes;
+    reminderMinutes !== initial.reminderMinutes ||
+    JSON.stringify(recurrence) !== JSON.stringify(initial.recurrence);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      setError('Введіть назву події');
+      setError(t('calendar.errorTitleRequired'));
       return;
     }
     if (!allDay && timeToMinutes(endTime) <= timeToMinutes(startTime)) {
-      setError('Час завершення має бути пізніше часу початку');
+      setError(t('calendar.errorEndAfterStart'));
       return;
     }
-    const payload = { title: trimmedTitle, description, date, allDay, startTime, endTime, location, color, reminderMinutes };
-    if (event) onUpdate(event.id, payload);
-    else onCreate(payload);
+    if (!event) {
+      onCreate({
+        title: trimmedTitle,
+        description,
+        date,
+        allDay,
+        startTime,
+        endTime,
+        location,
+        color,
+        reminderMinutes,
+        recurrence,
+        recurrenceExceptions: [],
+        recurrenceMasterId: null,
+      });
+      onClose();
+      return;
+    }
+    const effectiveScope: RecurrenceScope = isSeriesRelated ? scope : 'this';
+
+    // Clearing recurrence for the whole series cancels every future occurrence
+    // it would otherwise have generated — a destructive action worth a
+    // confirmation, unlike turning recurrence off on a plain event.
+    if (effectiveScope === 'all' && event.recurrence && !recurrence) {
+      const confirmed = await confirm({
+        title: t('recurrence.stopRepeatingTitle'),
+        message: t('recurrence.stopRepeatingMessage'),
+        confirmLabel: t('recurrence.stopRepeatingConfirm'),
+      });
+      if (!confirmed) return;
+    }
+
+    onUpdate(
+      event.id,
+      {
+        title: trimmedTitle,
+        description,
+        allDay,
+        startTime,
+        endTime,
+        location,
+        color,
+        reminderMinutes,
+        recurrence,
+        // Applying "all events" shouldn't silently shift the series' anchor
+        // date to whichever single occurrence happened to be open.
+        ...(effectiveScope === 'all' ? {} : { date }),
+      },
+      effectiveScope
+    );
     onClose();
   };
 
@@ -93,10 +157,10 @@ export function EventDetailDrawer({
     if (
       !isDirty ||
       (await confirm({
-        title: 'Закрити без збереження?',
-        message: 'У вас є незбережені зміни, які буде втрачено.',
-        confirmLabel: 'Закрити',
-        cancelLabel: 'Продовжити редагування',
+        title: t('calendar.discardChangesTitle'),
+        message: t('calendar.discardChangesMessage'),
+        confirmLabel: t('calendar.discardChangesConfirm'),
+        cancelLabel: t('calendar.discardChangesCancel'),
       }))
     ) {
       onClose();
@@ -105,13 +169,11 @@ export function EventDetailDrawer({
 
   const handleDelete = async () => {
     if (!event) return;
-    if (
-      await confirm({
-        title: `Видалити подію «${event.title}»?`,
-        confirmLabel: 'Видалити',
-      })
-    ) {
-      onDelete(event.id);
+    const effectiveScope: RecurrenceScope = isSeriesRelated ? scope : 'this';
+    const confirmTitle =
+      effectiveScope === 'all' ? t('recurrence.deleteAllTitle', { name: event.title }) : t('calendar.deleteEventTitle', { name: event.title });
+    if (await confirm({ title: confirmTitle, confirmLabel: t('tasks.delete') })) {
+      onDelete(event.id, effectiveScope);
       onClose();
     }
   };
@@ -122,14 +184,14 @@ export function EventDetailDrawer({
       <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-100">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">
-          {event ? 'Подія' : 'Нова подія'}
+          {event ? t('calendar.event') : t('calendar.newEvent')}
         </h2>
         <div className="flex items-center gap-1">
           {event && (
             <button
               onClick={handleDelete}
               className="rounded p-1 text-stone-400 hover:bg-red-50 hover:text-red-500"
-              aria-label="Видалити подію"
+              aria-label={t('calendar.deleteEventAria')}
             >
               <Trash2 size={16} />
             </button>
@@ -144,18 +206,49 @@ export function EventDetailDrawer({
         autoFocus
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Назва події"
+        placeholder={t('calendar.eventTitlePlaceholder')}
         className={`${inputClass} mb-4 w-full text-base font-semibold`}
       />
 
       <div className="flex flex-col gap-4">
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Дата</div>
-          <DatePicker value={date} onChange={(d) => setDate(d ?? defaultDate)} />
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.date')}</div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <DatePicker value={date} onChange={(d) => setDate(d ?? defaultDate)} />
+            {(!isSeriesRelated || scope === 'all') && (
+              <RecurrencePicker value={recurrence} anchorDate={date} onChange={setRecurrence} />
+            )}
+          </div>
         </div>
 
+        {isSeriesRelated && (
+          <div>
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('recurrence.applyTo')}</div>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => setScope('this')}
+                className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium ${
+                  scope === 'this' ? 'bg-brand-600 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                }`}
+              >
+                {t('recurrence.scopeThis')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setScope('all')}
+                className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium ${
+                  scope === 'all' ? 'bg-brand-600 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                }`}
+              >
+                {t('recurrence.scopeAll')}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
-          <span className="text-sm text-stone-600">Увесь день</span>
+          <span className="text-sm text-stone-600">{t('calendar.allDay')}</span>
           <Switch checked={allDay} onChange={setAllDay} />
         </div>
 
@@ -178,17 +271,17 @@ export function EventDetailDrawer({
         )}
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Місце</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('calendar.location')}</div>
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="Додати місце"
+            placeholder={t('calendar.addLocationPlaceholder')}
             className={`${inputClass} w-full`}
           />
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Колір</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('calendar.color')}</div>
           <div className="flex items-center gap-2">
             {TAG_COLOR_ORDER.map((c) => (
               <button
@@ -204,14 +297,14 @@ export function EventDetailDrawer({
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Нагадування</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('calendar.reminder')}</div>
           <select
             value={reminderMinutes ?? ''}
             onChange={(e) => setReminderMinutes(e.target.value === '' ? null : Number(e.target.value))}
             className={`${inputClass} w-full`}
           >
             {REMINDER_OPTIONS.map((opt) => (
-              <option key={opt.label} value={opt.value ?? ''}>
+              <option key={opt.value ?? 'none'} value={opt.value ?? ''}>
                 {opt.label}
               </option>
             ))}
@@ -219,11 +312,11 @@ export function EventDetailDrawer({
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">Опис</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.description')}</div>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Додати опис..."
+            placeholder={t('tasks.descriptionPlaceholder')}
             rows={4}
             className={`${inputClass} w-full resize-none`}
           />
@@ -235,7 +328,7 @@ export function EventDetailDrawer({
           onClick={handleSave}
           className="rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
-          {event ? 'Зберегти' : 'Створити'}
+          {event ? t('calendar.save') : t('calendar.create')}
         </button>
       </div>
       </aside>

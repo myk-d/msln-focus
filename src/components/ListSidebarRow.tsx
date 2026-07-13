@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { MoreHorizontal, Pencil, Star, Trash2 } from 'lucide-react';
+import { Check, MoreHorizontal, Pencil, Star, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { menuItemClass, popoverClass } from '../lib/ui';
 import type { TaskList } from '../types';
@@ -25,6 +26,7 @@ export function ListSidebarRow({
   onSetDefault,
   onDelete,
 }: ListSidebarRowProps) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [draft, setDraft] = useState(list.name);
@@ -40,14 +42,19 @@ export function ListSidebarRow({
 
   if (editing) {
     return (
-      <input
-        autoFocus
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commitRename}
-        onKeyDown={(e) => e.key === 'Enter' && commitRename()}
-        className="w-full rounded-xl bg-white px-3 py-2 text-sm outline-none ring-1 ring-brand-400"
-      />
+      <div className="flex items-center gap-1">
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commitRename}
+          onKeyDown={(e) => e.key === 'Enter' && commitRename()}
+          className="w-full flex-1 rounded-xl bg-white px-3 py-2 text-sm outline-none ring-1 ring-brand-400"
+        />
+        <button onClick={commitRename} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+          <Check size={15} />
+        </button>
+      </div>
     );
   }
 
@@ -62,11 +69,11 @@ export function ListSidebarRow({
         {list.isDefault && <Star size={11} className="shrink-0 fill-brand-400 text-brand-400" />}
       </button>
       <div className="relative flex items-center gap-1">
-        {taskCount > 0 && <span className="text-xs text-stone-400 group-hover:hidden">{taskCount}</span>}
+        {taskCount > 0 && <span className="text-xs text-stone-400 md:group-hover:hidden">{taskCount}</span>}
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="hidden rounded p-0.5 text-stone-400 hover:bg-stone-200 hover:text-stone-600 group-hover:block"
-          aria-label="Меню списку"
+          className="rounded p-0.5 text-stone-400 hover:bg-stone-200 hover:text-stone-600 md:hidden md:group-hover:block"
+          aria-label={t('tasks.menuAria')}
         >
           <MoreHorizontal size={14} />
         </button>
@@ -80,7 +87,7 @@ export function ListSidebarRow({
               }}
               className={menuItemClass}
             >
-              <Pencil size={14} /> Редагувати
+              <Pencil size={14} /> {t('tasks.edit')}
             </button>
             {!list.isDefault && (
               <button
@@ -90,7 +97,7 @@ export function ListSidebarRow({
                 }}
                 className={menuItemClass}
               >
-                <Star size={14} /> Зробити основним
+                <Star size={14} /> {t('tasks.setDefault')}
               </button>
             )}
             {canDelete && (
@@ -101,7 +108,7 @@ export function ListSidebarRow({
                 }}
                 className={`${menuItemClass} text-red-500 hover:bg-red-50`}
               >
-                <Trash2 size={14} /> Видалити
+                <Trash2 size={14} /> {t('tasks.delete')}
               </button>
             )}
           </div>

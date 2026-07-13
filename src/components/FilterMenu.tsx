@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Check, ListFilter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { menuItemClass, popoverClass } from '../lib/ui';
 import { GROUP_BY_META, GROUP_BY_ORDER, SORT_BY_META, SORT_BY_ORDER } from '../lib/utils';
@@ -13,6 +14,7 @@ interface FilterMenuProps {
 }
 
 export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: FilterMenuProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [subOpen, setSubOpen] = useState<'group' | 'sort' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -27,7 +29,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200"
       >
-        <ListFilter size={13} /> Фільтри
+        <ListFilter size={13} /> {t('tasks.filters')}
       </button>
 
       {open && (
@@ -37,13 +39,13 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
               onClick={() => setSubOpen((v) => (v === 'group' ? null : 'group'))}
               className={`${menuItemClass} justify-between`}
             >
-              <span>Групувати за</span>
+              <span>{t('tasks.groupBy')}</span>
               <span className="flex items-center gap-1 text-stone-400">
-                {GROUP_BY_META[groupBy].label} <span>›</span>
+                {t(GROUP_BY_META[groupBy].labelKey)} <span>›</span>
               </span>
             </button>
             {subOpen === 'group' && (
-              <div className={`${popoverClass} absolute right-full top-0 mr-1 w-48 p-1`}>
+              <div className={`${popoverClass} absolute left-0 top-full mt-1 w-48 p-1`}>
                 {GROUP_BY_ORDER.map((option) => (
                   <button
                     key={option}
@@ -54,7 +56,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
                     }}
                     className={`${menuItemClass} justify-between`}
                   >
-                    {GROUP_BY_META[option].label}
+                    {t(GROUP_BY_META[option].labelKey)}
                     {groupBy === option && <Check size={14} className="text-brand-600" />}
                   </button>
                 ))}
@@ -67,13 +69,13 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
               onClick={() => setSubOpen((v) => (v === 'sort' ? null : 'sort'))}
               className={`${menuItemClass} justify-between`}
             >
-              <span>Сортувати за</span>
+              <span>{t('tasks.sortBy')}</span>
               <span className="flex items-center gap-1 text-stone-400">
-                {SORT_BY_META[sortBy].label} <span>›</span>
+                {t(SORT_BY_META[sortBy].labelKey)} <span>›</span>
               </span>
             </button>
             {subOpen === 'sort' && (
-              <div className={`${popoverClass} absolute right-full top-0 mr-1 w-48 p-1`}>
+              <div className={`${popoverClass} absolute left-0 top-full mt-1 w-48 p-1`}>
                 {SORT_BY_ORDER.map((option) => (
                   <button
                     key={option}
@@ -84,7 +86,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
                     }}
                     className={`${menuItemClass} justify-between`}
                   >
-                    {SORT_BY_META[option].label}
+                    {t(SORT_BY_META[option].labelKey)}
                     {sortBy === option && <Check size={14} className="text-brand-600" />}
                   </button>
                 ))}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, Pencil, Play, Plus, Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useConfirm } from '../context/ConfirmContext';
 import { Switch } from './ui/Switch';
 import { inputClass } from '../lib/ui';
@@ -44,6 +45,7 @@ function PresetForm({
   onSave: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const numberField = (label: string, key: keyof Omit<PresetFormValue, 'name' | 'autoStartNext'>, min: number, max: number) => (
     <label className="flex items-center justify-between gap-2 text-xs text-stone-500">
       {label}
@@ -64,29 +66,29 @@ function PresetForm({
         autoFocus
         value={value.name}
         onChange={(e) => onChange({ ...value, name: e.target.value })}
-        placeholder="Назва пресету"
+        placeholder={t('pomodoro.presetNamePlaceholder')}
         className={`${inputClass} w-full`}
       />
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-        {numberField('Фокус, хв', 'focusMinutes', 1, 120)}
-        {numberField('Коротка перерва, хв', 'shortBreakMinutes', 1, 60)}
-        {numberField('Довга перерва, хв', 'longBreakMinutes', 1, 60)}
-        {numberField('Сесій до довгої', 'sessionsBeforeLongBreak', 1, 12)}
+        {numberField(t('pomodoro.focusMinutesField'), 'focusMinutes', 1, 120)}
+        {numberField(t('pomodoro.shortBreakMinutesField'), 'shortBreakMinutes', 1, 60)}
+        {numberField(t('pomodoro.longBreakMinutesField'), 'longBreakMinutes', 1, 60)}
+        {numberField(t('pomodoro.sessionsBeforeLongField'), 'sessionsBeforeLongBreak', 1, 12)}
       </div>
       <div className="flex items-center justify-between gap-2 border-t border-stone-200 pt-2 text-xs text-stone-500">
-        Автостарт наступної фази
+        {t('pomodoro.autoStartNext')}
         <Switch checked={value.autoStartNext} onChange={(v) => onChange({ ...value, autoStartNext: v })} />
       </div>
       <div className="flex justify-end gap-2 pt-1">
         <button onClick={onCancel} className="rounded-full px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200">
-          Скасувати
+          {t('pomodoro.cancel')}
         </button>
         <button
           onClick={onSave}
           disabled={!value.name.trim()}
           className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Зберегти
+          {t('pomodoro.save')}
         </button>
       </div>
     </div>
@@ -102,6 +104,7 @@ export function PomodoroPresetList({
   onUpdate,
   onDelete,
 }: PomodoroPresetListProps) {
+  const { t } = useTranslation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState<PresetFormValue>(EMPTY_FORM);
@@ -109,7 +112,7 @@ export function PomodoroPresetList({
   const confirm = useConfirm();
 
   const handleDeleteClick = async (preset: PomodoroPreset) => {
-    if (await confirm({ title: `Видалити пресет «${preset.name}»?`, confirmLabel: 'Видалити' })) {
+    if (await confirm({ title: t('pomodoro.deletePresetTitle', { name: preset.name }), confirmLabel: t('tasks.delete') })) {
       onDelete(preset.id);
     }
   };
@@ -152,9 +155,9 @@ export function PomodoroPresetList({
   return (
     <div className="w-full max-w-sm">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">Пресети</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t('pomodoro.presets')}</h2>
         <button onClick={startAdd} className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700">
-          <Plus size={14} /> Додати
+          <Plus size={14} /> {t('pomodoro.add')}
         </button>
       </div>
 
@@ -173,7 +176,7 @@ export function PomodoroPresetList({
             >
               {confirmingId === preset.id ? (
                 <div className="flex w-full items-center justify-between gap-2">
-                  <span className="text-xs text-stone-500">Зупинити поточний і почати?</span>
+                  <span className="text-xs text-stone-500">{t('pomodoro.stopAndStart')}</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
@@ -182,7 +185,7 @@ export function PomodoroPresetList({
                       }}
                       className="flex items-center gap-1 rounded-full bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700"
                     >
-                      <Check size={12} /> Так
+                      <Check size={12} /> {t('pomodoro.yes')}
                     </button>
                     <button
                       onClick={() => setConfirmingId(null)}
@@ -197,8 +200,12 @@ export function PomodoroPresetList({
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-stone-700">{preset.name}</div>
                     <div className="text-xs text-stone-400">
-                      {preset.focusMinutes}/{preset.shortBreakMinutes}/{preset.longBreakMinutes} хв ·{' '}
-                      {preset.sessionsBeforeLongBreak} сесії
+                      {t('pomodoro.presetSummary', {
+                        focus: preset.focusMinutes,
+                        shortBreak: preset.shortBreakMinutes,
+                        longBreak: preset.longBreakMinutes,
+                        sessions: preset.sessionsBeforeLongBreak,
+                      })}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
@@ -206,7 +213,7 @@ export function PomodoroPresetList({
                       onClick={() => handleRunClick(preset.id)}
                       className="flex items-center gap-1 rounded-full bg-brand-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-brand-700"
                     >
-                      <Play size={12} fill="currentColor" /> Старт
+                      <Play size={12} fill="currentColor" /> {t('pomodoro.start')}
                     </button>
                     <button
                       onClick={() => startEdit(preset)}

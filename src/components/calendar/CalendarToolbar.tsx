@@ -1,13 +1,7 @@
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export type CalendarViewType = 'month' | 'week' | 'day' | 'agenda';
-
-const VIEW_OPTIONS: { value: CalendarViewType; label: string }[] = [
-  { value: 'month', label: 'Місяць' },
-  { value: 'week', label: 'Тиждень' },
-  { value: 'day', label: 'День' },
-  { value: 'agenda', label: 'Список' },
-];
 
 interface CalendarToolbarProps {
   view: CalendarViewType;
@@ -20,6 +14,13 @@ interface CalendarToolbarProps {
 }
 
 export function CalendarToolbar({ view, onSetView, title, onPrev, onNext, onToday, onAddEvent }: CalendarToolbarProps) {
+  const { t } = useTranslation();
+  const VIEW_OPTIONS: { value: CalendarViewType; label: string }[] = [
+    { value: 'month', label: t('calendar.month') },
+    { value: 'week', label: t('calendar.week') },
+    { value: 'day', label: t('calendar.day') },
+    { value: 'agenda', label: t('calendar.agenda') },
+  ];
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
@@ -32,7 +33,7 @@ export function CalendarToolbar({ view, onSetView, title, onPrev, onNext, onToda
             onClick={onToday}
             className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 hover:bg-stone-200"
           >
-            Сьогодні
+            {t('calendar.today')}
           </button>
           <button onClick={onNext} className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
             <ChevronRight size={16} />
@@ -58,7 +59,7 @@ export function CalendarToolbar({ view, onSetView, title, onPrev, onNext, onToda
           onClick={onAddEvent}
           className="flex items-center gap-1 rounded-full bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700"
         >
-          <Plus size={14} /> Подія
+          <Plus size={14} /> {t('calendar.addEvent')}
         </button>
       </div>
     </div>

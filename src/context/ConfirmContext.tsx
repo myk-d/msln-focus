@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmOptions {
   title: string;
@@ -16,6 +17,7 @@ const ConfirmContext = createContext<ConfirmFn | null>(null);
 // Imperative, promise-based confirm so any component can gate a destructive or
 // discard-changes action without threading modal-open state through its parent.
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [options, setOptions] = useState<ConfirmOptions | null>(null);
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
@@ -48,7 +50,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => settle(false)}
                 className="rounded-full px-4 py-1.5 text-sm font-medium text-stone-500 hover:bg-stone-100"
               >
-                {options.cancelLabel ?? 'Скасувати'}
+                {options.cancelLabel ?? t('confirm.defaultCancel')}
               </button>
               <button
                 onClick={() => settle(true)}
@@ -56,7 +58,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                   options.danger !== false ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-600 hover:bg-brand-700'
                 }`}
               >
-                {options.confirmLabel ?? 'Видалити'}
+                {options.confirmLabel ?? t('confirm.defaultConfirm')}
               </button>
             </div>
           </div>

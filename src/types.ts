@@ -6,6 +6,18 @@ export interface Subtask {
   completed: boolean;
 }
 
+export type RecurrenceFreq = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+export interface RecurrenceRule {
+  freq: RecurrenceFreq;
+  interval: number;
+  // dayjs .day() values (0=Sun..6=Sat); only meaningful when freq === 'weekly'.
+  // null/empty means "same weekday as the anchor date".
+  byWeekday: number[] | null;
+  endDate: string | null;
+  count: number | null;
+}
+
 export interface Task {
   id: string;
   sectionId: string;
@@ -15,6 +27,14 @@ export interface Task {
   pinned: boolean;
   priority: Priority;
   dueDate: string | null;
+  recurrence: RecurrenceRule | null;
+  // The due date at the moment recurrence was first turned on. Fixed forever
+  // (unlike dueDate, which advances on each completion) so interval/weekday
+  // math stays correct after several advances.
+  recurrenceAnchorDate: string | null;
+  // When true and there's at least one subtask, `completed` is kept in sync
+  // with "every subtask is completed" on every subtask add/toggle/delete.
+  autoCompleteWithSubtasks: boolean;
   tagIds: string[];
   subtasks: Subtask[];
   order: number;
@@ -62,6 +82,12 @@ export interface CalendarEvent {
   location: string;
   color: TagColor;
   reminderMinutes: number | null;
+  recurrence: RecurrenceRule | null;
+  // Dates (of this series) to skip when expanding recurrence — deleted or overridden occurrences.
+  recurrenceExceptions: string[];
+  // Set only on a standalone event that overrides one occurrence of a series;
+  // null on normal events and on series masters.
+  recurrenceMasterId: string | null;
   createdAt: number;
   updatedAt: number;
 }

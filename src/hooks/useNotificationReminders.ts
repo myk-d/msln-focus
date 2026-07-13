@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
+import i18n from '../i18n';
 import type { CalendarEvent, Task } from '../types';
 
 const NOTIFIED_KEY = 'focus-pocus-notified-reminders';
@@ -61,7 +62,7 @@ export function useNotificationReminders(tasks: Task[], events: CalendarEvent[])
         if (notified.has(key)) continue;
         const triggerAt = dayjs(`${task.dueDate} ${TASK_DUE_TIME}`).subtract(TASK_REMINDER_MINUTES, 'minute');
         if (isDueNow(triggerAt, now)) {
-          await fireNotification('Завдання незабаром', task.text, key);
+          await fireNotification(i18n.t('notifications.taskDueSoonTitle'), task.text, key);
           notified.add(key);
           changed = true;
         }
@@ -74,7 +75,7 @@ export function useNotificationReminders(tasks: Task[], events: CalendarEvent[])
         const anchorTime = event.allDay ? TASK_DUE_TIME : event.startTime;
         const triggerAt = dayjs(`${event.date} ${anchorTime}`).subtract(event.reminderMinutes, 'minute');
         if (isDueNow(triggerAt, now)) {
-          await fireNotification('Подія незабаром', event.title, key);
+          await fireNotification(i18n.t('notifications.eventSoonTitle'), event.title, key);
           notified.add(key);
           changed = true;
         }

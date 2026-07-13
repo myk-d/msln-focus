@@ -1,33 +1,32 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalendarDays, ListTodo, LoaderCircle, Timer } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const FEATURES = [
-  {
-    icon: ListTodo,
-    title: 'Завдання',
-    description: 'Списки, секції, теги, пріоритети, підзавдання та дедлайни — усе в одному місці.',
-  },
-  {
-    icon: CalendarDays,
-    title: 'Календар',
-    description: 'Місяць, тиждень, день і список подій — з перетягуванням і зміною тривалості.',
-  },
-  {
-    icon: Timer,
-    title: 'Помодоро',
-    description: 'Таймер фокусу з пресетами, статистикою та зв’язком із конкретним завданням.',
-  },
-];
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function WelcomePage() {
+  const { t, i18n } = useTranslation();
   const { signInWithGoogle } = useAuth();
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
 
+  const FEATURES = [
+    { icon: ListTodo, title: t('welcome.featureTasksTitle'), description: t('welcome.featureTasksDescription') },
+    {
+      icon: CalendarDays,
+      title: t('welcome.featureCalendarTitle'),
+      description: t('welcome.featureCalendarDescription'),
+    },
+    {
+      icon: Timer,
+      title: t('welcome.featurePomodoroTitle'),
+      description: t('welcome.featurePomodoroDescription'),
+    },
+  ];
+
   useEffect(() => {
-    document.title = 'Focus-Pocus — фокус, завдання та час в одному додатку';
-  }, []);
+    document.title = t('welcome.documentTitle');
+  }, [t, i18n.language]);
 
   const handleSignIn = async () => {
     setError('');
@@ -35,21 +34,22 @@ export function WelcomePage() {
     try {
       await signInWithGoogle();
     } catch {
-      setError('Не вдалося увійти. Спробуйте ще раз.');
+      setError(t('welcome.signInError'));
     } finally {
       setPending(false);
     }
   };
 
   return (
-    <div className="flex h-dvh w-full flex-col items-center overflow-y-auto bg-canvas px-6 py-16">
+    <div className="relative flex h-dvh w-full flex-col items-center overflow-y-auto bg-canvas px-6 py-16">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
       <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg">
         <Timer size={28} />
       </div>
       <h1 className="text-center text-3xl font-black tracking-tight text-stone-900">Focus-Pocus</h1>
-      <p className="mt-2 max-w-md text-center text-sm text-stone-500">
-        Задачі, календар і Помодоро-таймер — в одному додатку, синхронізовані з вашим Google-акаунтом.
-      </p>
+      <p className="mt-2 max-w-md text-center text-sm text-stone-500">{t('welcome.tagline')}</p>
 
       <button
         onClick={() => void handleSignIn()}
@@ -57,7 +57,7 @@ export function WelcomePage() {
         className="mt-8 flex items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending && <LoaderCircle size={16} className="animate-spin" />}
-        Увійти через Google
+        {t('welcome.signInWithGoogle')}
       </button>
       {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
 
