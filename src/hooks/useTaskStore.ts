@@ -15,11 +15,7 @@ function seedData(): { lists: TaskList[]; sections: Section[]; tasks: Task[] } {
   return {
     lists: [{ id: listId, name: 'Вхідні', isDefault: true, createdAt: now, groupBy: 'sequence', sortBy: 'sequence' }],
     sections: [{ id: sectionId, listId, name: 'Список', order: 0, createdAt: now }],
-    tasks: [
-      { id: genId(), sectionId, text: 'Написати базову архітектуру додатка', description: '', completed: true, pinned: false, priority: 'none', dueDate: null, tagIds: [], subtasks: [], order: 0, createdAt: now, updatedAt: now },
-      { id: genId(), sectionId, text: 'Протестувати роботу Document PiP', description: '', completed: false, pinned: false, priority: 'medium', dueDate: null, tagIds: [], subtasks: [], order: 1, createdAt: now, updatedAt: now },
-      { id: genId(), sectionId, text: 'Додати синхронізацію стилей Tailwind', description: '', completed: false, pinned: false, priority: 'none', dueDate: null, tagIds: [], subtasks: [], order: 2, createdAt: now, updatedAt: now },
-    ],
+    tasks: [],
   };
 }
 
