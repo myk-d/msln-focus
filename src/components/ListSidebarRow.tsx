@@ -57,8 +57,9 @@ export function ListSidebarRow({
         isActive ? 'bg-brand-100 text-brand-800 font-medium' : 'text-stone-600 hover:bg-stone-100'
       }`}
     >
-      <button onClick={onSelect} className="flex-1 truncate text-left">
+      <button onClick={onSelect} className="flex flex-1 items-center gap-1.5 truncate text-left">
         {list.name}
+        {list.isDefault && <Star size={11} className="shrink-0 fill-brand-400 text-brand-400" />}
       </button>
       <div className="relative flex items-center gap-1">
         {taskCount > 0 && <span className="text-xs text-stone-400 group-hover:hidden">{taskCount}</span>}

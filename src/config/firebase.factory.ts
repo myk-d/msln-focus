@@ -1,0 +1,98 @@
+import {
+	DocumentData,
+	DocumentSnapshot,
+	Firestore,
+	QueryDocumentSnapshot,
+	QueryFieldFilterConstraint,
+	collection,
+	deleteDoc,
+	doc,
+	getDoc,
+	getDocs,
+	query,
+	setDoc,
+	updateDoc,
+} from 'firebase/firestore';
+interface ObjectWithId {
+	id: string;
+}
+type Collection = string;
+
+type GetAll<T> = () => Promise<T[]>;
+type GetById<T> = (id: string) => Promise<T | undefined>;
+type Create<T extends ObjectWithId> = (data: T) => Promise<T>;
+type Update<T> = (data: Partial<T> & ObjectWithId) => Promise<void>;
+type Delete<T extends { id: string }> = (id: T['id']) => Promise<void>;
+type Query<T> = (filter: QueryFieldFilterConstraint | QueryFieldFilterConstraint[]) => Promise<T[]>;
+
+export class FirebaseFactory<T extends ObjectWithId> {
+	constructor(
+		private readonly firestore: Firestore,
+		private readonly collectionName: Collection,
+	) {
+		this.collectionName = collectionName;
+	}
+
+	private getOneDocWithId = (doc: DocumentSnapshot<DocumentData>) => {
+		return {
+			...doc.data(),
+			id: doc.id,
+		} as T;
+	};
+
+	private getDocsWithId = (docs: QueryDocumentSnapshot<DocumentData>[]) => {
+		return docs.map(
+			(doc) =>
+				({
+					...doc.data(),
+					id: doc.id,
+				}) as T,
+		);
+	};
+
+	getAll: GetAll<T> = async () => {
+		const col = collection(this.firestore, this.collectionName);
+		const snapshot = await getDocs(col);
+		return this.getDocsWithId(snapshot.docs);
+	};
+
+	getById: GetById<T> = async (id) => {
+		const col = collection(this.firestore, this.collectionName);
+		const ref = doc(col, id);
+
+		const docWithData = await getDoc(ref);
+
+		if (!docWithData.exists()) {
+			return undefined;
+		}
+
+		return this.getOneDocWithId(docWithData);
+	};
+	// Upserts at the caller-supplied `id` (this app always generates ids up
+	// front via genId(), before a record ever reaches persistence) rather than
+	// Firestore auto-generating one via addDoc — the id must match what's
+	// already held in local state.
+	create: Create<T> = async (data) => {
+		const ref = doc(this.firestore, this.collectionName, data.id);
+		await setDoc(ref, data);
+		return data;
+	};
+
+	update: Update<T> = async (data) => {
+		const { id, ...rest } = data;
+		const ref = doc(this.firestore, this.collectionName, id);
+		return updateDoc(ref, rest);
+	};
+
+	delete: Delete<T> = async (id) => {
+		const ref = doc(this.firestore, this.collectionName, id);
+		return deleteDoc(ref);
+	};
+
+	query: Query<T> = async (filter) => {
+		const col = collection(this.firestore, this.collectionName);
+		const q = query(col, ...(filter instanceof Array ? filter : [filter]));
+		const docs = await getDocs(q);
+		return this.getDocsWithId(docs.docs);
+	};
+}

@@ -1,0 +1,24 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwnerField() {
+      return request.auth != null &&
+        (resource == null || resource.data.userId == request.auth.uid) &&
+        (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+    function isOwnerDoc(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /lists/{id} { allow read, write: if isOwnerField(); }
+    match /sections/{id} { allow read, write: if isOwnerField(); }
+    match /tasks/{id} { allow read, write: if isOwnerField(); }
+    match /tags/{id} { allow read, write: if isOwnerField(); }
+    match /events/{id} { allow read, write: if isOwnerField(); }
+    match /pomodoroPresets/{id} { allow read, write: if isOwnerField(); }
+
+    match /pomodoroSettings/{uid} { allow read, write: if isOwnerDoc(uid); }
+    match /pomodoroStats/{uid} { allow read, write: if isOwnerDoc(uid); }
+  }
+}

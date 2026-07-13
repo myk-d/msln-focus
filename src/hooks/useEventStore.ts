@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { useIndexedDBCollection } from './useIndexedDBCollection';
+import { useFirestoreCollection } from './useFirestoreCollection';
+import { firebaseCollections } from '../config/firebase.config';
 import { genId } from '../lib/utils';
 import type { CalendarEvent } from '../types';
 
 // Backfills fields added to the CalendarEvent shape after some records were
-// already persisted to IndexedDB, so older rows don't crash consumers expecting them.
+// already persisted to Firestore, so older rows don't crash consumers expecting them.
 function normalizeEvent(event: CalendarEvent): CalendarEvent {
   return {
     ...event,
@@ -13,7 +14,7 @@ function normalizeEvent(event: CalendarEvent): CalendarEvent {
 }
 
 export function useEventStore() {
-  const [rawEvents, setRawEvents] = useIndexedDBCollection<CalendarEvent>('events', []);
+  const [rawEvents, setRawEvents] = useFirestoreCollection<CalendarEvent>(firebaseCollections.events, []);
   const events = useMemo(() => rawEvents.map(normalizeEvent), [rawEvents]);
   const setEvents = (updater: (prev: CalendarEvent[]) => CalendarEvent[]) => {
     setRawEvents((prev) => updater(prev.map(normalizeEvent)));

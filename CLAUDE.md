@@ -15,34 +15,44 @@ There is no test suite. After any change, run `npx tsc --noEmit -p tsconfig.app.
 
 ## Architecture
 
-Focus-Pocus is a task manager + Pomodoro timer (React 19 + TypeScript + Vite + Tailwind v4). Single page, real routing via `react-router-dom` (`/tasks`, `/calendar`, `/pomodoro`), composed in `App.tsx` → `FocusDashboard.tsx` (nav rail + `<Routes>`).
+Focus-Pocus is a task manager + Pomodoro timer (React 19 + TypeScript + Vite + Tailwind v4), gated behind Google sign-in with per-account Firestore-backed data. Single page, real routing via `react-router-dom` (`/tasks`, `/calendar`, `/pomodoro`), composed in `App.tsx` → `AuthGate.tsx` → `FocusDashboard.tsx` (nav rail + `<Routes>`).
 
-### State: two contexts, IndexedDB-backed
+### Auth gate
+
+`App.tsx` wraps everything in `AuthProvider` (`context/AuthContext.tsx`) and renders `AuthGate.tsx`, which is the single place deciding what the user sees:
+- `loading` (initial `onAuthStateChanged` resolution) → a small centered spinner.
+- No `user` → `WelcomePage.tsx` (public marketing page, "Увійти через Google" button). No other route is reachable while signed out — this isn't a per-route guard, the whole app tree is swapped.
+- Signed in → the full provider stack (`ConfirmProvider` → `TaskStoreProvider` → `EventStoreProvider` → `PomodoroProvider` → `FocusDashboard`) mounts for the first time.
+
+Sign-in is Google popup only (`signInWithPopup` + `GoogleAuthProvider`, both from `config/firebase.config.ts`) — no email/password. Because the data-layer providers only mount once `user` is non-null, every `useFirestoreCollection`/`useFirestoreValue` call below is guaranteed to have a signed-in user; signing out unmounts the whole subtree so no state from one account can leak into the next account signing in.
+
+### State: three contexts, Firestore-backed
 
 - `TaskStoreContext` wraps `useTaskStore.ts` — lists, sections, tasks, tags.
+- `EventStoreContext` wraps `useEventStore.ts` — calendar events.
 - `PomodoroContext` wraps `usePomodoro.ts` — timer, settings, stats, presets.
 
-Both are provided once in `App.tsx`. Components consume them via `useTaskStoreContext()` / `usePomodoroContext()`, never by re-deriving state locally.
+Components consume them via `useTaskStoreContext()` / `useEventStoreContext()` / `usePomodoroContext()`, never by re-deriving state locally.
 
-Persistence goes through `src/lib/db.ts` (`idb` wrapper) with **one IndexedDB object store per collection** (`lists`, `sections`, `tasks`, `pomodoroPresets`, `tags`, keyed by `id`), plus a single `kv` store for singleton values (Pomodoro settings/stats). This deliberately mirrors Firestore's collection/document shape — `getAllRecords`/`replaceAllRecords`/`getKV`/`putKV` are the only functions that would need reimplementing to swap to Firestore later; nothing else references IndexedDB directly.
+Persistence goes through `src/config/firebase.factory.ts` (`FirebaseFactory<T>` — generic `getAll`/`getById`/`create`/`update`/`delete`/`query` over one Firestore collection) and `src/config/firebase.config.ts` (`firestoreDb`, `firebaseCollections` name constants). Collections are flat and top-level (`lists`, `sections`, `tasks`, `tags`, `pomodoroPresets`, `events`), scoped per user via a `userId` field on every document and filtered with `factory.query(where('userId', '==', uid))` — not per-user subcollection paths. `pomodoroSettings`/`pomodoroStats` are singleton docs instead, **keyed by the user's uid** as the doc ID (no `userId` field needed there). `FirebaseFactory.create()` upserts at a caller-supplied `id` (via `setDoc`) rather than Firestore auto-generating one (via `addDoc`) — every record's `id` already comes from this app's own `genId()` before it ever reaches persistence.
 
-Two hooks are the drop-in `useState` replacements that do the actual hydration:
-- `useIndexedDBCollection<T>(store, seed)` — array collections.
-- `useIndexedDBValue<T>(key, initial)` — singleton values.
+Two hooks are the drop-in `useState` replacements that do the actual hydration/sync — this is the one swap point were the app to move off Firestore later:
+- `useFirestoreCollection<T>(collectionName, seed)` — array collections. Hydrates once via `.query()`, then on every local array change diffs against the last-synced snapshot (by id) and fires `create` (upsert) for anything new/changed and `delete` for anything removed — fire-and-forget, optimistic-local-first (not real-time `onSnapshot`).
+- `useFirestoreValue<T>(collectionName, initial)` — singleton values, doc ID = uid.
 
-Both gate their persistence effect on an internal `hydrated` flag so the initial IndexedDB read always wins over seed data (no clobbering on mount).
+Both gate their persistence effect on an internal `hydrated` flag so the initial Firestore read always wins over seed data (no clobbering on mount).
 
 ### Backfilling schema changes on existing records
 
-Fields have been added to `Task` and `TaskList` after real records already existed in users' IndexedDB (e.g. `tagIds`, `subtasks`, `pinned`, `updatedAt`, `groupBy`/`sortBy`). There is no migration step — instead `useTaskStore.ts` defines `normalizeTask`/`normalizeList` and applies them in **two places**:
+Fields have been added to `Task` and `TaskList` after real records already existed in users' Firestore documents (e.g. `tagIds`, `subtasks`, `pinned`, `updatedAt`, `groupBy`/`sortBy`). There is no migration step — instead `useTaskStore.ts` defines `normalizeTask`/`normalizeList` and applies them in **two places**:
 1. On read, via `useMemo` over the raw collection, so every consumer sees complete objects.
-2. Wrapping the setter (`setTasks`/`setLists`) so mutator callbacks — which receive `prev` from the raw IndexedDB-backed state — never operate on a record missing a newer field either.
+2. Wrapping the setter (`setTasks`/`setLists`) so mutator callbacks — which receive `prev` from the raw Firestore-backed state — never operate on a record missing a newer field either.
 
-When adding a new field to `Task`, `TaskList`, or `Tag`, extend the corresponding `normalize*` function rather than assuming existing stored records already have it.
+When adding a new field to `Task`, `TaskList`, `Tag`, or `CalendarEvent`, extend the corresponding `normalize*` function rather than assuming existing stored records already have it.
 
 ### "Derived, not stored" state
 
-Recurring pattern to avoid effects that reconcile state after async IndexedDB hydration: compute the value fresh from live collections every render instead of storing and syncing it.
+Recurring pattern to avoid effects that reconcile state after async Firestore hydration: compute the value fresh from live collections every render instead of storing and syncing it.
 - `activeListId` (`useTaskStore.ts`) falls back to the first list if the stored preference no longer matches any list.
 - `activeTagId` (`TasksPage.tsx`) resets to `null` if the tag was deleted elsewhere.
 - `timeLeft` (`usePomodoro.ts`) — a `started` boolean gates whether the display tracks live `settings` (idle) or the ticking `rawTimeLeft` (running), so settings edits/hydration update the idle display immediately.
@@ -69,7 +79,7 @@ Apply this pattern for any new state that depends on a collection that might not
 - `tsconfig.app.json` has `types: ["vite/client"]` only — no Node globals (use `ReturnType<typeof setInterval>`, not `NodeJS.Timeout`) — and `erasableSyntaxOnly` (no TS `enum`; use a `Record<UnionType, T>` lookup instead, e.g. `PRIORITY_META`, `GROUP_BY_META`).
 - `noUnusedLocals`/`noUnusedParameters` are on — this is what the `tsc` step in `npm run build` enforces.
 - react-hooks lint rules actively shape the code: `set-state-in-effect` (no synchronous `setState` in an effect body — only inside a nested async/timer callback), a purity rule that flags `Date.now()` in a render body but not `new Date()`, and `exhaustive-deps` (suppressed with an explanatory comment in the one place — the timer interval effect — where adding the dep would re-arm the interval every render instead of once per tick).
-- `react-refresh/only-export-components` is disabled inline (`// eslint-disable-next-line`) in the context files (`TaskStoreContext.tsx`, `PomodoroContext.tsx`) — they intentionally colocate the Provider component with its `use*Context` hook.
+- `react-refresh/only-export-components` is disabled inline (`// eslint-disable-next-line`) in the context files (`TaskStoreContext.tsx`, `PomodoroContext.tsx`, `EventStoreContext.tsx`, `ConfirmContext.tsx`, `AuthContext.tsx`) — they intentionally colocate the Provider component with its `use*`/`useAuth` hook.
 - Shared Tailwind class strings live in `src/lib/ui.ts` (`inputClass`, `popoverClass`, `menuItemClass`) — reuse these for new inputs/popovers/menu items instead of restyling inline.
 - Popovers close on outside-click via `useClickOutside(ref, onOutside)` (`src/hooks/useClickOutside.ts`), not `onBlur` — `onBlur` fires before a sibling element's `onClick` when that element steals focus, which silently drops the click (see `TagSidebarRow.tsx`'s color-swatch picker for the fix already applied once).
 - All Ukrainian-language UI strings/labels — match this when adding new UI text.

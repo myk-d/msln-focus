@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Bell, BellOff, CalendarDays, ListTodo, Target, Timer } from 'lucide-react';
+import { Bell, BellOff, CalendarDays, ListTodo, LogOut, Target, Timer } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
   { to: '/tasks', label: 'Завдання', icon: ListTodo },
@@ -59,6 +60,26 @@ function NotificationToggle({ variant }: { variant: 'rail' | 'bar' }) {
   );
 }
 
+function UserMenu() {
+  const { user, signOutUser } = useAuth();
+  if (!user) return null;
+
+  return (
+    <button
+      onClick={() => void signOutUser()}
+      title={`Вийти${user.displayName ? ` (${user.displayName})` : ''}`}
+      className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium text-stone-400 transition hover:bg-stone-100 hover:text-stone-600"
+    >
+      {user.photoURL ? (
+        <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-5 w-5 rounded-full" />
+      ) : (
+        <LogOut size={19} />
+      )}
+      Вийти
+    </button>
+  );
+}
+
 export function NavRail() {
   return (
     <>
@@ -74,6 +95,7 @@ export function NavRail() {
           </NavLink>
         ))}
         <NotificationToggle variant="rail" />
+        <UserMenu />
       </nav>
 
       {/* Mobile: bottom tab bar */}
@@ -85,6 +107,7 @@ export function NavRail() {
           </NavLink>
         ))}
         <NotificationToggle variant="bar" />
+        <UserMenu />
       </nav>
     </>
   );

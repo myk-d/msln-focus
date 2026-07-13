@@ -1,6 +1,6 @@
 # Focus-Pocus
 
-A task manager and Pomodoro timer, built as a single-page React app with an original visual design. Tasks, lists, sections, tags, and Pomodoro presets all persist locally via IndexedDB (structured to mirror Firestore's collection/document shape, for an easy future migration).
+A task manager, calendar, and Pomodoro timer, built as a single-page React app with an original visual design. Sign in with Google to use it — tasks, lists, sections, tags, calendar events, and Pomodoro presets/settings/stats all persist to Firestore, scoped to your account.
 
 ## Features
 
@@ -24,10 +24,14 @@ A task manager and Pomodoro timer, built as a single-page React app with an orig
 
 - React 19 + TypeScript + Vite
 - Tailwind CSS v4 (`@theme` tokens in `src/index.css`)
-- IndexedDB via `idb` (per-collection object stores keyed by `id`)
+- Firebase Authentication (Google sign-in) + Firestore, via a small generic `FirebaseFactory<T>` CRUD wrapper (`src/config/firebase.factory.ts`)
 - `@dnd-kit` for drag-and-drop, `react-router-dom` for routing, `lucide-react` for icons, `dayjs` for the date picker
 
 ## Getting started
+
+1. Create a Firebase project with **Authentication** (enable the Google sign-in provider) and **Firestore** enabled.
+2. Copy `.env.example` to `.env` and fill in your Firebase web app config values.
+3. Deploy the security rules: `npx firebase deploy --only firestore:rules` (requires `firebase login` first).
 
 ```bash
 npm install

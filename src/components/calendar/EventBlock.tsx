@@ -1,6 +1,7 @@
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { HOUR_HEIGHT, SNAP_MINUTES, TAG_COLOR_META, minutesToTime, timeToMinutes } from '../../lib/utils';
 import type { CalendarEvent } from '../../types';
 
@@ -12,20 +13,42 @@ interface EventBlockProps {
 }
 
 const resizeHandleClass =
-  'absolute left-1/2 h-3 w-3 -translate-x-1/2 cursor-ns-resize rounded-full border-2 border-white bg-stone-700/80 shadow';
+  'absolute left-1/2 h-3 w-3 -translate-x-1/2 touch-none cursor-ns-resize rounded-full border-2 border-white bg-stone-700/80 shadow';
 
 // Drag (move) goes through @dnd-kit like the rest of the app's drag-and-drop.
 // Resize is a raw pointer listener instead — dnd-kit models drag-to-a-droppable,
 // not elastic resize. Each edge handle is a small circular grip (not a full-width
 // strip) so it stays a deliberate, precise target that doesn't swallow ordinary
-// touch-scroll gestures happening elsewhere on the event.
+// touch-scroll gestures happening elsewhere on the event, and only renders once
+// revealed (hover on desktop, first tap on touch) instead of cluttering every
+// event permanently.
 export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlockProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: `event:${event.id}` });
+  const [revealed, setRevealed] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  useClickOutside(containerRef, () => setRevealed(false));
+
+  const setRefs = (node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    containerRef.current = node;
+  };
 
   const startMinutes = timeToMinutes(event.startTime);
   const endMinutes = timeToMinutes(event.endTime);
   const top = (startMinutes / 60) * HOUR_HEIGHT;
   const height = Math.max(((endMinutes - startMinutes) / 60) * HOUR_HEIGHT, 18);
+
+  // Mouse users get the handles on hover before they ever click, so this always
+  // opens the detail drawer for them (unchanged from before). Touch users have
+  // no hover: their first tap only reveals the handles, and a second tap on the
+  // body (rather than a handle) opens the drawer.
+  const handleClick = () => {
+    if (!revealed) {
+      setRevealed(true);
+      return;
+    }
+    onSelect();
+  };
 
   const makeResizeHandler = (edge: 'start' | 'end') => (downEvent: ReactPointerEvent) => {
     downEvent.stopPropagation();
@@ -52,7 +75,7 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
 
   return (
     <div
-      ref={setNodeRef}
+      ref={setRefs}
       style={{
         top,
         height,
@@ -64,7 +87,9 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
       }}
       {...attributes}
       {...listeners}
-      onClick={onSelect}
+      onMouseEnter={() => setRevealed(true)}
+      onMouseLeave={() => setRevealed(false)}
+      onClick={handleClick}
       className={`absolute cursor-grab rounded-lg border border-black/5 shadow-sm active:cursor-grabbing ${TAG_COLOR_META[event.color].bg} ${TAG_COLOR_META[event.color].text}`}
     >
       <div className="h-full overflow-hidden px-1.5 py-0.5 text-left text-[11px]">
@@ -75,7 +100,7 @@ export function EventBlock({ event, overlapIndex, onSelect, onResize }: EventBlo
           </div>
         )}
       </div>
-      {!event.allDay && (
+      {!event.allDay && revealed && (
         <>
           <div
             onPointerDown={makeResizeHandler('start')}

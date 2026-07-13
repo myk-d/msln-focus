@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useIndexedDBCollection } from './useIndexedDBCollection';
+import { useFirestoreCollection } from './useFirestoreCollection';
+import { firebaseCollections } from '../config/firebase.config';
 import { genId, nextTagColor } from '../lib/utils';
 import type { Task, TaskList, Section, Priority, Tag } from '../types';
 
@@ -45,20 +46,20 @@ function normalizeList(list: TaskList): TaskList {
 
 export function useTaskStore() {
   const seed = useMemo(() => seedData(), []);
-  const [rawLists, setRawLists] = useIndexedDBCollection<TaskList>('lists', seed.lists);
+  const [rawLists, setRawLists] = useFirestoreCollection<TaskList>(firebaseCollections.lists, seed.lists);
   const lists = useMemo(() => rawLists.map(normalizeList), [rawLists]);
   const setLists = (updater: (prev: TaskList[]) => TaskList[]) => {
     setRawLists((prev) => updater(prev.map(normalizeList)));
   };
-  const [sections, setSections] = useIndexedDBCollection<Section>('sections', seed.sections);
-  const [rawTasks, setRawTasks] = useIndexedDBCollection<Task>('tasks', seed.tasks);
+  const [sections, setSections] = useFirestoreCollection<Section>(firebaseCollections.sections, seed.sections);
+  const [rawTasks, setRawTasks] = useFirestoreCollection<Task>(firebaseCollections.tasks, seed.tasks);
   const tasks = useMemo(() => rawTasks.map(normalizeTask), [rawTasks]);
   // Normalizes `prev` before every mutation so updaters below never have to
   // account for stale pre-migration records missing newer Task fields.
   const setTasks = (updater: (prev: Task[]) => Task[]) => {
     setRawTasks((prev) => updater(prev.map(normalizeTask)));
   };
-  const [tags, setTags] = useIndexedDBCollection<Tag>('tags', []);
+  const [tags, setTags] = useFirestoreCollection<Tag>(firebaseCollections.tags, []);
 
   // Derived rather than stored: falls back to the first list whenever the
   // previously-selected one no longer exists (e.g. IndexedDB hydration swaps

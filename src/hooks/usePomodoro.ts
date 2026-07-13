@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { useIndexedDBValue } from './useIndexedDBValue';
-import { useIndexedDBCollection } from './useIndexedDBCollection';
-import { getKV, putKV } from '../lib/db';
+import { useFirestoreValue } from './useFirestoreValue';
+import { useFirestoreCollection } from './useFirestoreCollection';
+import { FirebaseFactory } from '../config/firebase.factory';
+import { firebaseCollections, firestoreDb } from '../config/firebase.config';
+import { useAuth } from '../context/AuthContext';
 import { normalizeStatsForToday, genId } from '../lib/utils';
 import type { PomodoroPhase, PomodoroPreset, PomodoroSettings, PomodoroStats } from '../types';
 
@@ -48,31 +50,40 @@ function durationFor(phase: PomodoroPhase, settings: PomodoroSettings): number {
   return settings.longBreakMinutes * 60;
 }
 
-const STATS_KEY = 'pomodoroStats.v1';
-
 export function usePomodoro() {
-  const [settings, setSettings] = useIndexedDBValue<PomodoroSettings>('pomodoroSettings.v1', DEFAULT_SETTINGS);
+  const { user } = useAuth();
+  const uid = user?.uid ?? null;
+  const [settings, setSettings] = useFirestoreValue<PomodoroSettings>(
+    firebaseCollections.pomodoroSettings,
+    DEFAULT_SETTINGS
+  );
 
-  // Custom (not useIndexedDBValue) because the loaded value needs a rollover
+  // Custom (not useFirestoreValue) because the loaded value needs a rollover
   // normalize pass before it becomes state — see normalizeStatsForToday.
   const [stats, setStats] = useState<PomodoroStats>(DEFAULT_STATS);
   const [statsHydrated, setStatsHydrated] = useState(false);
+  const statsFactoryRef = useRef(
+    new FirebaseFactory<PomodoroStats & { id: string }>(firestoreDb, firebaseCollections.pomodoroStats)
+  );
   useEffect(() => {
+    if (!uid) return;
     let cancelled = false;
     (async () => {
-      const stored = await getKV<PomodoroStats>(STATS_KEY, DEFAULT_STATS);
+      const existing = await statsFactoryRef.current.getById(uid);
       if (cancelled) return;
-      setStats(normalizeStatsForToday(stored));
+      const rest: Record<string, unknown> = { ...(existing ?? { id: uid, ...DEFAULT_STATS }) };
+      delete rest.id;
+      setStats(normalizeStatsForToday(rest as unknown as PomodoroStats));
       setStatsHydrated(true);
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [uid]);
   useEffect(() => {
-    if (!statsHydrated) return;
-    void putKV(STATS_KEY, stats);
-  }, [stats, statsHydrated]);
+    if (!statsHydrated || !uid) return;
+    void statsFactoryRef.current.create({ ...stats, id: uid });
+  }, [stats, statsHydrated, uid]);
 
   const [phase, setPhase] = useState<PomodoroPhase>('focus');
   const [rawTimeLeft, setRawTimeLeft] = useState(() => durationFor('focus', settings));
@@ -85,7 +96,7 @@ export function usePomodoro() {
   const [sessionsInCycle, setSessionsInCycle] = useState(0);
   const [flashKey, setFlashKey] = useState(0);
   const [activeTaskId, setActiveTask] = useState<string | null>(null);
-  const [presets, setPresets] = useIndexedDBCollection<PomodoroPreset>('pomodoroPresets', SEED_PRESETS);
+  const [presets, setPresets] = useFirestoreCollection<PomodoroPreset>(firebaseCollections.pomodoroPresets, SEED_PRESETS);
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
