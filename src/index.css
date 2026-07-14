@@ -14,6 +14,16 @@
   --color-brand-900: #602012;
 }
 
+/* Safety net against any child (a popover positioned off past an edge, a long
+   unbreakable string) widening the page horizontally on mobile — which also
+   shifts `position: fixed` overlays sideways in some mobile WebKit versions,
+   since fixed elements there can track the overflowed layout viewport instead
+   of the visual one. Nothing in this app needs horizontal page scroll. */
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   @apply bg-canvas text-stone-800;
 }

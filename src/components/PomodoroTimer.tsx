@@ -39,6 +39,12 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
   const { tasks } = useTaskStoreContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const meta = PHASE_META[phase];
+  // The pip variant's own design size — the SVG's viewBox coordinate space,
+  // not its rendered pixel size (that's fluid, via vmin below, so the ring
+  // fills whatever size the user drags the PiP window to instead of staying
+  // pinned to a fixed pixel size that looks lost in a larger window). `vmin`
+  // here refers to the PiP window's own viewport — it's a separate document,
+  // not the main tab — so it tracks that window's size live, no JS needed.
   const size = variant === 'pip' ? 120 : 208;
   const linkedTask = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : undefined;
   const activePreset = activePresetId ? presets.find((p) => p.id === activePresetId) : undefined;
@@ -64,7 +70,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
     <div
       key={flashKey}
       className={`flex flex-col items-center rounded-3xl border border-stone-200 bg-white shadow-sm animate-phase-flash ${
-        variant === 'pip' ? 'gap-2 p-3' : 'gap-4 p-6'
+        variant === 'pip' ? 'gap-[clamp(0.5rem,3vmin,1rem)] p-[clamp(0.75rem,4vmin,1.5rem)]' : 'gap-4 p-6'
       }`}
     >
       <div className="flex w-full items-center justify-between">
@@ -104,8 +110,11 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
         </div>
       )}
 
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="-rotate-90">
+      <div
+        className={`relative ${variant === 'pip' ? 'aspect-square w-[clamp(90px,45vmin,220px)]' : ''}`}
+        style={variant === 'pip' ? undefined : { width: size, height: size }}
+      >
+        <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
           <circle cx={size / 2} cy={size / 2} r={RADIUS} fill="none" strokeWidth={8} className="stroke-stone-100" />
           <circle
             cx={size / 2}
@@ -120,7 +129,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           />
         </svg>
         <div
-          className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-stone-800 ${variant === 'pip' ? 'text-xl' : 'text-3xl'}`}
+          className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-stone-800 ${variant === 'pip' ? 'text-[clamp(0.85rem,7vmin,1.5rem)]' : 'text-3xl'}`}
         >
           {formatTime(timeLeft)}
         </div>

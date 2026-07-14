@@ -1,17 +1,28 @@
 import { useState } from 'react';
 
+// Building one DOM text node per CSS rule (Tailwind alone generates hundreds)
+// is what was making PiP open janky/freeze-y — a single `textContent` string
+// assignment per stylesheet is the same visual result for a fraction of the
+// DOM work. External stylesheets are re-linked instead of read, which also
+// sidesteps the cross-origin cssRules restriction entirely for those.
 function copyStyles(targetDoc: Document) {
   Array.from(document.styleSheets).forEach((styleSheet) => {
     try {
-      if (styleSheet.cssRules) {
-        const newStyle = targetDoc.createElement('style');
-        Array.from(styleSheet.cssRules).forEach((rule) => {
-          newStyle.appendChild(targetDoc.createTextNode(rule.cssText));
-        });
-        targetDoc.head.appendChild(newStyle);
+      if (styleSheet.href) {
+        const link = targetDoc.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = styleSheet.href;
+        targetDoc.head.appendChild(link);
+        return;
       }
+      if (!styleSheet.cssRules) return;
+      const newStyle = targetDoc.createElement('style');
+      newStyle.textContent = Array.from(styleSheet.cssRules)
+        .map((rule) => rule.cssText)
+        .join('\n');
+      targetDoc.head.appendChild(newStyle);
     } catch {
-      // Пропускаємо крос-доменні стилі (наприклад, Google Fonts лінки)
+      // Skips cross-origin stylesheets (e.g. Google Fonts links).
     }
   });
 }

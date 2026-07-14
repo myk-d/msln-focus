@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, MoreHorizontal, Pin, PinOff, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
-import { usePomodoroContext } from '../context/PomodoroContext';
+import { usePomodoroActions } from '../context/PomodoroContext';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import { Checkbox } from './ui/Checkbox';
 import { PriorityPicker } from './ui/PriorityPicker';
@@ -41,7 +41,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
     toggleTaskTag,
     togglePin,
   } = useTaskStoreContext();
-  const { startForTask } = usePomodoroContext();
+  const { startForTask } = usePomodoroActions();
   const navigate = useNavigate();
   const currentListId = sections.find((s) => s.id === task.sectionId)?.listId ?? '';
   useBodyScrollLock(true);
@@ -84,6 +84,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
                 lists={lists}
                 allTags={tags}
                 currentListId={currentListId}
+                align="left"
                 onClose={() => setMenuOpen(false)}
                 onSetPriority={(p) => setPriority(task.id, p)}
                 onSetDueDate={(d) => setDueDate(task.id, d)}

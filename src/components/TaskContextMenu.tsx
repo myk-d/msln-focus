@@ -28,6 +28,12 @@ interface TaskContextMenuProps {
   onDelete: () => void;
   onTogglePin: () => void;
   onRunFocus: () => void;
+  // Which edge the popover anchors to and grows away from. Defaults to
+  // 'right' (correct when the "..." trigger sits at the far right of a wide
+  // row, e.g. TaskRow) — TaskDetailPanel's header trigger sits close to its
+  // own left edge instead, where a right-anchored w-64 popover would overflow
+  // past the panel's left edge.
+  align?: 'left' | 'right';
 }
 
 export function TaskContextMenu({
@@ -48,6 +54,7 @@ export function TaskContextMenu({
   onDelete,
   onTogglePin,
   onRunFocus,
+  align = 'right',
 }: TaskContextMenuProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -67,7 +74,7 @@ export function TaskContextMenu({
   };
 
   return (
-    <div ref={ref} className={`${popoverClass} absolute right-0 top-8 z-20 w-64 p-2 text-sm`}>
+    <div className={`${popoverClass} absolute top-8 z-20 w-64 p-2 text-sm ${align === 'left' ? 'left-0' : 'right-0'}`} ref={ref}>
       <div className="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.priority')}</div>
       <div className="px-2 pb-2">
         <PriorityPicker value={task.priority} onChange={onSetPriority} />

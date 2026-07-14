@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Check, ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
@@ -17,7 +17,14 @@ interface TaskSectionProps {
   onSelectTask: (taskId: string) => void;
 }
 
-export function TaskSection({ section, tasks, lists, hideCompleted, selectedTaskId, onSelectTask }: TaskSectionProps) {
+export const TaskSection = memo(function TaskSection({
+  section,
+  tasks,
+  lists,
+  hideCompleted,
+  selectedTaskId,
+  onSelectTask,
+}: TaskSectionProps) {
   const { t } = useTranslation();
   const { renameSection, deleteSection, insertSection, moveSectionToList, addTask, sections } = useTaskStoreContext();
   const [collapsed, setCollapsed] = useState(false);
@@ -141,4 +148,4 @@ export function TaskSection({ section, tasks, lists, hideCompleted, selectedTask
       )}
     </div>
   );
-}
+});

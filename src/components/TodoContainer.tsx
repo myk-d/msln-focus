@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Eye, EyeOff, Menu, Plus } from 'lucide-react';
@@ -8,6 +8,7 @@ import { TaskSection } from './TaskSection';
 import { GroupedTaskList } from './GroupedTaskList';
 import { FilterMenu } from './FilterMenu';
 import { groupTasksBy, sortTasksBy } from '../lib/utils';
+import type { Task } from '../types';
 
 interface TodoContainerProps {
   selectedTaskId: string | null;
@@ -23,9 +24,38 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
   const [quickAddText, setQuickAddText] = useState('');
 
   const activeList = lists.find((l) => l.id === activeListId);
-  const activeSections = sections.filter((s) => s.listId === activeListId).sort((a, b) => a.order - b.order);
-  const listTasks = tasks.filter((t) => activeSections.some((s) => s.id === t.sectionId));
+  const activeSections = useMemo(
+    () => sections.filter((s) => s.listId === activeListId).sort((a, b) => a.order - b.order),
+    [sections, activeListId]
+  );
+  const listTasks = useMemo(
+    () => tasks.filter((t) => activeSections.some((s) => s.id === t.sectionId)),
+    [tasks, activeSections]
+  );
   const isGrouped = activeList ? activeList.groupBy !== 'sequence' : false;
+
+  // Recomputing sort/group on every render (e.g. every keystroke while typing
+  // in the quick-add input below) would hand GroupedTaskList/TaskSection a
+  // brand-new array each time, defeating any memoization on those components
+  // and re-rendering every row regardless of whether the underlying data
+  // actually changed.
+  const groupedGroups = useMemo(() => {
+    if (!activeList || !isGrouped) return [];
+    const base = hideCompleted ? listTasks.filter((t) => !t.completed) : listTasks;
+    return groupTasksBy(base, activeList.groupBy, tags).map((group) => ({
+      ...group,
+      tasks: sortTasksBy(group.tasks, activeList.sortBy, tags),
+    }));
+  }, [activeList, isGrouped, hideCompleted, listTasks, tags]);
+
+  const sectionTasks = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    if (!activeList) return map;
+    activeSections.forEach((section) => {
+      map.set(section.id, sortTasksBy(tasks.filter((t) => t.sectionId === section.id), activeList.sortBy, tags));
+    });
+    return map;
+  }, [activeSections, tasks, activeList, tags]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -115,11 +145,7 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
             </button>
           </div>
           <GroupedTaskList
-            groups={groupTasksBy(
-              hideCompleted ? listTasks.filter((t) => !t.completed) : listTasks,
-              activeList.groupBy,
-              tags
-            ).map((group) => ({ ...group, tasks: sortTasksBy(group.tasks, activeList.sortBy, tags) }))}
+            groups={groupedGroups}
             lists={lists}
             currentListId={activeList.id}
             selectedTaskId={selectedTaskId}
@@ -132,7 +158,7 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
             <TaskSection
               key={section.id}
               section={section}
-              tasks={sortTasksBy(tasks.filter((t) => t.sectionId === section.id), activeList.sortBy, tags)}
+              tasks={sectionTasks.get(section.id) ?? []}
               lists={lists}
               hideCompleted={hideCompleted}
               selectedTaskId={selectedTaskId}

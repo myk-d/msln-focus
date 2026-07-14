@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Flag, GripVertical, MoreHorizontal, Pin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
-import { usePomodoroContext } from '../context/PomodoroContext';
+import { usePomodoroActions } from '../context/PomodoroContext';
 import { Checkbox } from './ui/Checkbox';
 import { TaskContextMenu } from './TaskContextMenu';
 import { PRIORITY_META, TAG_COLOR_META, formatDueDate, isOverdue } from '../lib/utils';
@@ -19,7 +19,9 @@ interface TaskRowProps {
   onSelect: (taskId: string) => void;
 }
 
-export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: TaskRowProps) {
+// Memoized so selecting a different task (which changes `isSelected` for at
+// most two rows) doesn't re-render every other row in the list too.
+export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSelected, onSelect }: TaskRowProps) {
   const { t } = useTranslation();
   const {
     tags,
@@ -35,7 +37,7 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
     toggleTaskTag,
     togglePin,
   } = useTaskStoreContext();
-  const { startForTask } = usePomodoroContext();
+  const { startForTask } = usePomodoroActions();
   const navigate = useNavigate();
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -166,4 +168,4 @@ export function TaskRow({ task, lists, currentListId, isSelected, onSelect }: Ta
       </div>
     </div>
   );
-}
+});

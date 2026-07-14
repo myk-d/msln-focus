@@ -41,6 +41,7 @@ function normalizeTask(task: Task): Task {
     recurrence: task.recurrence ?? null,
     recurrenceAnchorDate: task.recurrenceAnchorDate ?? null,
     autoCompleteWithSubtasks: task.autoCompleteWithSubtasks ?? false,
+    completedAt: task.completedAt ?? null,
     updatedAt: task.updatedAt ?? task.createdAt,
   };
 }
@@ -177,6 +178,7 @@ export function useTaskStore() {
         recurrence: null,
         recurrenceAnchorDate: null,
         autoCompleteWithSubtasks: false,
+        completedAt: null,
         tagIds: [],
         subtasks: [],
         order: nextOrder(siblings),
@@ -201,10 +203,10 @@ export function useTaskStore() {
         if (t.id !== id) return t;
         if (!t.completed && t.recurrence && t.dueDate && t.recurrenceAnchorDate) {
           const next = computeNextOccurrenceDate(t.dueDate, t.recurrenceAnchorDate, t.recurrence);
-          if (next) return { ...t, dueDate: next, updatedAt: Date.now() };
-          return { ...t, completed: true, recurrence: null, recurrenceAnchorDate: null, updatedAt: Date.now() };
+          if (next) return { ...t, dueDate: next, completedAt: Date.now(), updatedAt: Date.now() };
+          return { ...t, completed: true, recurrence: null, recurrenceAnchorDate: null, completedAt: Date.now(), updatedAt: Date.now() };
         }
-        return { ...t, completed: !t.completed, updatedAt: Date.now() };
+        return { ...t, completed: !t.completed, completedAt: !t.completed ? Date.now() : null, updatedAt: Date.now() };
       })
     );
   };

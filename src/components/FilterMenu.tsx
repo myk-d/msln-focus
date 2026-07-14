@@ -33,7 +33,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
       </button>
 
       {open && (
-        <div className={`${popoverClass} absolute right-0 top-8 z-20 w-56 p-1 text-sm`}>
+        <div className={`${popoverClass} absolute left-0 top-8 z-20 w-56 p-1 text-sm sm:left-auto sm:right-0`}>
           <div className="relative">
             <button
               onClick={() => setSubOpen((v) => (v === 'group' ? null : 'group'))}

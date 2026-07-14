@@ -35,6 +35,12 @@ export interface Task {
   // When true and there's at least one subtask, `completed` is kept in sync
   // with "every subtask is completed" on every subtask add/toggle/delete.
   autoCompleteWithSubtasks: boolean;
+  // Timestamp of the most recent completion (set on every completion,
+  // including a recurring task's silent advance to its next occurrence;
+  // cleared back to null if a non-recurring completion is undone). Used for
+  // the stats page's completion-history chart — `updatedAt` can't serve this
+  // purpose since it changes on any edit, not just completion.
+  completedAt: number | null;
   tagIds: string[];
   subtasks: Subtask[];
   order: number;
@@ -119,4 +125,8 @@ export interface PomodoroStats {
   todayFocusMinutes: number;
   totalSessions: number;
   totalFocusMinutes: number;
+  // Daily archive, keyed by 'YYYY-MM-DD' — populated as each day rolls over
+  // (see normalizeStatsForToday in lib/utils.ts), used for the stats page's
+  // trend charts.
+  history: Record<string, { sessions: number; focusMinutes: number }>;
 }

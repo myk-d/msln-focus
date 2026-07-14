@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFirestoreValue } from './useFirestoreValue';
 import { useFirestoreCollection } from './useFirestoreCollection';
 import { FirebaseFactory } from '../config/firebase.factory';
@@ -56,6 +56,7 @@ const DEFAULT_STATS: PomodoroStats = {
   todayFocusMinutes: 0,
   totalSessions: 0,
   totalFocusMinutes: 0,
+  history: {},
 };
 
 function durationFor(phase: PomodoroPhase, settings: PomodoroSettings): number {
@@ -140,6 +141,10 @@ export function usePomodoro() {
       setPhase(nextPhase);
       setRawTimeLeft(durationFor(nextPhase, settings));
     } else {
+      // A long break finishing marks the end of a cycle — the session-count
+      // dots should clear for the new one. A short break finishing is still
+      // mid-cycle, so sessionsInCycle stays as-is.
+      if (phase === 'longBreak') setSessionsInCycle(0);
       setPhase('focus');
       setRawTimeLeft(durationFor('focus', settings));
     }
@@ -168,11 +173,22 @@ export function usePomodoro() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, rawTimeLeft]);
 
-  const start = () => {
-    setRawTimeLeft(timeLeft);
+  // `startForTask` is consumed far from the Pomodoro page itself (every
+  // TaskRow, TaskDetailPanel — via a narrower context, see PomodoroContext.tsx)
+  // specifically so those components don't re-render every second the timer
+  // ticks. That only works if `startForTask` (and `start`, which it calls) is
+  // referentially stable across renders — reading `timeLeft` through a ref
+  // instead of closing over it directly lets `start` stay a stable
+  // `useCallback` with an empty dep array while still using the latest value.
+  const timeLeftRef = useRef(timeLeft);
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
+  const start = useCallback(() => {
+    setRawTimeLeft(timeLeftRef.current);
     setStarted(true);
     setIsActive(true);
-  };
+  }, []);
   const pause = () => setIsActive(false);
   const toggle = () => (isActive ? pause() : start());
   const reset = () => {
@@ -181,10 +197,13 @@ export function usePomodoro() {
     setActiveTask(null);
     setActivePresetId(null);
   };
-  const startForTask = (taskId: string) => {
-    setActiveTask(taskId);
-    start();
-  };
+  const startForTask = useCallback(
+    (taskId: string) => {
+      setActiveTask(taskId);
+      start();
+    },
+    [start]
+  );
 
   // Applies a preset's durations directly rather than going through start()
   // (which derives `timeLeft` from the *current* `settings`/`phase` closure —
@@ -226,6 +245,7 @@ export function usePomodoro() {
       const nextPhase: PomodoroPhase = nextCount % settings.sessionsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak';
       setPhase(nextPhase);
     } else {
+      if (phase === 'longBreak') setSessionsInCycle(0);
       setPhase('focus');
     }
     setIsActive(false);

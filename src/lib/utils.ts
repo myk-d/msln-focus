@@ -31,10 +31,19 @@ export function getLocalDateKey(d: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// Lazy, derive-on-read rollover: checked on every hydration and before each
+// stat increment (see usePomodoro.ts). Archives the outgoing day's tally into
+// `history` before resetting today's counters, rather than just discarding
+// it, so the stats page can chart daily trends.
 export function normalizeStatsForToday(stats: PomodoroStats): PomodoroStats {
   const todayKey = getLocalDateKey(new Date());
-  if (stats.todayDate === todayKey) return stats;
-  return { ...stats, todayDate: todayKey, todaySessions: 0, todayFocusMinutes: 0 };
+  const history = stats.history ?? {};
+  if (stats.todayDate === todayKey) return { ...stats, history };
+  const nextHistory =
+    stats.todayDate && stats.todaySessions > 0
+      ? { ...history, [stats.todayDate]: { sessions: stats.todaySessions, focusMinutes: stats.todayFocusMinutes } }
+      : history;
+  return { ...stats, todayDate: todayKey, todaySessions: 0, todayFocusMinutes: 0, history: nextHistory };
 }
 
 export function formatDueDate(dueDate: string): string {
@@ -341,4 +350,63 @@ export function minutesToTime(minutes: number): string {
     .padStart(2, '0');
   const m = (snapped % 60).toString().padStart(2, '0');
   return `${h}:${m}`;
+}
+
+// Stats page derivations — each builds a contiguous `days`-day range ending
+// today, so idle days show as an explicit 0 rather than a gap in the chart.
+function lastNDayKeys(days: number): string[] {
+  const today = dayjs();
+  return Array.from({ length: days }, (_, i) => today.subtract(days - 1 - i, 'day').format('YYYY-MM-DD'));
+}
+
+export interface DailyStatPoint {
+  date: string;
+  label: string;
+  value: number;
+}
+
+export function getFocusMinutesHistory(stats: PomodoroStats, days: number): DailyStatPoint[] {
+  return lastNDayKeys(days).map((date) => ({
+    date,
+    label: dayjs(date).format('D MMM'),
+    value: date === stats.todayDate ? stats.todayFocusMinutes : (stats.history[date]?.focusMinutes ?? 0),
+  }));
+}
+
+export function getTasksCompletedHistory(tasks: Task[], days: number): DailyStatPoint[] {
+  const counts = new Map<string, number>();
+  tasks.forEach((t) => {
+    if (!t.completedAt) return;
+    const key = getLocalDateKey(new Date(t.completedAt));
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  });
+  return lastNDayKeys(days).map((date) => ({
+    date,
+    label: dayjs(date).format('D MMM'),
+    value: counts.get(date) ?? 0,
+  }));
+}
+
+export interface NamedStatPoint {
+  key: string;
+  label: string;
+  value: number;
+}
+
+export function getTasksByPriority(tasks: Task[]): NamedStatPoint[] {
+  return PRIORITY_ORDER.filter((p) => p !== 'none')
+    .map((p) => ({ key: p, label: i18n.t(PRIORITY_META[p].labelKey), value: tasks.filter((t) => t.priority === p).length }))
+    .filter((point) => point.value > 0);
+}
+
+export function getTasksByTag(tasks: Task[], tags: Tag[]): (NamedStatPoint & { color: TagColor })[] {
+  return tags
+    .map((tag) => ({
+      key: tag.id,
+      label: tag.name,
+      value: tasks.filter((t) => t.tagIds.includes(tag.id)).length,
+      color: tag.color,
+    }))
+    .filter((point) => point.value > 0)
+    .sort((a, b) => b.value - a.value);
 }
