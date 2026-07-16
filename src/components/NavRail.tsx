@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bell, BellOff, CalendarDays, ChartColumn, ListTodo, LoaderCircle, LogOut, Target, Timer, User } from 'lucide-react';
+import { Bell, BellOff, CalendarDays, ListTodo, LoaderCircle, LogOut, Target, Timer, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useClickOutside } from '../hooks/useClickOutside';
@@ -119,7 +119,6 @@ export function NavRail() {
     { to: '/tasks', label: t('nav.tasks'), icon: ListTodo },
     { to: '/calendar', label: t('nav.calendar'), icon: CalendarDays },
     { to: '/pomodoro', label: t('nav.pomodoro'), icon: Timer },
-    { to: '/stats', label: t('nav.stats'), icon: ChartColumn },
   ];
 
   return (

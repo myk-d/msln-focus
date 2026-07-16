@@ -13,7 +13,6 @@ import { useNotificationReminders } from '../hooks/useNotificationReminders';
 const TasksPage = lazy(() => import('./TasksPage').then((m) => ({ default: m.TasksPage })));
 const CalendarPage = lazy(() => import('./CalendarPage').then((m) => ({ default: m.CalendarPage })));
 const PomodoroPage = lazy(() => import('./PomodoroPage').then((m) => ({ default: m.PomodoroPage })));
-const StatsPage = lazy(() => import('./StatsPage').then((m) => ({ default: m.StatsPage })));
 // Its own lazy chunk (not statically imported here) so FocusDashboard doesn't
 // pull in PomodoroTimer eagerly — it only loads once a pip window is
 // actually open, same as visiting /pomodoro would.
@@ -32,7 +31,6 @@ export function FocusDashboard() {
       '/tasks': t('nav.tasks'),
       '/calendar': t('nav.calendar'),
       '/pomodoro': t('nav.pomodoro'),
-      '/stats': t('nav.stats'),
     };
     const pageTitle = pageTitles[location.pathname];
     document.title = pageTitle ? `${pageTitle} · Focus-Pocus` : 'Focus-Pocus';
@@ -53,7 +51,6 @@ export function FocusDashboard() {
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/pomodoro" element={<PomodoroPage />} />
-            <Route path="/stats" element={<StatsPage />} />
             <Route path="*" element={<Navigate to="/tasks" replace />} />
           </Routes>
         </Suspense>

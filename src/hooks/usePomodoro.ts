@@ -56,7 +56,6 @@ const DEFAULT_STATS: PomodoroStats = {
   todayFocusMinutes: 0,
   totalSessions: 0,
   totalFocusMinutes: 0,
-  history: {},
 };
 
 function durationFor(phase: PomodoroPhase, settings: PomodoroSettings): number {
