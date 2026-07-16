@@ -1,7 +1,14 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { usePomodoro } from '../hooks/usePomodoro';
+import { useDocumentPiP } from '../hooks/useDocumentPiP';
 
-type PomodoroValue = ReturnType<typeof usePomodoro>;
+// Document PiP lives here (not in PomodoroPage) so the open pip window
+// survives navigating away from /pomodoro — it's a real OS-level window,
+// independent of any one page's mount lifetime. Previously, navigating to
+// another page unmounted PomodoroPage's own useDocumentPiP() call, orphaning
+// the still-open native pip window (left blank) while the app forgot it
+// existed and showed the full timer on the page again.
+type PomodoroValue = ReturnType<typeof usePomodoro> & ReturnType<typeof useDocumentPiP>;
 
 const PomodoroContext = createContext<PomodoroValue | null>(null);
 
@@ -18,9 +25,11 @@ const PomodoroActionsContext = createContext<PomodoroActions | null>(null);
 
 export function PomodoroProvider({ children }: { children: ReactNode }) {
   const pomodoro = usePomodoro();
+  const pip = useDocumentPiP();
+  const value: PomodoroValue = { ...pomodoro, ...pip };
   const actions = useMemo(() => ({ startForTask: pomodoro.startForTask }), [pomodoro.startForTask]);
   return (
-    <PomodoroContext.Provider value={pomodoro}>
+    <PomodoroContext.Provider value={value}>
       <PomodoroActionsContext.Provider value={actions}>{children}</PomodoroActionsContext.Provider>
     </PomodoroContext.Provider>
   );

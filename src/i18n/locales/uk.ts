@@ -50,7 +50,7 @@ const uk = {
     priority: 'Пріоритет',
     date: 'Дата',
     subtasks: 'Підзавдання',
-    autoCompleteWithSubtasks: 'Завершувати, коли всі підзавдання виконано',
+    autoCompleteWithSubtasks: 'Завершити, коли всі виконано',
     description: 'Опис',
     descriptionPlaceholder: 'Додати опис...',
     runFocus: 'Запустити Focus',

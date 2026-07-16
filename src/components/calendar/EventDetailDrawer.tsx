@@ -6,6 +6,7 @@ import { RecurrencePicker } from '../ui/RecurrencePicker';
 import { Switch } from '../ui/Switch';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
+import { useAutoResizeTextarea } from '../../hooks/useAutoResizeTextarea';
 import { inputClass } from '../../lib/ui';
 import { TAG_COLOR_META, TAG_COLOR_ORDER, minutesToTime, timeToMinutes } from '../../lib/utils';
 import type { CalendarEvent, RecurrenceRule, TagColor } from '../../types';
@@ -43,7 +44,9 @@ export function EventDetailDrawer({
   ];
   const initialStart = event?.startTime ?? defaultStartTime ?? '09:00';
   const [title, setTitle] = useState(event?.title ?? '');
+  const titleRef = useAutoResizeTextarea(title);
   const [description, setDescription] = useState(event?.description ?? '');
+  const descriptionRef = useAutoResizeTextarea(description);
   const [date, setDate] = useState(event?.date ?? defaultDate);
   const [allDay, setAllDay] = useState(event?.allDay ?? false);
   const [startTime, setStartTime] = useState(initialStart);
@@ -181,7 +184,7 @@ export function EventDetailDrawer({
   return (
     <>
       <div onClick={handleClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-100">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-1/2 md:max-w-2xl">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">
           {event ? t('calendar.event') : t('calendar.newEvent')}
@@ -202,12 +205,20 @@ export function EventDetailDrawer({
         </div>
       </div>
 
-      <input
+      <textarea
+        ref={titleRef}
+        rows={1}
         autoFocus
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            (e.target as HTMLTextAreaElement).blur();
+          }
+        }}
         placeholder={t('calendar.eventTitlePlaceholder')}
-        className={`${inputClass} mb-4 w-full text-base font-semibold`}
+        className={`${inputClass} mb-4 w-full resize-none overflow-hidden text-base font-semibold`}
       />
 
       <div className="flex flex-col gap-4">
@@ -257,7 +268,15 @@ export function EventDetailDrawer({
             <input
               type="time"
               value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              onChange={(e) => {
+                const nextStart = e.target.value;
+                setStartTime(nextStart);
+                // Keep end time valid by default when it'd no longer be after
+                // the new start — the user can still edit it manually after.
+                if (timeToMinutes(nextStart) >= timeToMinutes(endTime)) {
+                  setEndTime(minutesToTime(timeToMinutes(nextStart) + 60));
+                }
+              }}
               className={`${inputClass} flex-1`}
             />
             <span className="text-stone-400">–</span>
@@ -314,11 +333,12 @@ export function EventDetailDrawer({
         <div>
           <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.description')}</div>
           <textarea
+            ref={descriptionRef}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t('tasks.descriptionPlaceholder')}
             rows={4}
-            className={`${inputClass} w-full resize-none`}
+            className={`${inputClass} w-full resize-none overflow-hidden`}
           />
         </div>
 

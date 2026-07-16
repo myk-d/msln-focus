@@ -11,9 +11,60 @@ interface SubtaskListProps {
   subtasks: Subtask[];
 }
 
+function SubtaskRow({
+  subtask,
+  onToggle,
+  onUpdate,
+  onDelete,
+}: {
+  subtask: Subtask;
+  onToggle: () => void;
+  onUpdate: (text: string) => void;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(subtask.text);
+
+  const commitEdit = () => {
+    const trimmed = draft.trim();
+    if (trimmed) onUpdate(trimmed);
+    else setDraft(subtask.text);
+    setEditing(false);
+  };
+
+  return (
+    <div className="group flex items-center gap-2">
+      <Checkbox size="sm" checked={subtask.completed} onChange={onToggle} />
+      {editing ? (
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commitEdit}
+          onKeyDown={(e) => e.key === 'Enter' && commitEdit()}
+          className="flex-1 rounded bg-stone-50 px-1 text-sm outline-none ring-1 ring-brand-400"
+        />
+      ) : (
+        <button
+          onClick={() => {
+            setDraft(subtask.text);
+            setEditing(true);
+          }}
+          className={`flex-1 truncate text-left text-sm ${subtask.completed ? 'text-stone-400 line-through' : 'text-stone-600'}`}
+        >
+          {subtask.text}
+        </button>
+      )}
+      <button onClick={onDelete} className="text-stone-300 hover:text-red-500 md:hidden md:group-hover:block">
+        <X size={13} />
+      </button>
+    </div>
+  );
+}
+
 export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
   const { t } = useTranslation();
-  const { addSubtask, toggleSubtask, deleteSubtask } = useTaskStoreContext();
+  const { addSubtask, updateSubtask, toggleSubtask, deleteSubtask } = useTaskStoreContext();
   const [newSubtask, setNewSubtask] = useState('');
   const confirm = useConfirm();
 
@@ -31,18 +82,13 @@ export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
   return (
     <div className="flex flex-col gap-1.5">
       {subtasks.map((st) => (
-        <div key={st.id} className="group flex items-center gap-2">
-          <Checkbox size="sm" checked={st.completed} onChange={() => toggleSubtask(taskId, st.id)} />
-          <span className={`flex-1 text-sm ${st.completed ? 'text-stone-400 line-through' : 'text-stone-600'}`}>
-            {st.text}
-          </span>
-          <button
-            onClick={() => handleDelete(st)}
-            className="text-stone-300 hover:text-red-500 md:hidden md:group-hover:block"
-          >
-            <X size={13} />
-          </button>
-        </div>
+        <SubtaskRow
+          key={st.id}
+          subtask={st}
+          onToggle={() => toggleSubtask(taskId, st.id)}
+          onUpdate={(text) => updateSubtask(taskId, st.id, text)}
+          onDelete={() => handleDelete(st)}
+        />
       ))}
       <div className="flex items-center gap-1">
         <input

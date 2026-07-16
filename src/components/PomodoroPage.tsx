@@ -1,14 +1,12 @@
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useDocumentPiP } from '../hooks/useDocumentPiP';
 import { usePomodoroContext } from '../context/PomodoroContext';
 import { PomodoroTimer } from './PomodoroTimer';
 import { PomodoroPresetList } from './PomodoroPresetList';
 
 export function PomodoroPage() {
   const { t } = useTranslation();
-  const { pipWindow, isSupported, openPiP, closePiP } = useDocumentPiP();
-  const { presets, activePresetId, isActive, runPreset, addPreset, updatePreset, deletePreset } = usePomodoroContext();
+  const { pipWindow, isSupported, openPiP, closePiP, presets, activePresetId, isActive, runPreset, addPreset, updatePreset, deletePreset } =
+    usePomodoroContext();
 
   return (
     <div className="flex h-full flex-col items-center overflow-y-auto px-6 py-10">
@@ -36,14 +34,6 @@ export function PomodoroPage() {
           )}
         </div>
       </div>
-
-      {pipWindow &&
-        createPortal(
-          <div className="flex h-dvh items-center justify-center p-3">
-            <PomodoroTimer variant="pip" />
-          </div>,
-          pipWindow.document.body
-        )}
     </div>
   );
 }

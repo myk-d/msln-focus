@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Flag, GripVertical, MoreHorizontal, Pin } from 'lucide-react';
+import { AlignLeft, Flag, GripVertical, MoreHorizontal, Pin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { usePomodoroActions } from '../context/PomodoroContext';
@@ -87,8 +87,9 @@ export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSel
             {task.pinned && <Pin size={12} className="shrink-0 rotate-45 text-stone-400" />}
           </div>
 
-          {(task.dueDate || task.tagIds.length > 0 || task.subtasks.length > 0) && (
+          {(task.dueDate || task.tagIds.length > 0 || task.subtasks.length > 0 || task.description.trim()) && (
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {task.description.trim() && <AlignLeft size={12} className="shrink-0 text-stone-400" aria-label={t('tasks.description')} />}
               {task.dueDate && (
                 <span
                   className={`rounded-full px-2 py-0.5 text-xs ${dueOverdue ? 'bg-red-50 text-red-500' : 'bg-stone-100 text-stone-500'}`}

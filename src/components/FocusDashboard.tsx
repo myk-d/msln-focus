@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { NavRail } from './NavRail';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { useEventStoreContext } from '../context/EventStoreContext';
+import { usePomodoroContext } from '../context/PomodoroContext';
 import { useNotificationReminders } from '../hooks/useNotificationReminders';
 
 // Route-level code splitting — each page (and its own heavy dependencies,
@@ -13,12 +14,17 @@ const TasksPage = lazy(() => import('./TasksPage').then((m) => ({ default: m.Tas
 const CalendarPage = lazy(() => import('./CalendarPage').then((m) => ({ default: m.CalendarPage })));
 const PomodoroPage = lazy(() => import('./PomodoroPage').then((m) => ({ default: m.PomodoroPage })));
 const StatsPage = lazy(() => import('./StatsPage').then((m) => ({ default: m.StatsPage })));
+// Its own lazy chunk (not statically imported here) so FocusDashboard doesn't
+// pull in PomodoroTimer eagerly — it only loads once a pip window is
+// actually open, same as visiting /pomodoro would.
+const PipPortal = lazy(() => import('./PipPortal').then((m) => ({ default: m.PipPortal })));
 
 export function FocusDashboard() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const { tasks } = useTaskStoreContext();
   const { events } = useEventStoreContext();
+  const { pipWindow } = usePomodoroContext();
   useNotificationReminders(tasks, events);
 
   useEffect(() => {
@@ -52,6 +58,11 @@ export function FocusDashboard() {
           </Routes>
         </Suspense>
       </div>
+      {pipWindow && (
+        <Suspense fallback={null}>
+          <PipPortal pipWindow={pipWindow} />
+        </Suspense>
+      )}
     </div>
   );
 }

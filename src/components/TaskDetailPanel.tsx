@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { usePomodoroActions } from '../context/PomodoroContext';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea';
 import { Checkbox } from './ui/Checkbox';
 import { PriorityPicker } from './ui/PriorityPicker';
 import { TagPicker } from './ui/TagPicker';
@@ -47,7 +48,9 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   useBodyScrollLock(true);
 
   const [titleDraft, setTitleDraft] = useState(task.text);
+  const titleRef = useAutoResizeTextarea(titleDraft);
   const [descriptionDraft, setDescriptionDraft] = useState(task.description);
+  const descriptionRef = useAutoResizeTextarea(descriptionDraft);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const commitTitle = () => {
@@ -61,7 +64,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-stone-200 bg-white md:w-100">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-stone-200 bg-white md:w-1/2 md:max-w-2xl">
       {/* Header sits outside the scrolling body so its "..." popover menu can't
           get clipped — a scrollable ancestor clips absolutely-positioned
           descendants regardless of z-index, since setting overflow-y non-visible
@@ -129,12 +132,19 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
         <div className="mt-1.5">
           <Checkbox checked={task.completed} onChange={() => toggleTaskCompleted(task.id)} />
         </div>
-        <input
+        <textarea
+          ref={titleRef}
+          rows={1}
           value={titleDraft}
           onChange={(e) => setTitleDraft(e.target.value)}
           onBlur={commitTitle}
-          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-          className={`flex-1 border-none px-0 py-0 text-lg font-semibold text-stone-800 outline-none focus:ring-0 ${
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              (e.target as HTMLTextAreaElement).blur();
+            }
+          }}
+          className={`flex-1 resize-none overflow-hidden border-none px-0 py-0 text-lg font-semibold text-stone-800 outline-none focus:ring-0 ${
             task.completed ? 'text-stone-400 line-through' : ''
           }`}
         />
@@ -195,12 +205,13 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
         <div>
           <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.description')}</div>
           <textarea
+            ref={descriptionRef}
             value={descriptionDraft}
             onChange={(e) => setDescriptionDraft(e.target.value)}
             onBlur={commitDescription}
             placeholder={t('tasks.descriptionPlaceholder')}
             rows={5}
-            className={`${inputClass} w-full resize-none`}
+            className={`${inputClass} w-full resize-none overflow-hidden`}
           />
         </div>
       </div>

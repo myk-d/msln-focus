@@ -295,6 +295,18 @@ export function useTaskStore() {
     );
   };
 
+  const updateSubtask = (taskId: string, subtaskId: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? { ...t, subtasks: t.subtasks.map((st) => (st.id === subtaskId ? { ...st, text: trimmed } : st)), updatedAt: Date.now() }
+          : t
+      )
+    );
+  };
+
   const toggleSubtask = (taskId: string, subtaskId: string) => {
     setTasks((prev) =>
       prev.map((t) => {
@@ -411,6 +423,7 @@ export function useTaskStore() {
     moveTask,
     reorderSection,
     addSubtask,
+    updateSubtask,
     toggleSubtask,
     deleteSubtask,
     setAutoCompleteWithSubtasks,
