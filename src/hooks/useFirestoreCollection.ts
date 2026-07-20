@@ -16,10 +16,10 @@ function omitUserId<T>(doc: WithUser<T>): T {
 // update the array exactly as before, unaware persistence now happens against
 // a flat Firestore collection scoped by a `userId` field. Only mounts inside
 // the authenticated tree (see AuthGate), so `user` is expected to be set.
-export function useFirestoreCollection<T extends { id: string }>(collectionName: string, seed: T[]) {
+export function useFirestoreCollection<T extends { id: string }>(collectionName: string, initialValue: T[] = []) {
   const { user } = useAuth();
   const uid = user?.uid ?? null;
-  const [value, setValue] = useState<T[]>(seed);
+  const [value, setValue] = useState<T[]>(initialValue);
   const [hydrated, setHydrated] = useState(false);
   const lastSyncedRef = useRef<WithUser<T>[]>([]);
   const factoryRef = useRef(new FirebaseFactory<WithUser<T>>(firestoreDb, collectionName));
@@ -31,7 +31,7 @@ export function useFirestoreCollection<T extends { id: string }>(collectionName:
       const docs = await factoryRef.current.query(where('userId', '==', uid));
       if (cancelled) return;
       lastSyncedRef.current = docs;
-      if (docs.length > 0) setValue(docs.map(omitUserId));
+      setValue(docs.map(omitUserId));
       setHydrated(true);
     })();
     return () => {

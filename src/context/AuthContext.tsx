@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
 import { firebaseAuth, googleProvider } from '../config/firebase.config';
 
+import { ensureUserInitialized } from '../lib/userInitializer';
+
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
@@ -16,7 +18,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(firebaseAuth, (u) => {
+    return onAuthStateChanged(firebaseAuth, async (u) => {
+      if (u) {
+        setLoading(true);
+        try {
+          await ensureUserInitialized(u.uid);
+        } catch (err) {
+          console.error('Error initializing user:', err);
+        }
+      }
       setUser(u);
       setLoading(false);
     });

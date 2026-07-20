@@ -16,18 +16,6 @@ function deriveCompleted(autoComplete: boolean, subtasks: Subtask[], fallback: b
   return autoComplete && subtasks.length > 0 ? subtasks.every((s) => s.completed) : fallback;
 }
 
-function seedData(): { lists: TaskList[]; sections: Section[]; tasks: Task[] } {
-  const listId = genId();
-  const sectionId = genId();
-  const now = Date.now();
-  return {
-    lists: [
-      { id: listId, name: i18n.t('tasks.defaultListName'), isDefault: true, createdAt: now, groupBy: 'sequence', sortBy: 'sequence' },
-    ],
-    sections: [{ id: sectionId, listId, name: i18n.t('tasks.defaultSectionName'), order: 0, createdAt: now }],
-    tasks: [],
-  };
-}
 
 // Backfills fields added to the Task/TaskList shape after some records were
 // already persisted to IndexedDB, so older rows don't crash consumers expecting them.
@@ -54,14 +42,13 @@ function normalizeList(list: TaskList): TaskList {
 }
 
 export function useTaskStore() {
-  const seed = useMemo(() => seedData(), []);
-  const [rawLists, setRawLists] = useFirestoreCollection<TaskList>(firebaseCollections.lists, seed.lists);
+  const [rawLists, setRawLists] = useFirestoreCollection<TaskList>(firebaseCollections.lists);
   const lists = useMemo(() => rawLists.map(normalizeList), [rawLists]);
   const setLists = (updater: (prev: TaskList[]) => TaskList[]) => {
     setRawLists((prev) => updater(prev.map(normalizeList)));
   };
-  const [sections, setSections] = useFirestoreCollection<Section>(firebaseCollections.sections, seed.sections);
-  const [rawTasks, setRawTasks] = useFirestoreCollection<Task>(firebaseCollections.tasks, seed.tasks);
+  const [sections, setSections] = useFirestoreCollection<Section>(firebaseCollections.sections);
+  const [rawTasks, setRawTasks] = useFirestoreCollection<Task>(firebaseCollections.tasks);
   const tasks = useMemo(() => rawTasks.map(normalizeTask), [rawTasks]);
   // Normalizes `prev` before every mutation so updaters below never have to
   // account for stale pre-migration records missing newer Task fields.

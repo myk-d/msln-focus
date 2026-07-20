@@ -21,6 +21,7 @@ export const googleProvider = new GoogleAuthProvider();
 // lets FirebaseFactory's existing `.query()` do the scoping unmodified.
 // pomodoroSettings/pomodoroStats are singleton docs instead, keyed by uid.
 export const firebaseCollections = {
+	users: 'users',
 	lists: 'lists',
 	sections: 'sections',
 	tasks: 'tasks',

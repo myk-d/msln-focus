@@ -56,7 +56,7 @@ const uk = {
     unpin: 'Відкріпити',
     pin: 'Закріпити',
     subtasksAndDetails: 'Підзавдання та деталі',
-    moveTo: 'Перейти до',
+    moveTo: 'Перенести до',
     duplicate: 'Створити копію',
     addSubtaskPlaceholder: '+ підзавдання',
     rename: 'Перейменувати',
