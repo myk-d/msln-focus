@@ -30,4 +30,8 @@ export const firebaseCollections = {
 	events: 'events',
 	pomodoroSettings: 'pomodoroSettings',
 	pomodoroStats: 'pomodoroStats',
+	// Projects module — read with onSnapshot, never via useFirestoreCollection (the agent API writes here too).
+	projects: 'projects',
+	workItems: 'workItems',
+	workItemComments: 'workItemComments',
 };

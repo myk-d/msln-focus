@@ -83,3 +83,15 @@ Apply this pattern for any new state that depends on a collection that might not
 - Shared Tailwind class strings live in `src/lib/ui.ts` (`inputClass`, `popoverClass`, `menuItemClass`) — reuse these for new inputs/popovers/menu items instead of restyling inline.
 - Popovers close on outside-click via `useClickOutside(ref, onOutside)` (`src/hooks/useClickOutside.ts`), not `onBlur` — `onBlur` fires before a sibling element's `onClick` when that element steals focus, which silently drops the click (see `TagSidebarRow.tsx`'s color-swatch picker for the fix already applied once).
 - All Ukrainian-language UI strings/labels — match this when adding new UI text.
+
+## Agent API (`functions/`)
+
+Cloud Functions v2 (Express, one export `api`, `europe-west1`), reached through the Hosting rewrite `/api/**`. It is the tracker for the projects module (`projects`, `workItems`, `workItemComments` — flat, with `userId`, same convention as the rest) and is used by coding agents (the factory's `focus` adapter). Single owner: every document it writes gets `userId = FOCUS_OWNER_UID`.
+
+- Single source of truth for the API description: `functions/src/lib/spec.ts` → `GET /api/docs` (markdown, or `?format=json` with `version` + `hash`). Changing a route → update `spec.ts` and bump `API_VERSION`; `app.test.ts` fails if routes and spec diverge.
+- Data access goes through the `Store` interface (`lib/store.ts`): `firestore-store.ts` in production, `memory-store.ts` in tests. Queries are equality-only (no composite indexes); sorting happens in memory.
+- Items are addressed by ref `<KEY>-<number>` (`FOC-12`); numbers come from a transaction on `projects/{id}.nextNumber`. The UI must create items the same way (transaction), never pick numbers itself.
+- **The projects UI must not use `useFirestoreCollection`** for these collections: the API writes to them, and that hook's diff-sync would overwrite agent changes with stale local state. Read with `onSnapshot`, write single fields with `updateDoc`.
+- Commands: `npm --prefix functions test`, `npm --prefix functions run build`. Root ESLint ignores `functions/`.
+- Work item fields mirror Azure DevOps: `assignee` (`me`/`claude`/`antigravity`), `severity` (bugs only), `blockedBy` = predecessors (successors are derived), `related` (stored on one side, shown on both). Items created before a field existed are normalized on read (`normalizeItem` in `src/lib/projects.ts` and `functions/src/lib/store.ts`) — extend both when adding a field.
+- `description`, `reproSteps`, acceptance criteria and comments are markdown, rendered through `renderMarkdown` (marked + DOMPurify). Never render them with `dangerouslySetInnerHTML` without that sanitizer — agents write this text.

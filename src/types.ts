@@ -120,3 +120,61 @@ export interface PomodoroStats {
   totalSessions: number;
   totalFocusMinutes: number;
 }
+
+// ---- Projects module (also written by the agent API in functions/) ----
+
+export type WorkItemType = 'epic' | 'story' | 'task' | 'bug';
+export type WorkItemStatus = 'backlog' | 'todo' | 'in-progress' | 'in-review' | 'done' | 'cancelled';
+export type CommentAuthor = 'me' | 'claude' | 'antigravity';
+export type Assignee = CommentAuthor;
+// As in Azure DevOps: 1 — Critical … 4 — Low. Bugs only.
+export type Severity = '1-critical' | '2-high' | '3-medium' | '4-low';
+
+export interface Project {
+  id: string;
+  userId: string;
+  key: string;
+  name: string;
+  repo: string | null;
+  defaultBranch: string;
+  // Next item number; taken inside a transaction so the UI and the API never hand out the same number.
+  nextNumber: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface WorkItem {
+  id: string;
+  userId: string;
+  projectId: string;
+  number: number;
+  type: WorkItemType;
+  status: WorkItemStatus;
+  title: string;
+  description: string;
+  acceptanceCriteria: string[];
+  reproSteps: string;
+  priority: Priority;
+  parentId: string | null;
+  // Predecessors (ADO): ids of items that must be done first. Successors are derived.
+  blockedBy: string[];
+  // Related (ADO): stored on one side, shown on both.
+  related: string[];
+  assignee: Assignee | null;
+  severity: Severity | null;
+  labels: string[];
+  branch: string | null;
+  prUrl: string | null;
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface WorkItemComment {
+  id: string;
+  userId: string;
+  itemId: string;
+  author: CommentAuthor;
+  body: string;
+  createdAt: number;
+}
