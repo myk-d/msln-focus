@@ -29,3 +29,6 @@ dev-dist
 .env.production
 .env.local
 .env.*.local
+
+# Cloud Functions build output
+functions/lib
