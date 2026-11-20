@@ -22,12 +22,11 @@ const cardClass = 'flex w-full flex-col gap-1.5 rounded-lg border border-l-4 bor
 // Draggable card for the taskboard. The dragged copy is rendered by DragOverlay (ItemCardOverlay), so the
 // original stays in its cell, dimmed, and is never transformed (the scroller would clip a transformed one).
 export function ItemCard({ item, project, allItems, showParent = true, onSelect, rowKey }: ItemCardProps) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id, data: { rowKey, status: item.status } });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id, disabled: rowKey === undefined, data: { rowKey, status: item.status } });
   return (
     <button
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
+      {...(rowKey === undefined ? {} : { ...attributes, ...listeners })}
       onClick={() => onSelect(item.id)}
       style={{ borderLeftColor: TYPE_META[item.type].hex }}
       className={`${cardClass} ${isDragging ? 'opacity-40' : ''}`}

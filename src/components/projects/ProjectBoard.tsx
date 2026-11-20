@@ -5,6 +5,8 @@ import {
   DragOverlay,
   KeyboardCode,
   KeyboardSensor,
+  pointerWithin,
+  rectIntersection,
   MouseSensor,
   TouchSensor,
   useDndContext,
@@ -13,6 +15,7 @@ import {
   useSensors,
   type Announcements,
   type DragEndEvent,
+  type CollisionDetection,
   type DragStartEvent,
   type KeyboardCoordinateGetter,
   type ScreenReaderInstructions,
@@ -128,6 +131,10 @@ const rowKeyboardCoordinates: KeyboardCoordinateGetter = (event, { context: { ac
   return { x: rect.left + 8, y: rect.top + 8 };
 };
 
+// Pointer drags only count the cell under the pointer (so a drop over another row or the story column
+// returns the card); keyboard drags have no pointer and use the rect of the card moved by the coordinate getter.
+const collisionDetection: CollisionDetection = (args) => (args.pointerCoordinates ? pointerWithin(args) : rectIntersection(args));
+
 function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle, onSelect, onMove }: BoardViewProps & { onMove: (id: string, status: WorkItemStatus) => void }) {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -157,7 +164,11 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
     };
     return {
       onDragStart: ({ active }) => t('projects.dnd.pickedUp', { item: label(active.id), status: current(active.id) }),
-      onDragOver: ({ active, over }) => (over ? t('projects.dnd.movedTo', { item: label(active.id), status: statusLabel(over.id) }) : undefined),
+      // Skip the origin cell, otherwise it would overwrite the 'picked up' announcement right away.
+      onDragOver: ({ active, over }) =>
+        over && over.id !== cellId(String(active.data.current?.rowKey), active.data.current?.status as WorkItemStatus)
+          ? t('projects.dnd.movedTo', { item: label(active.id), status: statusLabel(over.id) })
+          : undefined,
       onDragEnd: ({ active, over }) => {
         if (!over) return t('projects.dnd.cancelled', { item: label(active.id) });
         const item = allItems.find((i) => i.id === active.id);
@@ -187,6 +198,7 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={collisionDetection}
       accessibility={{ announcements, screenReaderInstructions }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
