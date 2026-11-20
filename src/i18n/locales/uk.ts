@@ -250,6 +250,7 @@ const uk = {
       clear: 'Очистити фільтри',
     },
     search: {
+      placeholderShort: 'Пошук',
       placeholder: 'Пошук (/)',
       label: 'Пошук за назвою або номером',
     },

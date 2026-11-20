@@ -82,8 +82,8 @@ export function ProjectToolbar({ project, epics, filters, onChange, onClear, sho
   );
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="relative">
+    <div className="relative flex w-full flex-wrap items-center gap-2 md:w-auto">
+      <div className="relative w-full md:w-auto">
         <Search size={13} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-stone-400" />
         <input
           ref={searchRef}
@@ -95,15 +95,15 @@ export function ProjectToolbar({ project, epics, filters, onChange, onClear, sho
               e.currentTarget.blur();
             }
           }}
-          placeholder={t('projects.search.placeholder')}
+          placeholder={t(isDesktop ? 'projects.search.placeholder' : 'projects.search.placeholderShort')}
           aria-label={t('projects.search.label')}
-          className="w-44 rounded-lg border border-stone-200 bg-white py-1 pl-7 pr-2 text-xs outline-none focus:border-brand-400"
+          className="w-full rounded-lg md:w-44 border border-stone-200 bg-white py-1 pl-7 pr-2 text-xs outline-none focus:border-brand-400"
         />
       </div>
       {isDesktop ? (
         selects
       ) : (
-        <div ref={popoverRef} className="relative">
+        <div ref={popoverRef}>
           <button
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
@@ -113,7 +113,7 @@ export function ProjectToolbar({ project, epics, filters, onChange, onClear, sho
             {t('projects.filter.filters')}
             {count > 0 && <span className="rounded-full bg-brand-600 px-1.5 text-[10px] text-white">{count}</span>}
           </button>
-          {open && <div className={`${popoverClass} absolute left-0 top-full z-40 mt-1 flex w-60 flex-col gap-2 p-3`}>{selects}</div>}
+          {open && <div className={`${popoverClass} absolute left-0 top-full z-40 mt-1 flex w-60 max-w-full flex-col gap-2 p-3`}>{selects}</div>}
         </div>
       )}
       {hasActiveFilters(filters) && (

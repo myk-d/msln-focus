@@ -252,6 +252,7 @@ const en: Translations = {
       clear: 'Clear filters',
     },
     search: {
+      placeholderShort: 'Search',
       placeholder: 'Search (/)',
       label: 'Search by title or ref',
     },
