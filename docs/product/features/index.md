@@ -13,7 +13,7 @@ Status: shipped / partial / idea. Spec file: none yet. Epic: Focus has no epics 
 | Pomodoro timer, settings, task link | shipped | `/pomodoro`, `PomodoroPage.tsx`, `PomodoroTimer.tsx`, `usePomodoro.ts` | — | — |
 | Pomodoro presets | shipped | `PomodoroPresetList.tsx` | — | — |
 | Pomodoro Picture-in-Picture | shipped | `PipPortal.tsx`, `useDocumentPiP.ts` | — | — |
-| Projects board (kanban by status, drag between columns) | partial | `/projects`, `src/components/projects/ProjectBoard.tsx`, `useProjectsStore.ts` | — | — |
+| Projects board (kanban by status, drag between columns) | partial | `/projects`, `src/components/projects/ProjectBoard.tsx`, `useProjectsStore.ts` | [projects-taskboard](projects-taskboard.md) | FOC-2 |
 | Work item detail (fields, markdown, children, links) | shipped | `ItemDetailPanel.tsx`, `fields.tsx` | — | — |
 | Work item comments | shipped | `ItemDetailPanel.tsx` | — | — |
 | New project (key, name, repo) | shipped | `NewProjectForm.tsx`, `ProjectsPage.tsx` | — | — |
