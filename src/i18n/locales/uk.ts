@@ -240,6 +240,19 @@ const uk = {
     allTypes: 'Усі',
     showCancelled: 'Показати скасовані',
     hideCancelled: 'Сховати скасовані',
+    filter: {
+      filters: 'Фільтри',
+      type: 'Тип',
+      assignee: 'Виконавець',
+      epic: 'Епік',
+      all: 'Усі',
+      unassigned: 'Без виконавця',
+      clear: 'Очистити фільтри',
+    },
+    search: {
+      placeholder: 'Пошук (/)',
+      label: 'Пошук за назвою або номером',
+    },
     board: {
       storyColumn: 'Історія',
       noStory: 'Без історії',
@@ -249,6 +262,7 @@ const uk = {
       expandAll: 'Розгорнути всі',
       progress: '{{done}} з {{total}} виконано',
       empty: 'Тут ще немає елементів. Додайте першу історію.',
+      noResults: 'Нічого не знайдено',
       emptyStory: 'У цій історії ще немає завдань',
     },
     dnd: {

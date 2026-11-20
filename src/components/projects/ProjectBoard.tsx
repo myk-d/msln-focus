@@ -20,20 +20,21 @@ import {
   type KeyboardCoordinateGetter,
   type ScreenReaderInstructions,
 } from '@dnd-kit/core';
-import { ChevronsDownUp, ChevronsUpDown, FolderKanban } from 'lucide-react';
-import { BOARD_STATUSES, STATUS_META, buildTaskboard, itemRef, type TaskboardRow } from '../../lib/projects';
+import { ChevronsDownUp, ChevronsUpDown, FolderKanban, SearchX } from 'lucide-react';
+import { BOARD_STATUSES, STATUS_META, buildTaskboard, hasActiveFilters, itemRef, type ItemFilters, type TaskboardRow } from '../../lib/projects';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { ItemCard, ItemCardOverlay } from './ItemCard';
 import { NewItemForm, NewItemButton } from './NewItemForm';
 import { StoryHeader } from './StoryHeader';
-import type { Project, WorkItem, WorkItemStatus, WorkItemType } from '../../types';
+import type { Project, WorkItem, WorkItemStatus } from '../../types';
 import type { NewItemInput } from '../../hooks/useProjectsStore';
 
 interface ProjectBoardProps {
   project: Project;
   // Every item of the project: rows are derived from it, so stories and parents are always known.
   items: WorkItem[];
-  typeFilter: WorkItemType | null;
+  filters: ItemFilters;
+  onClearFilters: () => void;
   showCancelled: boolean;
   onSelect: (id: string) => void;
   onCreate: (input: NewItemInput) => Promise<unknown>;
@@ -43,13 +44,13 @@ interface ProjectBoardProps {
 const STORY_COLUMN = '16rem';
 const STATUS_COLUMN = '18rem';
 
-export function ProjectBoard({ project, items, typeFilter, showCancelled, onSelect, onCreate, onMove }: ProjectBoardProps) {
+export function ProjectBoard({ project, items, filters, onClearFilters, showCancelled, onSelect, onCreate, onMove }: ProjectBoardProps) {
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 768px)');
   // Collapse state lives in memory only (keyed by story id): after a reload every story is expanded.
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const statuses: WorkItemStatus[] = showCancelled ? [...BOARD_STATUSES, 'cancelled'] : BOARD_STATUSES;
-  const rows = useMemo(() => buildTaskboard(items, typeFilter, showCancelled), [items, typeFilter, showCancelled]);
+  const rows = useMemo(() => buildTaskboard(items, project, filters, showCancelled), [items, project, filters, showCancelled]);
   const allCollapsed = rows.length > 0 && rows.every((r) => collapsed.has(r.key));
 
   const toggle = (key: string) =>
@@ -76,7 +77,15 @@ export function ProjectBoard({ project, items, typeFilter, showCancelled, onSele
           </button>
         )}
       </div>
-      {rows.length === 0 ? (
+      {rows.length === 0 && hasActiveFilters(filters) ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+          <SearchX size={36} className="text-stone-300" />
+          <p className="max-w-sm text-sm text-stone-500">{t('projects.board.noResults')}</p>
+          <button onClick={onClearFilters} className="rounded-lg px-2 py-1 text-sm text-brand-700 hover:bg-brand-50">
+            {t('projects.filter.clear')}
+          </button>
+        </div>
+      ) : rows.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
           <FolderKanban size={36} className="text-stone-300" />
           <p className="max-w-sm text-sm text-stone-500">{t('projects.board.empty')}</p>

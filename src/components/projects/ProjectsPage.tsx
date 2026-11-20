@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, FolderKanban } from 'lucide-react';
 import { useProjectsStore } from '../../hooks/useProjectsStore';
-import { TYPE_META, TYPE_ORDER } from '../../lib/projects';
-import type { WorkItemType } from '../../types';
+import { EMPTY_FILTERS, sortItems, type ItemFilters } from '../../lib/projects';
 import { NewItemButton } from './NewItemForm';
 import { NewProjectForm } from './NewProjectForm';
 import { ProjectBoard } from './ProjectBoard';
+import { ProjectToolbar } from './ProjectToolbar';
 import { ItemDetailPanel } from './ItemDetailPanel';
 
 const PROJECT_PREF_KEY = 'projects.activeProjectId';
@@ -25,17 +25,23 @@ export function ProjectsPage() {
   const { projects, items, loading } = store;
   const [projectPref, setProjectPref] = useState<string | null>(readPref);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<WorkItemType | null>(null);
+  // Filters live only in memory: they reset on reload and through resetFilters (FOC-8 calls it from the Board/Backlog switch).
+  const [rawFilters, setFilters] = useState<ItemFilters>(EMPTY_FILTERS);
   const [showCancelled, setShowCancelled] = useState(false);
 
   // Derived, not stored: falls back to the first project if the preference no longer exists.
   const project = projects.find((p) => p.id === projectPref) ?? [...projects].sort((a, b) => a.key.localeCompare(b.key))[0];
   const projectItems = project ? items.filter((i) => i.projectId === project.id) : [];
+  // Derived, not stored: an epic filter whose epic no longer exists counts as "All".
+  const epicOptions = sortItems(projectItems.filter((i) => i.type === 'epic' && (showCancelled || i.status !== 'cancelled' || i.id === rawFilters.epicId)));
+  const filters: ItemFilters = rawFilters.epicId && !projectItems.some((i) => i.id === rawFilters.epicId && i.type === 'epic') ? { ...rawFilters, epicId: null } : rawFilters;
+  const resetFilters = () => setFilters(EMPTY_FILTERS);
   const selectedItem = selectedItemId ? (projectItems.find((i) => i.id === selectedItemId) ?? null) : null;
 
   const selectProject = (id: string) => {
     setProjectPref(id);
     setSelectedItemId(null);
+    resetFilters();
     try {
       localStorage.setItem(PROJECT_PREF_KEY, id);
     } catch {
@@ -113,40 +119,21 @@ export function ProjectsPage() {
                 onCreate={(input) => store.createItem(project.id, input)}
                 className="ml-auto"
               />
-              <div className="flex flex-wrap items-center gap-1">
-                <button
-                  onClick={() => setTypeFilter(null)}
-                  className={`rounded-full px-2.5 py-1 text-xs transition ${typeFilter === null ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-100'}`}
-                >
-                  {t('projects.allTypes')}
-                </button>
-                {TYPE_ORDER.map((type) => {
-                  const { icon: Icon, color, labelKey } = TYPE_META[type];
-                  return (
-                    <button
-                      key={type}
-                      onClick={() => setTypeFilter(typeFilter === type ? null : type)}
-                      className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs transition ${
-                        typeFilter === type ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-100'
-                      }`}
-                    >
-                      <Icon size={13} className={typeFilter === type ? '' : color} />
-                      {t(labelKey)}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => setShowCancelled((v) => !v)}
-                  className="rounded-full px-2.5 py-1 text-xs text-stone-500 transition hover:bg-stone-100"
-                >
-                  {showCancelled ? t('projects.hideCancelled') : t('projects.showCancelled')}
-                </button>
-              </div>
+              <ProjectToolbar
+                project={project}
+                epics={epicOptions}
+                filters={filters}
+                onChange={setFilters}
+                onClear={resetFilters}
+                showCancelled={showCancelled}
+                onToggleCancelled={() => setShowCancelled((v) => !v)}
+              />
             </header>
             <ProjectBoard
               project={project}
               items={projectItems}
-              typeFilter={typeFilter}
+              filters={filters}
+              onClearFilters={resetFilters}
               showCancelled={showCancelled}
               onSelect={setSelectedItemId}
               onCreate={(input) => store.createItem(project.id, input)}
