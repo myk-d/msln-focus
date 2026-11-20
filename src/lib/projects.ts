@@ -194,3 +194,72 @@ export function cleanTitle(raw: string): string | null {
   const title = raw.trim();
   return title ? title : null;
 }
+
+export interface BacklogNode {
+  // `null` marks the final "No story" group.
+  item: WorkItem | null;
+  key: string;
+  // 0 for epics and the "No story" group, then one level per nesting step.
+  depth: number;
+  // Visible children (after filters and the cancelled toggle).
+  children: BacklogNode[];
+  // Progress over all descendants except cancelled ones, ignoring filters.
+  done: number;
+  total: number;
+}
+
+// Backlog tree: epic > story > task/bug, then a final "No story" group for stories without an epic, loose tasks
+// and orphans (missing or invalid parent). Parent links are only followed along the valid chain (task -> story or
+// epic, story -> epic, epics are roots), so a parentId cycle can never form a loop: its members just end up in
+// "No story". A hidden (cancelled) parent counts as missing, so its children are never dropped. A node stays when
+// it matches the filters or has a visible descendant. Pure and O(n log n), so it is memoized by the caller.
+export function buildBacklog(items: WorkItem[], project: Pick<Project, 'key'> | undefined, filters: ItemFilters, showCancelled: boolean): BacklogNode[] {
+  const pool = items.filter((i) => showCancelled || i.status !== 'cancelled');
+  const byId = new Map(pool.map((i) => [i.id, i]));
+  const matching = new Set(filterItems(pool, project, filters).map((i) => i.id));
+  const childrenOf = new Map<string, WorkItem[]>();
+  const looseStories: WorkItem[] = [];
+  const looseTasks: WorkItem[] = [];
+  const epics: WorkItem[] = [];
+  for (const i of pool) {
+    if (i.type === 'epic') {
+      epics.push(i);
+      continue;
+    }
+    const parent = i.parentId ? byId.get(i.parentId) : undefined;
+    const valid = parent && validParentTypes(i.type).includes(parent.type) ? parent : undefined;
+    if (valid) {
+      const list = childrenOf.get(valid.id);
+      if (list) list.push(i);
+      else childrenOf.set(valid.id, [i]);
+    } else if (i.type === 'story') looseStories.push(i);
+    else looseTasks.push(i);
+  }
+
+  const make = (item: WorkItem, depth: number): BacklogNode => {
+    const kids = sortItems(childrenOf.get(item.id) ?? []).map((c) => make(c, depth + 1));
+    return {
+      item,
+      key: item.id,
+      depth,
+      children: kids.filter((k) => matching.has(k.item!.id) || k.children.length > 0),
+      done: kids.reduce((n, k) => n + k.done, 0) + kids.filter((k) => k.item!.status === 'done').length,
+      total: kids.reduce((n, k) => n + k.total, 0) + kids.filter((k) => k.item!.status !== 'cancelled').length,
+    };
+  };
+  const keep = (n: BacklogNode) => matching.has(n.item!.id) || n.children.length > 0;
+
+  const roots = sortItems(epics).map((e) => make(e, 0)).filter(keep);
+  const loose = [...sortItems(looseStories), ...sortItems(looseTasks)].map((i) => make(i, 1)).filter(keep);
+  if (loose.length > 0) {
+    roots.push({
+      item: null,
+      key: NO_STORY_KEY,
+      depth: 0,
+      children: loose,
+      done: loose.reduce((n, k) => n + k.done + (k.item!.status === 'done' ? 1 : 0), 0),
+      total: loose.reduce((n, k) => n + k.total + (k.item!.status !== 'cancelled' ? 1 : 0), 0),
+    });
+  }
+  return roots;
+}
