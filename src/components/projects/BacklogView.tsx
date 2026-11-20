@@ -112,21 +112,21 @@ export function BacklogView({ project, items, filters, onClearFilters, showCance
                     aria-label={toggleLabel}
                     aria-expanded={open}
                     title={toggleLabel}
-                    className="flex h-9 w-7 shrink-0 items-center justify-center rounded text-stone-500 hover:bg-stone-200/70 disabled:cursor-default md:h-7"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded text-stone-500 hover:bg-stone-200/70 disabled:cursor-default md:h-7 md:w-7"
                   >
                     {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
                   </button>
                 ) : (
-                  <span className="w-7 shrink-0" />
+                  <span className="w-9 shrink-0 md:w-7" />
                 )}
                 {item && Icon ? (
-                  <button onClick={() => onSelect(item.id)} title={item.title} className="flex min-w-0 flex-1 items-center gap-2 py-1.5 text-left">
+                  <button onClick={() => onSelect(item.id)} title={item.title} className="flex min-h-9 min-w-0 flex-1 items-center gap-2 py-1.5 text-left md:min-h-0">
                     <Icon size={14} className={`shrink-0 ${TYPE_META[item.type].color}`} />
                     <span className="shrink-0 font-mono text-xs text-stone-400">{itemRef(project, item)}</span>
                     <span className={`min-w-0 flex-1 truncate text-sm text-stone-800 ${cancelled ? 'line-through' : ''}`}>{item.title}</span>
                   </button>
                 ) : (
-                  <p className="min-w-0 flex-1 truncate py-1.5 text-sm font-medium text-stone-600">{t('projects.board.noStory')}</p>
+                  <p className="min-h-9 min-w-0 flex-1 truncate py-1.5 text-sm font-medium leading-6 text-stone-600 md:min-h-0">{t('projects.board.noStory')}</p>
                 )}
                 {node.total > 0 && <span className="hidden shrink-0 text-[11px] text-stone-500 sm:inline">{t('projects.board.progress', { done: node.done, total: node.total })}</span>}
                 {canAdd && (
@@ -135,7 +135,7 @@ export function BacklogView({ project, items, filters, onClearFilters, showCance
                     aria-expanded={adding}
                     aria-label={t(item?.type === 'epic' ? 'projects.backlog.addStory' : 'projects.newItem.addTask')}
                     title={t(item?.type === 'epic' ? 'projects.backlog.addStory' : 'projects.newItem.addTask')}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-stone-400 hover:bg-stone-200/70 hover:text-stone-700 focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded text-stone-400 md:h-7 md:w-7 hover:bg-stone-200/70 hover:text-stone-700 focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                   >
                     <Plus size={14} />
                   </button>
