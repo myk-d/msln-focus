@@ -39,6 +39,29 @@ body {
   display: none;
 }
 
+/* Opt-in visible scrollbar for wide scrollers (e.g. the projects board), where
+   a hidden bar leaves mouse users with no way to scroll horizontally. */
+.scrollbar-visible {
+  scrollbar-width: thin;
+  scrollbar-color: #d6d3d1 transparent;
+  -ms-overflow-style: auto;
+}
+
+.scrollbar-visible::-webkit-scrollbar {
+  display: block;
+  height: 10px;
+  width: 10px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 9999px;
+}
+
+.scrollbar-visible::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* iOS Safari auto-zooms the page when a focused input/textarea/select computes
    to under 16px — several of our fields use text-sm/text-xs (14px/12px). Force
    16px on mobile only (not :focus-scoped, so there's no size jump on focus/blur),
