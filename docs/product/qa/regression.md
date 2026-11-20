@@ -12,7 +12,7 @@ Tests: only `functions/src/app.test.ts` (Agent API, memory store). The web app h
 | 5 | Calendar event | `/calendar`: create event on a date; edit; delete; switch month/week/day/agenda | Event appears on the right date in all views; edit and delete persist | browser | none |
 | 6 | Pomodoro for a task | `/pomodoro`: start timer; run a saved preset; start from a task; open Picture-in-Picture; reset | Countdown runs; task banner shows and clears on reset; PiP window shows timer with styles; settings edit updates idle display | browser (PiP: manual, Chromium only) | none |
 | 7 | Create project | `/projects`: "new project", key, name, repo; repeat with same key and a bad key | Project appears; key uppercased; duplicate or bad key rejected | browser | API side: `app.test.ts` "projects: creates with an uppercased key, rejects duplicates and bad keys"; UI none |
-| 8 | Add work item | In a board: title, type (epic/story/task/bug), submit | Card gets ref `<KEY>-<n>` in the next free number, in the todo column | browser | API numbering: `app.test.ts` "items: numbers items per project..."; UI none |
+| 8 | Add work item | In a board: title, type (epic/story/task/bug), submit | Card gets ref `<KEY>-<n>` in the next free number, in the backlog column | browser | API numbering: `app.test.ts` "items: numbers items per project..."; UI none |
 | 9 | Move between statuses | Drag card to another column; change status in detail select; PATCH the item via API while the board is open | Card moves and persists; API change appears live without reload; cancelled column behind toggle | browser | API patch/list order: `app.test.ts` "items: patches fields...", "lists sorted by status..."; UI and live sync none |
 | 10 | Item detail and comment | Open item; edit assignee, severity (bug), blockedBy, related, markdown description; add comment | Fields persist; severity only for bugs; related shows on both items; successors derived; markdown sanitized | browser | API: `app.test.ts` "ADO-style fields", "comments and brief"; sanitizer/UI none |
 | 9a | Board scroll and layout (taskboard) | Project with items in all columns, 1280 px and 800 px windows; scroll right/down (shift+wheel, scrollbar, touch swipe); open and close detail; collapse/expand a story and Collapse all; reload; 375 px phone | Scrollbar visible, reaches Done/Cancelled; page does not scroll sideways; story column and header sticky; collapse state survives live agent updates but resets (all expanded) after reload; scroll kept with the panel open; below 768 px stacked story cards with status groups, no horizontal scroll, no drag | browser | none (spec `projects-taskboard.md` S1, S2a) |
@@ -31,7 +31,7 @@ Tests: only `functions/src/app.test.ts` (Agent API, memory store). The web app h
 - No web tests at all; flows 1-10 and 12 have no automation.
 - Task reminders (browser notifications) are not verified end to end; no scenario until behaviour is confirmed.
 - Horizontal scroll of the projects board was not checked in a browser (see 9a; root cause unconfirmed).
-- Flows 8 and 9 describe the old per-column quick-add and flat columns; replace them by 9a-9f when the taskboard ships.
+- Flows 8 and 9 predate the taskboard; 9a-9f describe the current behavior (new items land in the backlog column).
 - Pure helpers (`buildTaskboard`, `filterItems`, valid parents, backlog tree) are unit-testable but the web has no test runner; adding one is out of scope of the taskboard feature.
 - Per-user data isolation (two accounts) has no scenario; needs two Google accounts (manual).
 

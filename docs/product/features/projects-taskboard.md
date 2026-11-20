@@ -1,5 +1,5 @@
 # Projects taskboard
-Status: specified   Epic: FOC-2   Updated: 2026-11-20
+Status: shipped   Epic: FOC-2   Updated: 2026-11-20
 
 ## Summary
 The projects page gets an Azure DevOps style Taskboard: rows are stories, columns are the fixed statuses, and each story's tasks and bugs sit in the status columns to its right. Epics become a filter/group, not a row. The owner can create epics, stories, tasks and bugs manually with a chosen type and parent (including straight inside a story row), filter and search the board, and plan from a separate hierarchical Backlog view. The board scrolls horizontally on desktop when columns overflow. Columns stay fixed; the Agent API is unchanged unless strictly needed.
@@ -182,7 +182,7 @@ Verified against code; no Firestore schema, API, rules or index changes (confirm
 **Recommended order.** S1 (reproduce, fix) > S2a > S2b (parallel with S3) > S3 > S4 > S5.
 
 ## Stories
-### S1 Fix horizontal scroll on the board — FOC-3  size S  depends on: —  manual (needs browser reproduction; root cause unconfirmed)
+### S1 Fix horizontal scroll on the board — FOC-3 (done)  size S  depends on: —  manual (needs browser reproduction; root cause unconfirmed)
 - AC1. In a desktop browser with columns wider than the viewport, the board scrolls horizontally by trackpad/wheel (shift+wheel) and by scrollbar, reaching the last column.
 - AC2. The page itself does not scroll horizontally, and the nav rail and header stay in place.
 - AC3. Opening the item detail panel does not hide or break the scrollable area.
@@ -198,7 +198,7 @@ Test scenarios (qa):
 - T6 [browser] (AC1, edge) Given a narrow window (800 px) and touch emulation, When swiping horizontally on a card, Then the board scrolls and no drag starts.
 - T7 [manual] (AC5) Given the fix, Then the story note names the confirmed cause (scrollbar hidden / height chain / touch-none) with the reproduction steps.
 
-### S2a Taskboard grid with story rows and sticky columns — FOC-4  size M  depends on: S1  manual (visual layout needs human check)
+### S2a Taskboard grid with story rows and sticky columns — FOC-4 (done)  size M  depends on: S1  manual (visual layout needs human check)
 - AC1. Each story is a row: first column shows the story (ref, title, progress "{done} of {total} done"), status columns show its tasks/bugs by status.
 - AC2. A story row can be collapsed/expanded (button with aria label Collapse/Expand story); collapsed shows only the story column. State is in memory: after reload all stories are expanded.
 - AC3. Items without a parent (non-epic, non-story) and children of epics appear in a "No story" row; the row is hidden when empty.
@@ -222,7 +222,7 @@ Test scenarios (qa):
 - T12 [browser] (AC1, a11y) Given keyboard only, Then Tab reaches chevron, title, "Add task", cards in visual order; Enter on a card opens detail; focus ring visible.
 - T13 [auto-candidate] (AC1, AC3, AC4, AC5) `buildTaskboard`: epics skipped, orphan/missing parent/epic parent to No story, progress excludes cancelled, stories sorted, empty arrays.
 
-### S2b Drag within a row — FOC-5  size M  depends on: S2a  manual (dnd feel, touch and keyboard need human check)
+### S2b Drag within a row — FOC-5 (done)  size M  depends on: S2a  manual (dnd feel, touch and keyboard need human check)
 - AC1. Dragging a card between status cells within its row changes its status; dropping in the same cell changes nothing.
 - AC2. Dropping onto a cell of another row, or outside any cell, does not change the parent or status and the card returns; other rows' cells show no hover style.
 - AC3. Mouse drag starts after a short distance; touch drag (tablets, `md` and up) starts after a long press (250 ms) so horizontal swipe scroll still works; a dragged card is shown in a DragOverlay not clipped by the scroller. Below `md` there is no drag.
@@ -239,7 +239,7 @@ Test scenarios (qa):
 - T8 [browser] (AC1, edge) Given an agent changes the item status via API during a drag, Then no crash, the final state matches the last write.
 - T9 [browser] (AC1) Given the "No story" row, Then in-row drag works the same way and orphans do not move rows.
 
-### S3 Create epic, story, task, bug with type and parent — FOC-6  size M  depends on: S2a  auto (store unchanged, pure helper + form)
+### S3 Create epic, story, task, bug with type and parent — FOC-6 (done)  size M  depends on: S2a  auto (store unchanged, pure helper + form)
 - AC1. Each story row has an "Add task" action opening a quick-add with title, item type (task, bug) and the story preselected as parent; submit creates the item with that parentId and status backlog (or the cell's status if added from a cell).
 - AC2. A quick-add has a parent select limited to valid candidates and a type select; invalid combinations (e.g. epic with parent) are not offered.
 - AC3. A task/bug can also be created in "No story" with parent empty or chosen.
@@ -264,7 +264,7 @@ Test scenarios (qa):
 - T13 [browser] (edge) Given a story is deleted/cancelled while its form is open, Then submit does not crash (item lands in "No story" or the error shows).
 - T14 [auto-candidate] valid parents by type; trimmed-title guard.
 
-### S4 Filters and search — FOC-7  size M  depends on: S2a  auto (pure filter helper + toolbar)
+### S4 Filters and search — FOC-7 (done)  size M  depends on: S2a  auto (pure filter helper + toolbar)
 - AC1. Search by case-insensitive substring over title or ref (`FOC-12`, `12`, `1` matches FOC-1 and FOC-12) hides non-matching cards; a story row stays if the story or any child matches.
 - AC2. Filters: type, assignee (including unassigned), epic; options include "All"; combinable with search.
 - AC3. Epic filter shows the epic's stories and their children.
@@ -289,7 +289,7 @@ Test scenarios (qa):
 - T12 [browser] (AC8) Filters apply the same in the Backlog view; with type, assignee, epic and search set, switching Board to Backlog (and back) clears all of them and "Clear filters" disappears; after reload filters are empty.
 - T13 [auto-candidate] `filterItems`: case, ref forms, unassigned, epic descendants, empty query.
 
-### S5 Backlog view — FOC-8  size M  depends on: S3, S4  auto
+### S5 Backlog view — FOC-8 (done)  size M  depends on: S3, S4  auto
 - AC1. A toggle Board / Backlog in the project header switches views; the choice survives a reload (per viewer).
 - AC2. Backlog lists epic > story > task/bug indented with type icon, ref, title, status, assignee; groups are collapsible.
 - AC3. Items without a parent appear in a final group (stories and loose tasks under "No story"); orphans are never dropped.
@@ -319,11 +319,12 @@ Test scenarios (qa):
 - Decided (UX, owner delegated 2026-11-20): mobile (below 768 px) is a stacked per-story card list with status groups, no drag; the grid with sticky column is `md` and up. Reason: the swipe grid leaves ~200 px for cells on phones and fights touch drag; stacked reads top to bottom. S2a stays M (upper end), S2b loses mobile touch work.
 - Decided (owner, 2026-11-20): search is a case-insensitive substring over ref and title (`1` matches FOC-1 and FOC-12).
 - Decided (owner, 2026-11-20): filters reset when switching Board/Backlog and on reload.
-- Open: should stories without children and items under an epic go to "No story" or under an epic row? (assumed: epic is only a filter, per Requirement 5).
-- Open: does dragging a card to another story's row re-parent? (assumed: no, status only.)
-- Open: horizontal scroll cause not reproduced from code; S1 starts with browser reproduction.
+- Decided (shipped, FOC-4): epic is only a filter; stories without children keep a row, tasks directly under an epic go to "No story" with a parent chip.
+- Decided (shipped, FOC-5): dragging never re-parents; only cells of the card's own row accept a drop. Re-parenting is done in the detail panel.
+- Decided (shipped, FOC-3): the horizontal scroll problem came from globally hidden scrollbars, a flex chain without `min-h-0`/`min-w-0` that pushed the bar below the fold, and `touch-none` on cards blocking touch swipe.
 - Original asks: epics/stories/tasks/bugs currently share one column per status; no horizontal scroll on desktop when columns overflow; no manual creation of stories/tasks/bugs like in ADO (the board has a per-column quick-add today — verify what is missing, e.g. choosing type/parent, creating children inside a story row, creating epics).
 ## History
 - 2026-11-20 — created — owner request: make the projects page work like Azure DevOps/Jira
 - 2026-11-20 — ux — owner decisions applied: collapse not persisted, mobile = stacked story cards (no drag), search = substring on ref/title, filters reset on view switch and reload
 - 2026-11-20 — filed in tracker — epic FOC-2, stories FOC-3..FOC-8
+- 2026-11-20 — shipped — FOC-3..FOC-8 merged (PRs #1-#6), epic FOC-2 done; open decisions closed

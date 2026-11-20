@@ -13,7 +13,7 @@ Status: shipped / partial / idea. Spec file: none yet. Epic: Focus has no epics 
 | Pomodoro timer, settings, task link | shipped | `/pomodoro`, `PomodoroPage.tsx`, `PomodoroTimer.tsx`, `usePomodoro.ts` | — | — |
 | Pomodoro presets | shipped | `PomodoroPresetList.tsx` | — | — |
 | Pomodoro Picture-in-Picture | shipped | `PipPortal.tsx`, `useDocumentPiP.ts` | — | — |
-| Projects board (kanban by status, drag between columns) | partial | `/projects`, `src/components/projects/ProjectBoard.tsx`, `useProjectsStore.ts` | [projects-taskboard](projects-taskboard.md) | FOC-2 |
+| Projects board (taskboard: story rows, status columns, drag within a row, create with parent, filters/search, Backlog view) | shipped | `/projects`, `src/components/projects/ProjectBoard.tsx`, `useProjectsStore.ts` | [projects-taskboard](projects-taskboard.md) | FOC-2 |
 | Work item detail (fields, markdown, children, links) | shipped | `ItemDetailPanel.tsx`, `fields.tsx` | — | — |
 | Work item comments | shipped | `ItemDetailPanel.tsx` | — | — |
 | New project (key, name, repo) | shipped | `NewProjectForm.tsx`, `ProjectsPage.tsx` | — | — |
@@ -23,5 +23,5 @@ Status: shipped / partial / idea. Spec file: none yet. Epic: Focus has no epics 
 
 ## Notes
 
-- Projects board (confirmed in `ProjectBoard.tsx`): columns are the fixed `BOARD_STATUSES` (plus `cancelled` behind a toggle), each a flat list of that status's items sorted by `sortItems`. There is no story-grouped hierarchy on the board (parent progress shows only as a done/total count on a card), no custom columns. Horizontal scroll exists (`overflow-x-auto`) but was not checked in a browser.
+- Projects board: shipped as the taskboard (epic FOC-2): story rows over fixed status columns (no custom columns), sticky story column and header, stacked cards below 768 px, drag within a row, create with type and parent, filters and search, separate Backlog view. Real touch long-press and the empty-project state were not checked in a browser.
 - Status can be changed by dragging a card to another column or with the status select in `ItemDetailPanel.tsx`.
