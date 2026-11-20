@@ -64,6 +64,9 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
 
+    // First-login marker written by ensureUserInitialized (src/lib/userInitializer.ts); owner only, never deleted.
+    match /users/{uid} { allow read, create, update: if isOwnerDoc(uid); }
+
     match /pomodoroSettings/{uid} { allow read, write: if isOwnerDoc(uid); }
     match /pomodoroStats/{uid} { allow read, write: if isOwnerDoc(uid); }
   }
