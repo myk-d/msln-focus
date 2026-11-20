@@ -1,6 +1,6 @@
 # Focus-Pocus
 
-A task manager, calendar, and Pomodoro timer, built as a single-page React app with an original visual design. Sign in with Google to use it — tasks, lists, sections, tags, calendar events, and Pomodoro presets/settings/stats all persist to Firestore, scoped to your account.
+A task manager, calendar, Pomodoro timer, and projects tracker, built as a single-page React app with an original visual design. Sign in with Google to use it — tasks, lists, sections, tags, calendar events, and Pomodoro presets/settings/stats all persist to Firestore, scoped to your account.
 
 ## Features
 
@@ -17,14 +17,22 @@ A task manager, calendar, and Pomodoro timer, built as a single-page React app w
 - Daily/total stats, and Document Picture-in-Picture scoped to just the timer
 - Link a running session to a specific task from that task's menu
 
+**Calendar**
+- Calendar page (`/calendar`) with events stored per account
+
+**Projects**
+- Projects tracker (`/projects`): kanban board by status, epic / story / task / bug items with markdown descriptions, acceptance criteria and comments
+- Live updates via Firestore `onSnapshot`; an owner-only HTTP Agent API (`functions/`, docs at `/api/docs`) lets coding agents read and write the same board
+
 **Navigation**
-- Real URL routing (`/tasks`, `/pomodoro`) via `react-router-dom`, with a sidebar nav rail
+- Real URL routing (`/tasks`, `/calendar`, `/pomodoro`, `/projects`) via `react-router-dom`, with a sidebar nav rail
 
 ## Tech stack
 
 - React 19 + TypeScript + Vite
 - Tailwind CSS v4 (`@theme` tokens in `src/index.css`)
 - Firebase Authentication (Google sign-in) + Firestore, via a small generic `FirebaseFactory<T>` CRUD wrapper (`src/config/firebase.factory.ts`)
+- Firebase Cloud Functions v2 (Express) for the Agent API
 - `@dnd-kit` for drag-and-drop, `react-router-dom` for routing, `lucide-react` for icons, `dayjs` for the date picker
 
 ## Getting started
