@@ -77,3 +77,54 @@ export function renderMarkdown(md: string, inline = false): string {
 }
 
 export const PROJECT_KEY_RE = /^[A-Z][A-Z0-9]{1,9}$/;
+
+export interface TaskboardRow {
+  // `null` marks the "No story" row.
+  story: WorkItem | null;
+  key: string;
+  // Visible children (after the type filter and the cancelled toggle), by status.
+  byStatus: Record<WorkItemStatus, WorkItem[]>;
+  // Progress over all children except cancelled ones, ignoring filters.
+  done: number;
+  total: number;
+  // Children that exist at all (ignoring filters), to tell "no tasks yet" from "filtered out".
+  childCount: number;
+}
+
+export const NO_STORY_KEY = 'none';
+
+function emptyByStatus(): Record<WorkItemStatus, WorkItem[]> {
+  return { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [], cancelled: [] };
+}
+
+// Taskboard rows: one per story (sorted), then "No story" for tasks/bugs whose parent is missing, an epic or
+// not a story. Epics never produce a row or a card. Pure, so it is recomputed from live items on every render.
+export function buildTaskboard(items: WorkItem[], typeFilter: WorkItemType | null, showCancelled: boolean): TaskboardRow[] {
+  const storyIds = new Set(items.filter((i) => i.type === 'story').map((i) => i.id));
+  const childFilter = (i: WorkItem) => typeFilter === null || typeFilter === i.type;
+  const makeRow = (story: WorkItem | null, children: WorkItem[]): TaskboardRow => {
+    const byStatus = emptyByStatus();
+    const counted = children.filter((c) => c.status !== 'cancelled');
+    for (const c of sortItems(children)) {
+      if (!childFilter(c)) continue;
+      if (c.status === 'cancelled' && !showCancelled) continue;
+      byStatus[c.status].push(c);
+    }
+    return {
+      story,
+      key: story?.id ?? NO_STORY_KEY,
+      byStatus,
+      done: counted.filter((c) => c.status === 'done').length,
+      total: counted.length,
+      childCount: children.length,
+    };
+  };
+
+  const children = items.filter((i) => i.type !== 'epic' && i.type !== 'story');
+  const stories = sortItems(items.filter((i) => i.type === 'story' && (showCancelled || i.status !== 'cancelled')));
+  const rows = stories.map((s) => makeRow(s, children.filter((c) => c.parentId === s.id)));
+  const loose = children.filter((c) => !c.parentId || !storyIds.has(c.parentId));
+  const looseRow = makeRow(null, loose);
+  if (Object.values(looseRow.byStatus).some((cards) => cards.length > 0)) rows.push(looseRow);
+  return rows;
+}

@@ -136,10 +136,9 @@ export function ProjectsPage() {
             </header>
             <ProjectBoard
               project={project}
-              items={typeFilter ? projectItems.filter((i) => i.type === typeFilter) : projectItems}
-              allItems={projectItems}
+              items={projectItems}
+              typeFilter={typeFilter}
               showCancelled={showCancelled}
-              defaultType={typeFilter ?? 'task'}
               onSelect={setSelectedItemId}
               onCreate={(input) => store.createItem(project.id, input)}
               onMove={(id, status) => void store.updateItem(id, { status })}
