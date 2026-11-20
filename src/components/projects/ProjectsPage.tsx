@@ -143,7 +143,7 @@ export function ProjectsPage() {
                     role="radio"
                     aria-checked={view === v}
                     onClick={() => setView(v)}
-                    className={`rounded-md px-2.5 py-1 transition ${view === v ? 'bg-brand-100 text-brand-700' : 'text-stone-500 hover:bg-stone-100'}`}
+                    className={`min-h-9 rounded-md px-3 py-1 transition md:min-h-0 md:px-2.5 ${view === v ? 'bg-brand-100 text-brand-700' : 'text-stone-500 hover:bg-stone-100'}`}
                   >
                     {t(`projects.view.${v}`)}
                   </button>
