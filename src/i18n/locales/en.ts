@@ -256,6 +256,19 @@ const en: Translations = {
       placeholder: 'Search (/)',
       label: 'Search by title or ref',
     },
+    view: {
+      label: 'View',
+      board: 'Board',
+      backlog: 'Backlog',
+    },
+    backlog: {
+      empty: 'The backlog is empty',
+      noResults: 'Nothing found',
+      collapse: 'Collapse',
+      expand: 'Expand',
+      addStory: 'Add story',
+      newEpic: 'New epic',
+    },
     board: {
       storyColumn: 'Story',
       noStory: 'No story',

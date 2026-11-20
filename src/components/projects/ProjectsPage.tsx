@@ -5,11 +5,23 @@ import { useProjectsStore } from '../../hooks/useProjectsStore';
 import { EMPTY_FILTERS, sortItems, type ItemFilters } from '../../lib/projects';
 import { NewItemButton } from './NewItemForm';
 import { NewProjectForm } from './NewProjectForm';
+import { BacklogView } from './BacklogView';
 import { ProjectBoard } from './ProjectBoard';
 import { ProjectToolbar } from './ProjectToolbar';
 import { ItemDetailPanel } from './ItemDetailPanel';
 
 const PROJECT_PREF_KEY = 'projects.activeProjectId';
+
+const VIEW_PREF_KEY = 'projects.view';
+type ProjectView = 'board' | 'backlog';
+
+function readView(): ProjectView {
+  try {
+    return localStorage.getItem(VIEW_PREF_KEY) === 'backlog' ? 'backlog' : 'board';
+  } catch {
+    return 'board';
+  }
+}
 
 function readPref(): string | null {
   try {
@@ -24,6 +36,7 @@ export function ProjectsPage() {
   const store = useProjectsStore();
   const { projects, items, loading } = store;
   const [projectPref, setProjectPref] = useState<string | null>(readPref);
+  const [view, setViewState] = useState<ProjectView>(readView);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   // Filters live only in memory: they reset on reload and through resetFilters (FOC-8 calls it from the Board/Backlog switch).
   const [rawFilters, setFilters] = useState<ItemFilters>(EMPTY_FILTERS);
@@ -37,6 +50,18 @@ export function ProjectsPage() {
   const filters: ItemFilters = rawFilters.epicId && !projectItems.some((i) => i.id === rawFilters.epicId && i.type === 'epic') ? { ...rawFilters, epicId: null } : rawFilters;
   const resetFilters = () => setFilters(EMPTY_FILTERS);
   const selectedItem = selectedItemId ? (projectItems.find((i) => i.id === selectedItemId) ?? null) : null;
+
+  // Filters are not kept across views: the switch handler resets them.
+  const setView = (next: ProjectView) => {
+    if (next === view) return;
+    setViewState(next);
+    resetFilters();
+    try {
+      localStorage.setItem(VIEW_PREF_KEY, next);
+    } catch {
+      /* storage unavailable — keep the in-memory choice */
+    }
+  };
 
   const selectProject = (id: string) => {
     setProjectPref(id);
@@ -111,6 +136,19 @@ export function ProjectsPage() {
                   {t('projects.repo')}
                 </a>
               )}
+              <div role="radiogroup" aria-label={t('projects.view.label')} className="flex rounded-lg border border-stone-200 bg-white p-0.5 text-xs">
+                {(['board', 'backlog'] as const).map((v) => (
+                  <button
+                    key={v}
+                    role="radio"
+                    aria-checked={view === v}
+                    onClick={() => setView(v)}
+                    className={`rounded-md px-2.5 py-1 transition ${view === v ? 'bg-brand-100 text-brand-700' : 'text-stone-500 hover:bg-stone-100'}`}
+                  >
+                    {t(`projects.view.${v}`)}
+                  </button>
+                ))}
+              </div>
               <NewItemButton
                 project={project}
                 items={projectItems}
@@ -129,16 +167,28 @@ export function ProjectsPage() {
                 onToggleCancelled={() => setShowCancelled((v) => !v)}
               />
             </header>
-            <ProjectBoard
-              project={project}
-              items={projectItems}
-              filters={filters}
-              onClearFilters={resetFilters}
-              showCancelled={showCancelled}
-              onSelect={setSelectedItemId}
-              onCreate={(input) => store.createItem(project.id, input)}
-              onMove={(id, status) => void store.updateItem(id, { status })}
-            />
+            {view === 'backlog' ? (
+              <BacklogView
+                project={project}
+                items={projectItems}
+                filters={filters}
+                onClearFilters={resetFilters}
+                showCancelled={showCancelled}
+                onSelect={setSelectedItemId}
+                onCreate={(input) => store.createItem(project.id, input)}
+              />
+            ) : (
+              <ProjectBoard
+                project={project}
+                items={projectItems}
+                filters={filters}
+                onClearFilters={resetFilters}
+                showCancelled={showCancelled}
+                onSelect={setSelectedItemId}
+                onCreate={(input) => store.createItem(project.id, input)}
+                onMove={(id, status) => void store.updateItem(id, { status })}
+              />
+            )}
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">

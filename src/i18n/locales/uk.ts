@@ -254,6 +254,19 @@ const uk = {
       placeholder: 'Пошук (/)',
       label: 'Пошук за назвою або номером',
     },
+    view: {
+      label: 'Вигляд',
+      board: 'Дошка',
+      backlog: 'Беклог',
+    },
+    backlog: {
+      empty: 'Беклог порожній',
+      noResults: 'Нічого не знайдено',
+      collapse: 'Згорнути',
+      expand: 'Розгорнути',
+      addStory: 'Додати історію',
+      newEpic: 'Новий епік',
+    },
     board: {
       storyColumn: 'Історія',
       noStory: 'Без історії',
