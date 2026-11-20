@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, MouseSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { GitPullRequest, ListChecks, Plus } from 'lucide-react';
 import { PRIORITY_META } from '../../lib/utils';
 import { BOARD_STATUSES, SEVERITY_META, STATUS_META, TYPE_META, TYPE_ORDER, isOpen, itemRef, sortItems } from '../../lib/projects';
@@ -22,7 +22,11 @@ interface ProjectBoardProps {
 
 export function ProjectBoard({ project, items, allItems, showCancelled, defaultType, onSelect, onCreate, onMove }: ProjectBoardProps) {
   // A small distance threshold keeps a plain click (open the card) distinct from a drag.
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    // MouseSensor + TouchSensor (not PointerSensor) so touch gets its own constraint: touch drags need a long-press so a horizontal swipe scrolls the board instead of grabbing a card.
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+  );
   const statuses: WorkItemStatus[] = showCancelled ? [...BOARD_STATUSES, 'cancelled'] : BOARD_STATUSES;
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -33,7 +37,7 @@ export function ProjectBoard({ project, items, allItems, showCancelled, defaultT
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex flex-1 gap-3 overflow-x-auto p-4 md:p-6">
+      <div className="scrollbar-visible flex min-h-0 min-w-0 flex-1 gap-3 overflow-x-auto p-4 md:p-6">
         {statuses.map((status) => (
           <BoardColumn
             key={status}
@@ -166,7 +170,7 @@ function ItemCard({ item, project, allItems, onSelect }: { item: WorkItem; proje
       {...listeners}
       onClick={() => onSelect(item.id)}
       style={{ borderLeftColor: hex, ...(transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : {}) }}
-      className={`flex w-full touch-none flex-col gap-1.5 rounded-lg border border-l-4 border-stone-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:shadow-md ${
+      className={`flex w-full flex-col gap-1.5 rounded-lg border border-l-4 border-stone-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:shadow-md ${
         isDragging ? 'z-10 rotate-1 shadow-lg' : ''
       }`}
     >

@@ -72,7 +72,7 @@ export function ProjectsPage() {
         <NewProjectForm existingKeys={projects.map((p) => p.key)} onCreate={store.createProject} onCreated={(p) => selectProject(p.id)} />
       </aside>
 
-      <main className="flex min-w-0 flex-1 flex-col">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col">
         {project ? (
           <>
             <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-stone-200 px-4 py-3 md:px-6">
