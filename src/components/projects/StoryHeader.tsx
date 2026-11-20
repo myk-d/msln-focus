@@ -1,5 +1,6 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { TYPE_META, itemRef, type TaskboardRow } from '../../lib/projects';
 import { useAuth } from '../../context/AuthContext';
 import { AssigneeAvatar } from './fields';
@@ -11,10 +12,13 @@ interface StoryHeaderProps {
   collapsed: boolean;
   onToggle: () => void;
   onSelect: (id: string) => void;
+  onAddTask: () => void;
+  // Inline quick-add form, rendered under the header while open.
+  addForm?: ReactNode;
 }
 
 // First cell of a taskboard row (desktop) and header of a story card (mobile).
-export function StoryHeader({ row, project, collapsed, onToggle, onSelect }: StoryHeaderProps) {
+export function StoryHeader({ row, project, collapsed, onToggle, onSelect, onAddTask, addForm }: StoryHeaderProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { story } = row;
@@ -50,6 +54,15 @@ export function StoryHeader({ row, project, collapsed, onToggle, onSelect }: Sto
         )}
         {story && <AssigneeAvatar assignee={story.assignee} photoURL={user?.photoURL} size={20} />}
       </div>
+      <button
+        onClick={onAddTask}
+        aria-expanded={!!addForm}
+        className="ml-7 flex w-fit items-center gap-1 rounded-lg px-1.5 py-1 text-xs text-stone-500 transition hover:bg-stone-200/70 hover:text-stone-700"
+      >
+        <Plus size={13} />
+        {t('projects.newItem.addTask')}
+      </button>
+      {addForm && <div className="ml-7">{addForm}</div>}
       {row.total > 0 && (
         <div className="ml-7">
           <p className="text-[11px] text-stone-500">{t('projects.board.progress', { done: row.done, total: row.total })}</p>

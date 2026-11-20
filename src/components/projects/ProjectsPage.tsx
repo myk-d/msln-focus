@@ -4,6 +4,7 @@ import { ExternalLink, FolderKanban } from 'lucide-react';
 import { useProjectsStore } from '../../hooks/useProjectsStore';
 import { TYPE_META, TYPE_ORDER } from '../../lib/projects';
 import type { WorkItemType } from '../../types';
+import { NewItemButton } from './NewItemForm';
 import { NewProjectForm } from './NewProjectForm';
 import { ProjectBoard } from './ProjectBoard';
 import { ItemDetailPanel } from './ItemDetailPanel';
@@ -104,7 +105,15 @@ export function ProjectsPage() {
                   {t('projects.repo')}
                 </a>
               )}
-              <div className="ml-auto flex flex-wrap items-center gap-1">
+              <NewItemButton
+                project={project}
+                items={projectItems}
+                types={['story', 'epic', 'task', 'bug']}
+                label={t('projects.newItem.new')}
+                onCreate={(input) => store.createItem(project.id, input)}
+                className="ml-auto"
+              />
+              <div className="flex flex-wrap items-center gap-1">
                 <button
                   onClick={() => setTypeFilter(null)}
                   className={`rounded-full px-2.5 py-1 text-xs transition ${typeFilter === null ? 'bg-stone-800 text-white' : 'text-stone-500 hover:bg-stone-100'}`}
