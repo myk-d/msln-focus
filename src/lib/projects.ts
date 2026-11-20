@@ -97,11 +97,55 @@ function emptyByStatus(): Record<WorkItemStatus, WorkItem[]> {
   return { backlog: [], todo: [], 'in-progress': [], 'in-review': [], done: [], cancelled: [] };
 }
 
+export type AssigneeFilter = Assignee | 'unassigned';
+
+// Board/backlog filters. Plain data kept in component state (never stored): `null` means "All".
+export interface ItemFilters {
+  query: string;
+  type: WorkItemType | null;
+  assignee: AssigneeFilter | null;
+  epicId: string | null;
+}
+
+export const EMPTY_FILTERS: ItemFilters = { query: '', type: null, assignee: null, epicId: null };
+
+export function hasActiveFilters(f: ItemFilters): boolean {
+  return f.query.trim() !== '' || f.type !== null || f.assignee !== null || f.epicId !== null;
+}
+
+// Active filters among the select-based ones (search is visible on its own, so it is not counted).
+export function activeFilterCount(f: ItemFilters): number {
+  return (f.type ? 1 : 0) + (f.assignee ? 1 : 0) + (f.epicId ? 1 : 0);
+}
+
+// An item belongs to an epic if it is a story under it, or a task/bug under it directly or through its story.
+function inEpic(item: WorkItem, epicId: string, byId: Map<string, WorkItem>): boolean {
+  if (item.parentId === epicId) return true;
+  const parent = item.parentId ? byId.get(item.parentId) : undefined;
+  return parent?.type === 'story' && parent.parentId === epicId;
+}
+
+// Case-insensitive substring over ref and title, plus type, assignee and epic, all combined with AND.
+// Pass the whole project: the epic chain is resolved inside it. Cancelled items are the caller's concern.
+export function filterItems(items: WorkItem[], project: Pick<Project, 'key'> | undefined, f: ItemFilters): WorkItem[] {
+  const byId = new Map(items.map((i) => [i.id, i]));
+  const q = f.query.trim().toLowerCase();
+  return items.filter((item) => {
+    if (q && !itemRef(project, item).toLowerCase().includes(q) && !item.title.toLowerCase().includes(q)) return false;
+    if (f.type && item.type !== f.type) return false;
+    if (f.assignee && (f.assignee === 'unassigned' ? item.assignee !== null : item.assignee !== f.assignee)) return false;
+    if (f.epicId && !inEpic(item, f.epicId, byId)) return false;
+    return true;
+  });
+}
+
 // Taskboard rows: one per story (sorted), then "No story" for tasks/bugs whose parent is missing, an epic or
-// not a story. Epics never produce a row or a card. Pure, so it is recomputed from live items on every render.
-export function buildTaskboard(items: WorkItem[], typeFilter: WorkItemType | null, showCancelled: boolean): TaskboardRow[] {
+// not a story. Epics never produce a row or a card. A story row stays when the story or any child matches the
+// filters; cards that do not match are hidden. Pure, so it is recomputed from live items on every render.
+export function buildTaskboard(items: WorkItem[], project: Pick<Project, 'key'> | undefined, filters: ItemFilters, showCancelled: boolean): TaskboardRow[] {
   const storyIds = new Set(items.filter((i) => i.type === 'story').map((i) => i.id));
-  const childFilter = (i: WorkItem) => typeFilter === null || typeFilter === i.type;
+  const matching = new Set(filterItems(items, project, filters).map((i) => i.id));
+  const childFilter = (i: WorkItem) => matching.has(i.id);
   const makeRow = (story: WorkItem | null, children: WorkItem[]): TaskboardRow => {
     const byStatus = emptyByStatus();
     const counted = children.filter((c) => c.status !== 'cancelled');
@@ -122,7 +166,9 @@ export function buildTaskboard(items: WorkItem[], typeFilter: WorkItemType | nul
 
   const children = items.filter((i) => i.type !== 'epic' && i.type !== 'story');
   const stories = sortItems(items.filter((i) => i.type === 'story' && (showCancelled || i.status !== 'cancelled')));
-  const rows = stories.map((s) => makeRow(s, children.filter((c) => c.parentId === s.id)));
+  const rows = stories
+    .map((s) => makeRow(s, children.filter((c) => c.parentId === s.id)))
+    .filter((r) => matching.has(r.story!.id) || Object.values(r.byStatus).some((cards) => cards.length > 0));
   const loose = children.filter((c) => !c.parentId || !storyIds.has(c.parentId));
   const looseRow = makeRow(null, loose);
   if (Object.values(looseRow.byStatus).some((cards) => cards.length > 0)) rows.push(looseRow);

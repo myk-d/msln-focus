@@ -242,6 +242,20 @@ const en: Translations = {
     allTypes: 'All',
     showCancelled: 'Show cancelled',
     hideCancelled: 'Hide cancelled',
+    filter: {
+      filters: 'Filters',
+      type: 'Type',
+      assignee: 'Assignee',
+      epic: 'Epic',
+      all: 'All',
+      unassigned: 'Unassigned',
+      clear: 'Clear filters',
+    },
+    search: {
+      placeholderShort: 'Search',
+      placeholder: 'Search (/)',
+      label: 'Search by title or ref',
+    },
     board: {
       storyColumn: 'Story',
       noStory: 'No story',
@@ -251,6 +265,7 @@ const en: Translations = {
       expandAll: 'Expand all',
       progress: '{{done}} of {{total}} done',
       empty: 'No items yet. Add your first story.',
+      noResults: 'Nothing found',
       emptyStory: 'This story has no tasks yet',
     },
     dnd: {
