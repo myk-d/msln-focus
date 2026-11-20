@@ -128,3 +128,23 @@ export function buildTaskboard(items: WorkItem[], typeFilter: WorkItemType | nul
   if (Object.values(looseRow.byStatus).some((cards) => cards.length > 0)) rows.push(looseRow);
   return rows;
 }
+
+// Parent rules for creation: an epic has no parent, a story hangs under an epic (or nothing),
+// a task/bug under a story or an epic (or nothing).
+export function validParentTypes(type: WorkItemType): WorkItemType[] {
+  if (type === 'epic') return [];
+  if (type === 'story') return ['epic'];
+  return ['story', 'epic'];
+}
+
+// Live candidates for the parent select of a new item (cancelled items are not offered).
+export function parentCandidates(items: WorkItem[], type: WorkItemType): WorkItem[] {
+  const allowed = validParentTypes(type);
+  return sortItems(items.filter((i) => allowed.includes(i.type) && i.status !== 'cancelled'));
+}
+
+// Trimmed title, or null when nothing is left (empty / whitespace-only titles are never created).
+export function cleanTitle(raw: string): string | null {
+  const title = raw.trim();
+  return title ? title : null;
+}

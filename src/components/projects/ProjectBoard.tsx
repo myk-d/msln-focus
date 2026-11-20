@@ -24,7 +24,7 @@ import { ChevronsDownUp, ChevronsUpDown, FolderKanban } from 'lucide-react';
 import { BOARD_STATUSES, STATUS_META, buildTaskboard, itemRef, type TaskboardRow } from '../../lib/projects';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { ItemCard, ItemCardOverlay } from './ItemCard';
-import { QuickAddItem } from './QuickAddItem';
+import { NewItemForm, NewItemButton } from './NewItemForm';
 import { StoryHeader } from './StoryHeader';
 import type { Project, WorkItem, WorkItemStatus, WorkItemType } from '../../types';
 import type { NewItemInput } from '../../hooks/useProjectsStore';
@@ -58,12 +58,14 @@ export function ProjectBoard({ project, items, typeFilter, showCancelled, onSele
       if (!next.delete(key)) next.add(key);
       return next;
     });
+  // Row key whose inline quick-add is open (one at a time).
+  const [addingKey, setAddingKey] = useState<string | null>(null);
+  const addProps = { items, addingKey, onAddTask: (key: string) => setAddingKey((k) => (k === key ? null : key)), onCloseAdd: () => setAddingKey(null), onCreate };
   const toggleAll = () => setCollapsed(allCollapsed ? new Set() : new Set(rows.map((r) => r.key)));
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="flex items-center gap-2 px-4 pt-3 md:px-6">
-        <QuickAddItem defaultType={typeFilter ?? 'task'} onCreate={onCreate} />
         {rows.length > 0 && (
           <button
             onClick={toggleAll}
@@ -78,6 +80,7 @@ export function ProjectBoard({ project, items, typeFilter, showCancelled, onSele
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
           <FolderKanban size={36} className="text-stone-300" />
           <p className="max-w-sm text-sm text-stone-500">{t('projects.board.empty')}</p>
+          <NewItemButton project={project} items={items} types={['story', 'epic', 'task', 'bug']} label={t('projects.newItem.newStory')} onCreate={onCreate} />
         </div>
       ) : isDesktop ? (
         <TaskboardGrid
@@ -86,12 +89,13 @@ export function ProjectBoard({ project, items, typeFilter, showCancelled, onSele
           statuses={statuses}
           allItems={items}
           collapsed={collapsed}
+          {...addProps}
           onToggle={toggle}
           onSelect={onSelect}
           onMove={onMove}
         />
       ) : (
-        <TaskboardStack project={project} rows={rows} statuses={statuses} allItems={items} collapsed={collapsed} onToggle={toggle} onSelect={onSelect} />
+        <TaskboardStack project={project} rows={rows} statuses={statuses} allItems={items} collapsed={collapsed} onToggle={toggle} onSelect={onSelect} {...addProps} />
       )}
     </div>
   );
@@ -105,6 +109,16 @@ interface BoardViewProps {
   collapsed: Set<string>;
   onToggle: (key: string) => void;
   onSelect: (id: string) => void;
+  items: WorkItem[];
+  addingKey: string | null;
+  onAddTask: (rowKey: string) => void;
+  onCloseAdd: () => void;
+  onCreate: (input: NewItemInput) => Promise<unknown>;
+}
+
+// Quick-add for a row: story preselected as parent ("No story": none), types task/bug.
+function RowAddForm({ row, project, items, onCreate, onClose }: { row: TaskboardRow; project: Project; items: WorkItem[]; onCreate: (input: NewItemInput) => Promise<unknown>; onClose: () => void }) {
+  return <NewItemForm project={project} items={items} allowedTypes={['task', 'bug']} defaultType="task" parentId={row.story?.id ?? null} onCreate={onCreate} onClose={onClose} />;
 }
 
 // Cell ids are `${rowKey}:${status}`; rowKey is a story id or 'none', so split on the last colon.
@@ -135,7 +149,7 @@ const rowKeyboardCoordinates: KeyboardCoordinateGetter = (event, { context: { ac
 // returns the card); keyboard drags have no pointer and use the rect of the card moved by the coordinate getter.
 const collisionDetection: CollisionDetection = (args) => (args.pointerCoordinates ? pointerWithin(args) : rectIntersection(args));
 
-function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle, onSelect, onMove }: BoardViewProps & { onMove: (id: string, status: WorkItemStatus) => void }) {
+function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle, onSelect, onMove, items, addingKey, onAddTask, onCloseAdd, onCreate }: BoardViewProps & { onMove: (id: string, status: WorkItemStatus) => void }) {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState<string | null>(null);
   // MouseSensor + TouchSensor (not PointerSensor) so touch gets its own constraint: a long-press, so a
@@ -221,7 +235,11 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
             return (
               <div key={row.key} className="contents">
                 <div className="sticky left-0 z-10 border-b border-r border-stone-200 bg-canvas p-3 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)]">
-                  <StoryHeader row={row} project={project} collapsed={isCollapsed} onToggle={() => onToggle(row.key)} onSelect={onSelect} />
+                  <StoryHeader row={row} project={project} collapsed={isCollapsed} onToggle={() => onToggle(row.key)}
+                    onSelect={onSelect}
+                    onAddTask={() => onAddTask(row.key)}
+                    addForm={addingKey === row.key && <RowAddForm row={row} project={project} items={items} onCreate={onCreate} onClose={onCloseAdd} />}
+                  />
                 </div>
                 {isCollapsed ? (
                   <div className="border-b border-stone-200" style={{ gridColumn: '2 / -1' }} />
@@ -265,7 +283,7 @@ function DropCell({ rowKey, status, children }: { rowKey: string; status: WorkIt
 
 // Below `md`: one card per story, children grouped under non-empty status headings. No drag here —
 // the status is changed from the detail panel.
-function TaskboardStack({ project, rows, statuses, allItems, collapsed, onToggle, onSelect }: BoardViewProps) {
+function TaskboardStack({ project, rows, statuses, allItems, collapsed, onToggle, onSelect, items, addingKey, onAddTask, onCloseAdd, onCreate }: BoardViewProps) {
   const { t } = useTranslation();
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-3">
@@ -275,7 +293,11 @@ function TaskboardStack({ project, rows, statuses, allItems, collapsed, onToggle
           const groups = statuses.filter((s) => row.byStatus[s].length > 0);
           return (
             <section key={row.key} className="rounded-2xl bg-stone-100/70 p-3">
-              <StoryHeader row={row} project={project} collapsed={isCollapsed} onToggle={() => onToggle(row.key)} onSelect={onSelect} />
+              <StoryHeader row={row} project={project} collapsed={isCollapsed} onToggle={() => onToggle(row.key)}
+                    onSelect={onSelect}
+                    onAddTask={() => onAddTask(row.key)}
+                    addForm={addingKey === row.key && <RowAddForm row={row} project={project} items={items} onCreate={onCreate} onClose={onCloseAdd} />}
+                  />
               {!isCollapsed && (
                 <div className="mt-3 flex flex-col gap-3">
                   {row.story && row.childCount === 0 && <p className="text-sm text-stone-400">{t('projects.board.emptyStory')}</p>}
