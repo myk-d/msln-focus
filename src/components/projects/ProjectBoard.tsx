@@ -257,8 +257,7 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
                 {isCollapsed ? (
                   <div className="border-b border-border" style={{ gridColumn: '2 / -1' }} />
                 ) : row.story && row.childCount === 0 ? (
-                  <div className="flex items-center gap-3 border-b border-border p-3 text-sm text-muted" style={{ gridColumn: '2 / -1' }}>
-                    <Axl emotion="neutral" width={48} />
+                  <div className="border-b border-border p-3 text-sm text-muted" style={{ gridColumn: '2 / -1' }}>
                     {t('projects.board.emptyStory')}
                   </div>
                 ) : (
@@ -326,12 +325,7 @@ function TaskboardStack({ project, rows, statuses, allItems, collapsed, onToggle
                   />
               {!isCollapsed && (
                 <div className="mt-3 flex flex-col gap-3">
-                  {row.story && row.childCount === 0 && (
-                    <p className="flex items-center gap-3 text-sm text-muted">
-                      <Axl emotion="neutral" width={48} />
-                      {t('projects.board.emptyStory')}
-                    </p>
-                  )}
+                  {row.story && row.childCount === 0 && <p className="text-sm text-muted">{t('projects.board.emptyStory')}</p>}
                   {groups.map((status) => (
                     <div key={status} className="flex flex-col gap-2">
                       <h3 className="flex items-center gap-2 text-xs font-medium text-muted">

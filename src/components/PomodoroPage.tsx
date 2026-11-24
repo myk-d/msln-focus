@@ -24,7 +24,7 @@ export function PomodoroPage() {
           )}
         </div>
 
-        <aside className="rounded-2xl border border-border bg-surface p-5">
+        <aside className="self-start rounded-2xl border border-border bg-surface p-5">
         <PomodoroPresetList
           presets={presets}
           activePresetId={activePresetId}
