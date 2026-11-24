@@ -15,9 +15,9 @@ export default defineConfig({
 				enabled: true,
 			},
 			manifest: {
-				name: 'Focus-Pocus',
-				short_name: 'Focus-Pocus',
-				description: 'Task manager and Pomodoro timer',
+				name: 'Axo',
+				short_name: 'Axo',
+				description: 'Tasks, calendar, Pomodoro and a project board in one calm place',
 				theme_color: '#c9431f',
 				background_color: '#f7f3ec',
 				display: 'standalone',
