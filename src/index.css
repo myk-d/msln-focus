@@ -46,6 +46,7 @@
   --color-status-review: #6B3FA0;
   --color-avatar-claude: #D97757;
   --color-avatar-agent: #0277B3;
+  --color-icon-spark: #F0895C;
   --color-tag-rose: #B4234A;
   --color-tag-rose-soft: #FBE4EA;
   --color-tag-amber: #8F5A00;
@@ -105,6 +106,8 @@
     --color-status-review: #C3A6EC;
     --color-avatar-claude: #D97757;
     --color-avatar-agent: #38BDF8;
+    --color-icon-spark: #B8451C;
+  --color-icon-spark: #B8451C;
     --color-tag-rose: #F28BA8;
     --color-tag-rose-soft: #3A1C26;
     --color-tag-amber: #E6B65A;
@@ -163,6 +166,7 @@
   --color-status-review: #C3A6EC;
   --color-avatar-claude: #D97757;
   --color-avatar-agent: #38BDF8;
+  --color-icon-spark: #B8451C;
   --color-tag-rose: #F28BA8;
   --color-tag-rose-soft: #3A1C26;
   --color-tag-amber: #E6B65A;
