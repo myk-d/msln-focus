@@ -449,6 +449,11 @@ const en: Translations = {
     deleteSectionTitle: 'Delete section?',
     deleteSectionMessage: 'Tasks in this section will be moved to another section in the list.',
   },
+  errors: {
+    pageLoadTitle: 'Could not load this page',
+    pageLoadDescription: 'A new version of the app may have been deployed, or your connection dropped. Reload to continue.',
+    reload: 'Reload page',
+  },
 };
 
 export default en;

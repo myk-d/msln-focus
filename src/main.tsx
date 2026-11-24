@@ -8,7 +8,10 @@ import '@fontsource/ibm-plex-mono/500.css'
 import '@fontsource/ibm-plex-mono/600.css'
 import './index.css'
 import './i18n'
+import { installChunkReloadHandler } from './lib/chunkReload'
 import App from './App.tsx'
+
+installChunkReloadHandler()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
