@@ -317,6 +317,25 @@ export function useTaskStore() {
     );
   };
 
+  const reorderSubtasks = (taskId: string, orderedSubtaskIds: string[]) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const byId = new Map(t.subtasks.map((st) => [st.id, st]));
+        const reordered: Subtask[] = [];
+        for (const id of orderedSubtaskIds) {
+          const st = byId.get(id);
+          if (st) {
+            reordered.push(st);
+            byId.delete(id);
+          }
+        }
+        for (const remaining of byId.values()) reordered.push(remaining);
+        return { ...t, subtasks: reordered, updatedAt: Date.now() };
+      })
+    );
+  };
+
   // Toggling the switch on immediately syncs `completed` to the subtasks'
   // current state too, not just future changes.
   const setAutoCompleteWithSubtasks = (taskId: string, value: boolean) => {
@@ -416,6 +435,7 @@ export function useTaskStore() {
     updateSubtask,
     toggleSubtask,
     deleteSubtask,
+    reorderSubtasks,
     setAutoCompleteWithSubtasks,
     setPriority,
     setDueDate,
