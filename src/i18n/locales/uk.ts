@@ -165,6 +165,8 @@ const uk = {
     heading: 'Помодоро',
     subheading: 'Фокусуйтесь на одній задачі за раз',
     returnToPage: 'Повернути на сторінку',
+    sessionOf: 'Сесія {{current}} з {{total}}',
+    unlinkTask: 'Відв’язати задачу',
     settingsAria: 'Налаштування',
     pause: 'Пауза',
     start: 'Старт',

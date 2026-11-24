@@ -167,6 +167,8 @@ const en: Translations = {
     heading: 'Pomodoro',
     subheading: 'Focus on one task at a time',
     returnToPage: 'Return to page',
+    sessionOf: 'Session {{current}} of {{total}}',
+    unlinkTask: 'Unlink task',
     settingsAria: 'Settings',
     pause: 'Pause',
     start: 'Start',
