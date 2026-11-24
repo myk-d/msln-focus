@@ -140,9 +140,12 @@ export function filterItems(items: WorkItem[], project: Pick<Project, 'key'> | u
   });
 }
 
-// Taskboard rows: one per story (sorted), then "No story" for tasks/bugs whose parent is missing, an epic or
-// not a story. Epics never produce a row or a card. A story row stays when the story or any child matches the
-// filters; cards that do not match are hidden. Pure, so it is recomputed from live items on every render.
+const ACTIVE_BOARD_STATUSES: ReadonlySet<WorkItemStatus> = new Set(['todo', 'in-progress', 'in-review']);
+
+// Taskboard rows: one per story with at least one task/bug in todo/in-progress/in-review (sorted),
+// then "No story" for tasks/bugs whose parent is missing, an epic or not a story. Epics never produce
+// a row or a card. A story row stays when the story or any child matches the filters; cards that do
+// not match are hidden. Pure, so it is recomputed from live items on every render.
 export function buildTaskboard(items: WorkItem[], project: Pick<Project, 'key'> | undefined, filters: ItemFilters, showCancelled: boolean): TaskboardRow[] {
   const storyIds = new Set(items.filter((i) => i.type === 'story').map((i) => i.id));
   const matching = new Set(filterItems(items, project, filters).map((i) => i.id));
@@ -168,9 +171,12 @@ export function buildTaskboard(items: WorkItem[], project: Pick<Project, 'key'> 
 
   const children = items.filter((i) => i.type !== 'epic' && i.type !== 'story');
   const stories = sortItems(items.filter((i) => i.type === 'story' && (showCancelled || i.status !== 'cancelled')));
-  const rows = stories
-    .map((s) => makeRow(s, children.filter((c) => c.parentId === s.id)))
-    .filter((r) => matching.has(r.story!.id) || Object.values(r.byStatus).some((cards) => cards.length > 0));
+  const rows = stories.flatMap((s) => {
+    const storyChildren = children.filter((c) => c.parentId === s.id);
+    if (!storyChildren.some((c) => ACTIVE_BOARD_STATUSES.has(c.status))) return [];
+    const row = makeRow(s, storyChildren);
+    return matching.has(s.id) || Object.values(row.byStatus).some((cards) => cards.length > 0) ? [row] : [];
+  });
   const loose = children.filter((c) => !c.parentId || !storyIds.has(c.parentId));
   const looseRow = makeRow(null, loose);
   if (Object.values(looseRow.byStatus).some((cards) => cards.length > 0)) rows.push(looseRow);
