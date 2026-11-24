@@ -142,7 +142,8 @@ export function filterItems(items: WorkItem[], project: Pick<Project, 'key'> | u
 
 const ACTIVE_BOARD_STATUSES: ReadonlySet<WorkItemStatus> = new Set(['todo', 'in-progress', 'in-review']);
 
-// Taskboard rows: one per story with at least one task/bug in todo/in-progress/in-review (sorted),
+// Taskboard rows: one per story that is itself in todo/in-progress/in-review or has at least one
+// task/bug in those statuses (sorted); an active story with no active children shows its empty row,
 // then "No story" for tasks/bugs whose parent is missing, an epic or not a story. Epics never produce
 // a row or a card. A story row stays when the story or any child matches the filters; cards that do
 // not match are hidden. Pure, so it is recomputed from live items on every render.
@@ -173,7 +174,7 @@ export function buildTaskboard(items: WorkItem[], project: Pick<Project, 'key'> 
   const stories = sortItems(items.filter((i) => i.type === 'story' && (showCancelled || i.status !== 'cancelled')));
   const rows = stories.flatMap((s) => {
     const storyChildren = children.filter((c) => c.parentId === s.id);
-    if (!storyChildren.some((c) => ACTIVE_BOARD_STATUSES.has(c.status))) return [];
+    if (!ACTIVE_BOARD_STATUSES.has(s.status) && !storyChildren.some((c) => ACTIVE_BOARD_STATUSES.has(c.status))) return [];
     const row = makeRow(s, storyChildren);
     return matching.has(s.id) || Object.values(row.byStatus).some((cards) => cards.length > 0) ? [row] : [];
   });
