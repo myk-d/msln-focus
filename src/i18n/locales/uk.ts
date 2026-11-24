@@ -447,6 +447,11 @@ const uk = {
     deleteSectionTitle: 'Видалити секцію?',
     deleteSectionMessage: 'Завдання із цієї секції буде перенесено до іншої секції списку.',
   },
+  errors: {
+    pageLoadTitle: 'Не вдалося завантажити сторінку',
+    pageLoadDescription: 'Можливо, вийшла нова версія застосунку або зникло з’єднання. Оновіть сторінку, щоб продовжити.',
+    reload: 'Оновити сторінку',
+  },
 } as const;
 
 // Same nested key shape as `uk`, but with every leaf widened to `string` —
