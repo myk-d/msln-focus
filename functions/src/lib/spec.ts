@@ -6,7 +6,7 @@ import { ASSIGNEES, AUTHORS, ITEM_STATUSES, ITEM_TYPES, PRIORITIES, SEVERITIES }
  * а тест перевіряє, що кожен маршрут Express описаний тут і навпаки.
  * Змінили API — оновіть цей файл і підніміть API_VERSION.
  */
-export const API_VERSION = '1.1.0';
+export const API_VERSION = '1.2.0';
 
 export interface Endpoint {
 	method: 'GET' | 'POST' | 'PATCH';
@@ -51,7 +51,7 @@ export const ENDPOINTS: Endpoint[] = [
 		summary: 'Create an item. The number is assigned atomically per project.',
 		body: '{ "project": "FOC", "type": "bug", "title": "Timer resets on tab switch", "reproSteps": "1. ...", "priority": "high", "parent": "FOC-3", "labels": ["pomodoro"] }',
 		response: '201 { "item": { "ref": "FOC-13", ... } }',
-		notes: ['Required: `project`, `type`, `title`. Defaults: status `backlog`, priority `none`, assignee and severity `null`.', '`parent`, `blockedBy` (predecessors) and `related` take refs; unknown refs → 400.', '`severity` is kept only for bugs.'],
+		notes: ['Required: `project`, `type`, `title`. Defaults: status `backlog`, priority `none`, assignee and severity `null`.', '`parent`, `blockedBy` (predecessors) and `related` take refs; unknown refs → 400.', 'Parent type must fit the hierarchy: an epic has no parent, a story\'s parent is an epic, a task or bug\'s parent is a story or an epic; otherwise 400.', '`severity` is kept only for bugs.'],
 	},
 	{
 		method: 'GET',
@@ -68,7 +68,7 @@ export const ENDPOINTS: Endpoint[] = [
 		response: '{ "item": { ... } }',
 		notes: [
 			'Fields: `type`, `status`, `title`, `description` (markdown), `acceptanceCriteria`, `reproSteps` (markdown), `priority`, `severity`, `assignee`, `parent`, `blockedBy`, `related`, `labels`, `branch`, `prUrl`, `order`. Others → 400.',
-			'Arrays replace the stored value. `parent: null` detaches.',
+			'Arrays replace the stored value. `parent: null` detaches.', 'When `parent` or `type` changes, the parent type is checked as in POST /items (400 if it does not fit).',
 		],
 	},
 	{

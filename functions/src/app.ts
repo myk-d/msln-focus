@@ -37,6 +37,17 @@ export const createApp = (store: Store, getApiKey: () => string) => {
 		if (!item) throw new HttpError(status, `Item ${ref} not found`);
 		return item;
 	};
+	/** Hierarchy rules (same as the UI's validParentTypes): epic → no parent, story → epic, task/bug → story or epic. */
+	const PARENT_TYPES: Record<WorkItem['type'], WorkItem['type'][]> = { epic: [], story: ['epic'], task: ['story', 'epic'], bug: ['story', 'epic'] };
+	const checkParentType = async (type: WorkItem['type'], parentId: string | null) => {
+		if (!parentId) return;
+		const parent = await store.getItem(parentId);
+		if (parent && !PARENT_TYPES[type].includes(parent.type)) {
+			const allowed = PARENT_TYPES[type].join(' or ') || 'no parent';
+			const an = (w: string) => (/^[aeiou]/.test(w) ? 'an' : 'a');
+			throw new HttpError(400, `${an(type) === 'an' ? 'An' : 'A'} ${type} cannot have ${an(parent.type)} ${parent.type} as parent (allowed: ${allowed})`);
+		}
+	};
 	/** parent / blockedBy приходять посиланнями (FOC-12), зберігаються як id. Невідоме посилання → 400. */
 	const resolveLinks = async (self: WorkItem | null, parent: string | null | undefined, blockedBy: string[] | undefined, related?: string[]) => {
 		const out: Pick<ItemChanges, 'parentId' | 'blockedBy' | 'related'> = {};
@@ -136,6 +147,7 @@ export const createApp = (store: Store, getApiKey: () => string) => {
 			const { project: key, parent, blockedBy, related, ...fields } = itemCreate.parse(req.body);
 			const project = await projectOrThrow(key);
 			const links = await resolveLinks(null, parent, blockedBy, related);
+			await checkParentType(fields.type, links.parentId ?? null);
 			const item = await store.createItem(project.id, {
 				...fields,
 				severity: fields.type === 'bug' ? fields.severity : null,
@@ -163,6 +175,10 @@ export const createApp = (store: Store, getApiKey: () => string) => {
 			const item = await itemOrThrow(req.params.ref);
 			const { parent, blockedBy, related, ...rest } = patch;
 			const links = await resolveLinks(item, parent, blockedBy, related);
+			// Checked only when the parent or the type changes, so items saved before this rule still update.
+			if (parent !== undefined || rest.type !== undefined) {
+				await checkParentType(rest.type ?? item.type, links.parentId !== undefined ? links.parentId : item.parentId);
+			}
 			const updated = await store.updateItem(item.id, { ...rest, ...links });
 			res.json({ item: await buildView(store, updated) });
 		}),

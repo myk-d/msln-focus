@@ -115,6 +115,21 @@ describe('items', () => {
 		const detached = await call('/items/FOC-2', 'PATCH', { parent: null });
 		expect(detached.json.item.parent).toBeNull();
 	});
+	it('enforces the parent type hierarchy on create and on parent/type changes', async () => {
+		await seed(); // FOC-1 epic, FOC-2 story (parent FOC-1), FOC-3 bug
+		expect((await call('/items', 'POST', { project: 'FOC', type: 'story', title: 'x', parent: 'FOC-2' })).status).toBe(400);
+		expect((await call('/items', 'POST', { project: 'FOC', type: 'epic', title: 'x', parent: 'FOC-1' })).status).toBe(400);
+		expect((await call('/items', 'POST', { project: 'FOC', type: 'task', title: 'x', parent: 'FOC-3' })).status).toBe(400);
+		expect((await call('/items', 'POST', { project: 'FOC', type: 'task', title: 'under story', parent: 'FOC-2' })).status).toBe(201);
+		expect((await call('/items', 'POST', { project: 'FOC', type: 'bug', title: 'under epic', parent: 'FOC-1' })).status).toBe(201);
+		expect((await call('/items/FOC-3', 'PATCH', { parent: 'FOC-2' })).status).toBe(200);
+		expect((await call('/items/FOC-2', 'PATCH', { parent: 'FOC-3' })).status).toBe(400);
+		const err = await call('/items/FOC-2', 'PATCH', { type: 'epic' });
+		expect(err.status).toBe(400);
+		expect(err.json.error).toMatch(/An epic cannot have an epic as parent/);
+		expect((await call('/items/FOC-2', 'PATCH', { type: 'epic', parent: null })).status).toBe(200);
+		expect((await call('/items/FOC-3', 'PATCH', { status: 'in-progress' })).status).toBe(200);
+	});
 	it('404 for a missing item, 400 for a malformed ref', async () => {
 		await seed();
 		expect((await call('/items/FOC-42')).status).toBe(404);
