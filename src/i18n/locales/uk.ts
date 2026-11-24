@@ -355,6 +355,8 @@ const uk = {
     itemTitlePlaceholder: 'Назва задачі',
     blocked: 'заблоковано',
     deleteItem: 'Видалити задачу',
+    copyRef: 'Копіювати номер',
+    copiedRef: 'Скопійовано',
     close: 'Закрити',
     noParent: 'Без батьківської',
     labelsPlaceholder: 'через кому',

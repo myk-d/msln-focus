@@ -357,6 +357,8 @@ const en: Translations = {
     itemTitlePlaceholder: 'Item title',
     blocked: 'blocked',
     deleteItem: 'Delete item',
+    copyRef: 'Copy reference',
+    copiedRef: 'Copied',
     close: 'Close',
     noParent: 'No parent',
     labelsPlaceholder: 'comma-separated',
