@@ -1,6 +1,6 @@
-# Focus-Pocus
+# Axo
 
-A task manager, calendar, Pomodoro timer, and projects tracker, built as a single-page React app with an original visual design. Sign in with Google to use it — tasks, lists, sections, tags, calendar events, and Pomodoro presets/settings/stats all persist to Firestore, scoped to your account.
+Axo (formerly Focus-Pocus) is a task manager, calendar, Pomodoro timer and projects tracker in one calm place, built as a single-page React app. The brand (logo, tokens, screens) lives in [`docs/product/brand/`](docs/product/brand/index.html). Sign in with Google to use it — tasks, lists, sections, tags, calendar events, and Pomodoro presets/settings/stats all persist to Firestore, scoped to your account.
 
 ## Features
 
