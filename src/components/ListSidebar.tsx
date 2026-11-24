@@ -77,17 +77,17 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
         <div onClick={onCloseMobile} className="animate-fade-in fixed inset-0 z-20 bg-black/30 md:hidden" />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-72 shrink-0 flex-col gap-1 overflow-y-auto border-r border-stone-200 bg-white px-3 py-6 md:static md:z-auto md:flex md:w-56 ${
+        className={`fixed inset-y-0 left-0 z-30 w-72 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-surface px-3 py-6 md:static md:z-auto md:flex md:w-56 ${
           mobileOpen ? 'animate-slide-in-left flex' : 'hidden'
         }`}
       >
         <div className="mb-1 flex items-center justify-between md:hidden">
-          <h2 className="px-2 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.lists')}</h2>
-          <button onClick={onCloseMobile} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+          <h2 className="px-2 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.lists')}</h2>
+          <button onClick={onCloseMobile} className="rounded p-1 text-muted hover:bg-surface-sunken hover:text-text">
             <X size={18} />
           </button>
         </div>
-        <h2 className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400 md:block">{t('tasks.lists')}</h2>
+        <h2 className="hidden px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-muted md:block">{t('tasks.lists')}</h2>
       {lists.map((list) => (
         <ListSidebarRow
           key={list.id}
@@ -115,16 +115,16 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
             onBlur={commitAdd}
             onKeyDown={(e) => e.key === 'Enter' && commitAdd()}
             placeholder={t('tasks.newListPlaceholder')}
-            className="flex-1 rounded-lg border border-stone-200 px-2 py-1 text-sm outline-none focus:border-brand-400"
+            className="flex-1 rounded-lg border border-border px-2 py-1 text-sm outline-none focus:border-ring"
           />
-          <button onClick={commitAdd} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+          <button onClick={commitAdd} className="shrink-0 rounded-full p-1 text-primary hover:bg-primary-soft" aria-label={t('tasks.save')}>
             <Plus size={14} />
           </button>
         </div>
       ) : (
         <button
           onClick={() => setIsAdding(true)}
-          className="mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2 text-left text-sm text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+          className="mt-1 flex items-center gap-1.5 rounded-xl px-3 py-2 text-left text-sm text-muted hover:bg-surface-sunken hover:text-text"
         >
           <Plus size={14} /> {t('tasks.newList')}
         </button>
@@ -132,7 +132,7 @@ export function ListSidebar({ activeTagId, onSelectTag, onSelectList, mobileOpen
 
       {tags.length > 0 && (
         <>
-          <h2 className="mt-4 px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.tags')}</h2>
+          <h2 className="mt-4 px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.tags')}</h2>
           {tags.map((tag) => (
             <TagSidebarRow
               key={tag.id}

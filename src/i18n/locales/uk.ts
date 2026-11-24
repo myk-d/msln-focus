@@ -12,6 +12,10 @@ const uk = {
     signOut: 'Вийти',
     account: 'Акаунт',
     language: 'Мова',
+    theme: 'Тема',
+    themeSystem: 'Як у системі',
+    themeLight: 'Світла',
+    themeDark: 'Темна',
   },
   welcome: {
     tagline: 'Задачі, календар, Помодоро й дошка проєктів — в одному спокійному місці, синхронізовані з вашим Google-акаунтом.',

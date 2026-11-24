@@ -163,18 +163,18 @@ export function formatTime(totalSeconds: number): string {
 }
 
 export const PRIORITY_META: Record<Priority, { labelKey: string; colorClass: string; dotClass: string }> = {
-  high: { labelKey: 'priority.high', colorClass: 'text-red-500', dotClass: 'bg-red-500' },
-  medium: { labelKey: 'priority.medium', colorClass: 'text-amber-500', dotClass: 'bg-amber-500' },
-  low: { labelKey: 'priority.low', colorClass: 'text-blue-500', dotClass: 'bg-blue-500' },
-  none: { labelKey: 'priority.none', colorClass: 'text-stone-400', dotClass: 'bg-stone-300' },
+  high: { labelKey: 'priority.high', colorClass: 'text-danger', dotClass: 'bg-danger' },
+  medium: { labelKey: 'priority.medium', colorClass: 'text-warning', dotClass: 'bg-warning' },
+  low: { labelKey: 'priority.low', colorClass: 'text-info', dotClass: 'bg-info' },
+  none: { labelKey: 'priority.none', colorClass: 'text-muted', dotClass: 'bg-border-strong' },
 };
 
 export const PRIORITY_ORDER: Priority[] = ['high', 'medium', 'low', 'none'];
 
 export const PHASE_META: Record<PomodoroPhase, { labelKey: string; ring: string; text: string; soft: string }> = {
-  focus: { labelKey: 'pomodoro.focus', ring: 'stroke-brand-500', text: 'text-brand-700', soft: 'bg-brand-50' },
-  shortBreak: { labelKey: 'pomodoro.shortBreak', ring: 'stroke-emerald-500', text: 'text-emerald-700', soft: 'bg-emerald-50' },
-  longBreak: { labelKey: 'pomodoro.longBreak', ring: 'stroke-indigo-500', text: 'text-indigo-700', soft: 'bg-indigo-50' },
+  focus: { labelKey: 'pomodoro.focus', ring: 'stroke-phase-focus', text: 'text-phase-focus', soft: 'bg-accent-soft' },
+  shortBreak: { labelKey: 'pomodoro.shortBreak', ring: 'stroke-phase-short', text: 'text-phase-short', soft: 'bg-success-soft' },
+  longBreak: { labelKey: 'pomodoro.longBreak', ring: 'stroke-phase-long', text: 'text-phase-long', soft: 'bg-phase-long-soft' },
 };
 
 export const TAG_COLOR_ORDER: TagColor[] = ['rose', 'amber', 'emerald', 'sky', 'violet', 'stone'];
@@ -183,12 +183,12 @@ export const TAG_COLOR_ORDER: TagColor[] = ['rose', 'amber', 'emerald', 'sky', '
 // specifically (chip and full cell/column background), distinct from the
 // muted `bg` swatch regular timed-event chips use.
 export const TAG_COLOR_META: Record<TagColor, { bg: string; text: string; dot: string; wash: string }> = {
-  rose: { bg: 'bg-rose-50', text: 'text-rose-600', dot: 'bg-rose-500', wash: 'bg-rose-500/10' },
-  amber: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', wash: 'bg-amber-500/10' },
-  emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', wash: 'bg-emerald-500/10' },
-  sky: { bg: 'bg-sky-50', text: 'text-sky-700', dot: 'bg-sky-500', wash: 'bg-sky-500/10' },
-  violet: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500', wash: 'bg-violet-500/10' },
-  stone: { bg: 'bg-stone-100', text: 'text-stone-600', dot: 'bg-stone-400', wash: 'bg-stone-500/10' },
+  rose: { bg: 'bg-tag-rose-soft', text: 'text-tag-rose', dot: 'bg-tag-rose', wash: 'bg-tag-rose/10' },
+  amber: { bg: 'bg-tag-amber-soft', text: 'text-tag-amber', dot: 'bg-tag-amber', wash: 'bg-tag-amber/10' },
+  emerald: { bg: 'bg-tag-emerald-soft', text: 'text-tag-emerald', dot: 'bg-tag-emerald', wash: 'bg-tag-emerald/10' },
+  sky: { bg: 'bg-tag-sky-soft', text: 'text-tag-sky', dot: 'bg-tag-sky', wash: 'bg-tag-sky/10' },
+  violet: { bg: 'bg-tag-violet-soft', text: 'text-tag-violet', dot: 'bg-tag-violet', wash: 'bg-tag-violet/10' },
+  stone: { bg: 'bg-tag-stone-soft', text: 'text-tag-stone', dot: 'bg-tag-stone', wash: 'bg-tag-stone/10' },
 };
 
 export function nextTagColor(existingCount: number): TagColor {

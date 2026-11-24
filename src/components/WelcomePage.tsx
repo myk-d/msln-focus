@@ -41,34 +41,34 @@ export function WelcomePage() {
   };
 
   return (
-    <div className="relative flex h-dvh w-full flex-col items-center overflow-y-auto bg-canvas px-6 py-16">
+    <div className="relative flex h-dvh w-full flex-col items-center overflow-y-auto bg-bg px-6 py-16">
       <div className="absolute right-4 top-4">
         <LanguageSwitcher />
       </div>
-      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg">
+      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-lg">
         <Timer size={28} />
       </div>
-      <h1 className="text-center text-3xl font-black tracking-tight text-stone-900">Axo</h1>
-      <p className="mt-2 max-w-md text-center text-sm text-stone-500">{t('welcome.tagline')}</p>
+      <h1 className="text-center text-3xl font-black tracking-tight text-text">Axo</h1>
+      <p className="mt-2 max-w-md text-center text-sm text-muted">{t('welcome.tagline')}</p>
 
       <button
         onClick={() => void handleSignIn()}
         disabled={pending}
-        className="mt-8 flex items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-8 flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-md transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending && <LoaderCircle size={16} className="animate-spin" />}
         {t('welcome.signInWithGoogle')}
       </button>
-      {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-3 text-xs text-danger">{error}</p>}
 
       <div className="mt-14 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
         {FEATURES.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="rounded-2xl border border-stone-200 bg-white p-5 text-center shadow-sm">
-            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+          <div key={title} className="rounded-2xl border border-border bg-surface p-5 text-center shadow-sm">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
               <Icon size={20} />
             </div>
-            <h2 className="text-sm font-semibold text-stone-800">{title}</h2>
-            <p className="mt-1 text-xs text-stone-500">{description}</p>
+            <h2 className="text-sm font-semibold text-text">{title}</h2>
+            <p className="mt-1 text-xs text-muted">{description}</p>
           </div>
         ))}
       </div>

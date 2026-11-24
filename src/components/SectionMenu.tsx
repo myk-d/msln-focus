@@ -66,7 +66,7 @@ export function SectionMenu({
             <span className="flex items-center gap-2">
               <FolderInput size={15} /> {t('tasks.moveTo')}
             </span>
-            <span className="text-stone-400">›</span>
+            <span className="text-muted">›</span>
           </button>
           {showMoveTo && (
             <div className={`${popoverClass} absolute left-0 top-full mt-1 w-44 p-1`}>
@@ -80,12 +80,12 @@ export function SectionMenu({
         </div>
       )}
 
-      <div className="my-1 border-t border-stone-100" />
+      <div className="my-1 border-t border-border-subtle" />
 
       <button
         onClick={handleDelete}
         disabled={!canDelete}
-        className={`${menuItemClass} text-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-stone-300 disabled:hover:bg-transparent`}
+        className={`${menuItemClass} text-danger hover:bg-danger-soft disabled:cursor-not-allowed disabled:text-faint disabled:hover:bg-transparent`}
       >
         <Trash2 size={15} /> {t('tasks.deleteSection')}
       </button>

@@ -51,10 +51,10 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full flex-wrap items-center gap-1.5 rounded-xl border border-dashed border-stone-200 px-2.5 py-1.5 text-left hover:border-stone-300"
+        className="flex w-full flex-wrap items-center gap-1.5 rounded-xl border border-dashed border-border px-2.5 py-1.5 text-left hover:border-border-strong"
       >
         {selectedTags.length === 0 ? (
-          <span className="flex items-center gap-1.5 text-xs text-stone-400">
+          <span className="flex items-center gap-1.5 text-xs text-muted">
             <TagIcon size={13} /> {t('tasks.addTags')}
           </span>
         ) : (
@@ -71,8 +71,8 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
 
       {open && (
         <div className={`${popoverClass} absolute left-0 top-10 z-30 w-64 p-2`}>
-          <div className="mb-2 flex flex-wrap items-center gap-1.5 rounded-lg border border-stone-200 px-2 py-1.5">
-            <Search size={13} className="shrink-0 text-stone-400" />
+          <div className="mb-2 flex flex-wrap items-center gap-1.5 rounded-lg border border-border px-2 py-1.5">
+            <Search size={13} className="shrink-0 text-muted" />
             {selectedTags.map((tag) => (
               <span
                 key={tag.id}
@@ -90,7 +90,7 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
               placeholder={t('tasks.enterTag')}
-              className="min-w-15 flex-1 bg-transparent text-xs outline-none placeholder:text-stone-400"
+              className="min-w-15 flex-1 bg-transparent text-xs outline-none placeholder:text-muted"
             />
           </div>
 
@@ -102,8 +102,8 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
             )}
 
             {filtered.length === 0 && !query.trim() && (
-              <div className="flex flex-col items-center gap-2 px-2 py-6 text-center text-xs text-stone-400">
-                <TagIcon size={28} className="text-stone-200" />
+              <div className="flex flex-col items-center gap-2 px-2 py-6 text-center text-xs text-muted">
+                <TagIcon size={28} className="text-faint" />
                 {t('tasks.noTags')}
               </div>
             )}
@@ -115,12 +115,12 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
                     <span className={`h-2 w-2 rounded-full ${TAG_COLOR_META[tag.color].dot}`} />
                     {tag.name}
                   </span>
-                  {selectedTagIds.includes(tag.id) && <Check size={14} className="text-brand-600" />}
+                  {selectedTagIds.includes(tag.id) && <Check size={14} className="text-primary" />}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDeleteTag(tag)}
-                  className="shrink-0 rounded p-1.5 text-stone-300 hover:bg-red-50 hover:text-red-500 md:hidden md:group-hover:block"
+                  className="shrink-0 rounded p-1.5 text-faint hover:bg-danger-soft hover:text-danger md:hidden md:group-hover:block"
                   aria-label={t('tasks.deleteTagAria')}
                 >
                   <Trash2 size={13} />
@@ -129,18 +129,18 @@ export function TagPicker({ selectedTagIds, allTags, onToggle, onCreate, onDelet
             ))}
           </div>
 
-          <div className="mt-2 flex justify-end gap-2 border-t border-stone-100 pt-2">
+          <div className="mt-2 flex justify-end gap-2 border-t border-border-subtle pt-2">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-full px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-100"
+              className="rounded-full px-3 py-1 text-xs font-medium text-muted hover:bg-surface-sunken"
             >
               {t('tasks.cancel')}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white hover:bg-brand-700"
+              className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:bg-primary-hover"
             >
               {t('tasks.ok')}
             </button>

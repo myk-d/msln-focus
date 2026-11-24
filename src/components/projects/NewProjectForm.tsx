@@ -50,7 +50,7 @@ export function NewProjectForm({ existingKeys, onCreate, onCreated }: NewProject
     return (
       <button
         onClick={() => setOpen(true)}
-        className="mt-1 flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-stone-400 transition hover:bg-stone-100 hover:text-stone-600"
+        className="mt-1 flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted transition hover:bg-surface-sunken hover:text-text"
       >
         <Plus size={15} />
         {t('projects.newProject')}
@@ -59,7 +59,7 @@ export function NewProjectForm({ existingKeys, onCreate, onCreated }: NewProject
   }
 
   return (
-    <form onSubmit={(e) => void submit(e)} className="mt-2 flex flex-col gap-2 rounded-xl border border-stone-200 bg-white p-2">
+    <form onSubmit={(e) => void submit(e)} className="mt-2 flex flex-col gap-2 rounded-xl border border-border bg-surface p-2">
       <input
         autoFocus
         value={key}
@@ -70,15 +70,15 @@ export function NewProjectForm({ existingKeys, onCreate, onCreated }: NewProject
       />
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('projects.namePlaceholder')} className={inputClass} />
       <input value={repo} onChange={(e) => setRepo(e.target.value)} placeholder={t('projects.repoPlaceholder')} className={inputClass} />
-      {error && <p className="px-1 text-xs text-red-500">{error}</p>}
+      {error && <p className="px-1 text-xs text-danger">{error}</p>}
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={reset} className="rounded-lg px-3 py-1.5 text-sm text-stone-500 hover:bg-stone-100">
+        <button type="button" onClick={reset} className="rounded-lg px-3 py-1.5 text-sm text-muted hover:bg-surface-sunken">
           {t('tasks.cancel')}
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+          className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-on-primary hover:bg-primary-hover disabled:opacity-50"
         >
           {t('projects.create')}
         </button>

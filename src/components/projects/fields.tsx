@@ -30,11 +30,11 @@ export function TagInput({ value, suggestions, onChange }: { value: string[]; su
   return (
     <div ref={ref} className="relative flex flex-wrap items-center gap-1">
       {value.map((tag) => (
-        <span key={tag} className="group flex items-center gap-1 rounded bg-sky-50 py-0.5 pr-1 pl-2 text-xs text-sky-800">
+        <span key={tag} className="group flex items-center gap-1 rounded bg-info-soft py-0.5 pr-1 pl-2 text-xs text-info">
           {tag}
           <button
             onClick={() => onChange(value.filter((v) => v !== tag))}
-            className="rounded p-0.5 text-sky-400 hover:bg-sky-100 hover:text-sky-700"
+            className="rounded p-0.5 text-info hover:bg-info-soft hover:text-info/80"
             aria-label={t('projects.removeTag', { tag })}
           >
             <X size={11} />
@@ -55,12 +55,12 @@ export function TagInput({ value, suggestions, onChange }: { value: string[]; su
             if (e.key === 'Backspace' && !draft && value.length) onChange(value.slice(0, -1));
           }}
           placeholder={t('projects.tagPlaceholder')}
-          className="w-32 rounded border border-sky-300 px-2 py-0.5 text-xs outline-none"
+          className="w-32 rounded border border-info/40 px-2 py-0.5 text-xs outline-none"
         />
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-700"
+          className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted hover:bg-surface-sunken hover:text-text"
         >
           <Tag size={12} />
           {value.length ? <Plus size={12} /> : t('projects.addTag')}
@@ -70,13 +70,13 @@ export function TagInput({ value, suggestions, onChange }: { value: string[]; su
         <div className={`${popoverClass} absolute top-full left-0 z-20 mt-1 w-56 p-1`}>
           {matches.map((m) => (
             <button key={m} onClick={() => add(m)} className={menuItemClass}>
-              <Tag size={13} className="text-stone-400" />
+              <Tag size={13} className="text-muted" />
               {m}
             </button>
           ))}
           {q && !suggestions.some((s) => s.toLowerCase() === q) && (
             <button onClick={() => add(draft)} className={menuItemClass}>
-              <Plus size={13} className="text-stone-400" />
+              <Plus size={13} className="text-muted" />
               {t('projects.createTag', { tag: draft.trim() })}
             </button>
           )}
@@ -92,7 +92,7 @@ export function AssigneeAvatar({ assignee, photoURL, size = 20 }: { assignee: As
   const style = { width: size, height: size, fontSize: size * 0.42 };
   if (!assignee)
     return (
-      <span style={style} className="flex shrink-0 items-center justify-center rounded-full border border-dashed border-stone-300 text-stone-300">
+      <span style={style} className="flex shrink-0 items-center justify-center rounded-full border border-dashed border-border-strong text-faint">
         <User size={size * 0.6} />
       </span>
     );
@@ -112,9 +112,9 @@ export function AssigneePicker({ value, photoURL, onChange }: { value: Assignee 
   useClickOutside(ref, () => setOpen(false));
   return (
     <div ref={ref} className="relative">
-      <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 rounded px-1.5 py-1 text-sm text-stone-700 hover:bg-stone-100">
+      <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 rounded px-1.5 py-1 text-sm text-text hover:bg-surface-sunken">
         <AssigneeAvatar assignee={value} photoURL={photoURL} />
-        <span className={value ? '' : 'text-stone-400'}>{value ? t(ASSIGNEE_META[value].labelKey) : t('projects.unassigned')}</span>
+        <span className={value ? '' : 'text-muted'}>{value ? t(ASSIGNEE_META[value].labelKey) : t('projects.unassigned')}</span>
       </button>
       {open && (
         <div className={`${popoverClass} absolute top-full left-0 z-20 mt-1 w-48 p-1`}>
@@ -125,7 +125,7 @@ export function AssigneePicker({ value, photoURL, onChange }: { value: Assignee 
                 onChange(a);
                 setOpen(false);
               }}
-              className={`${menuItemClass} ${a === value ? 'bg-stone-100' : ''}`}
+              className={`${menuItemClass} ${a === value ? 'bg-surface-sunken' : ''}`}
             >
               <AssigneeAvatar assignee={a} photoURL={photoURL} size={18} />
               {a ? t(ASSIGNEE_META[a].labelKey) : t('projects.unassigned')}
@@ -154,7 +154,7 @@ export function MarkdownField({ value, placeholder, onSave }: { value: string; p
           setDraft(value);
           setEditing(true);
         }}
-        className="md-content cursor-text rounded-lg p-2 -mx-2 hover:bg-stone-50"
+        className="md-content cursor-text rounded-lg p-2 -mx-2 hover:bg-surface-hover"
         // Sanitized by DOMPurify in renderMarkdown.
         dangerouslySetInnerHTML={{ __html: html }}
       />
@@ -164,7 +164,7 @@ export function MarkdownField({ value, placeholder, onSave }: { value: string; p
           setDraft(value);
           setEditing(true);
         }}
-        className="w-full rounded-lg p-2 -mx-2 text-left text-sm text-stone-400 hover:bg-stone-50"
+        className="w-full rounded-lg p-2 -mx-2 text-left text-sm text-muted hover:bg-surface-hover"
       >
         {placeholder}
       </button>
@@ -178,18 +178,18 @@ export function MarkdownField({ value, placeholder, onSave }: { value: string; p
   };
 
   return (
-    <div className="rounded-xl border border-stone-200 focus-within:border-brand-300 focus-within:ring-2 focus-within:ring-brand-100">
-      <div className="flex items-center gap-1 border-b border-stone-100 px-2 pt-1.5">
+    <div className="rounded-xl border border-border focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-ring/30">
+      <div className="flex items-center gap-1 border-b border-border-subtle px-2 pt-1.5">
         {(['write', 'preview'] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
-            className={`rounded-t-md px-2.5 py-1 text-xs ${tab === k ? 'border-b-2 border-brand-500 font-medium text-stone-800' : 'text-stone-500 hover:text-stone-700'}`}
+            className={`rounded-t-md px-2.5 py-1 text-xs ${tab === k ? 'border-b-2 border-primary font-medium text-text' : 'text-muted hover:text-text'}`}
           >
             {t(k === 'write' ? 'projects.mdWrite' : 'projects.mdPreview')}
           </button>
         ))}
-        <span className="ml-auto pb-1 text-[10px] text-stone-400">Markdown</span>
+        <span className="ml-auto pb-1 text-[10px] text-muted">Markdown</span>
       </div>
       {tab === 'write' ? (
         <textarea
@@ -203,16 +203,16 @@ export function MarkdownField({ value, placeholder, onSave }: { value: string; p
             if (e.key === 'Escape') setEditing(false);
           }}
           placeholder={placeholder}
-          className="block w-full resize-none overflow-hidden bg-transparent p-3 font-mono text-[13px] text-stone-700 outline-none placeholder:font-sans placeholder:text-stone-400"
+          className="block w-full resize-none overflow-hidden bg-transparent p-3 font-mono text-[13px] text-text outline-none placeholder:font-sans placeholder:text-muted"
         />
       ) : (
         <div className="md-content min-h-24 p-3" dangerouslySetInnerHTML={{ __html: html }} />
       )}
-      <div className="flex justify-end gap-2 border-t border-stone-100 p-2">
-        <button onClick={() => setEditing(false)} className="rounded-lg px-3 py-1 text-xs text-stone-500 hover:bg-stone-100">
+      <div className="flex justify-end gap-2 border-t border-border-subtle p-2">
+        <button onClick={() => setEditing(false)} className="rounded-lg px-3 py-1 text-xs text-muted hover:bg-surface-sunken">
           {t('tasks.cancel')}
         </button>
-        <button onClick={save} className="rounded-lg bg-brand-600 px-3 py-1 text-xs font-medium text-white hover:bg-brand-700">
+        <button onClick={save} className="rounded-lg bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:bg-primary-hover">
           {t('tasks.save')}
         </button>
       </div>
@@ -247,8 +247,8 @@ export function ItemPicker({
 
   return (
     <div ref={ref} className={`${popoverClass} absolute top-full right-0 z-30 mt-1 w-80 p-2`}>
-      <div className="flex items-center gap-2 rounded-lg border border-stone-200 px-2">
-        <Search size={14} className="text-stone-400" />
+      <div className="flex items-center gap-2 rounded-lg border border-border px-2">
+        <Search size={14} className="text-muted" />
         <input
           autoFocus
           value={q}
@@ -260,14 +260,14 @@ export function ItemPicker({
       </div>
       <div className="mt-1 max-h-72 overflow-y-auto">
         {results.length === 0 ? (
-          <p className="px-2 py-3 text-center text-xs text-stone-400">{t('projects.nothingFound')}</p>
+          <p className="px-2 py-3 text-center text-xs text-muted">{t('projects.nothingFound')}</p>
         ) : (
           results.map((i) => {
             const { icon: Icon, color } = TYPE_META[i.type];
             return (
               <button key={i.id} onClick={() => onPick(i)} className={menuItemClass}>
                 <Icon size={13} className={`shrink-0 ${color}`} />
-                <span className="shrink-0 font-mono text-xs text-stone-400">{itemRef(project, i)}</span>
+                <span className="shrink-0 font-mono text-xs text-muted">{itemRef(project, i)}</span>
                 <span className="truncate">{i.title}</span>
                 <span className={`ml-auto h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_META[i.status].dot}`} />
               </button>

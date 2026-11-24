@@ -51,14 +51,14 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
 
   if (variant === 'placeholder') {
     return (
-      <div className={`flex items-center justify-between rounded-2xl border border-stone-200 p-4 ${meta.soft}`}>
+      <div className={`flex items-center justify-between rounded-2xl border border-border p-4 ${meta.soft}`}>
         <div>
           <div className={`text-xs font-medium ${meta.text}`}>{t(meta.labelKey)}</div>
-          <div className="font-mono text-2xl font-bold text-stone-800">{formatTime(timeLeft)}</div>
+          <div className="font-mono text-2xl font-bold text-text">{formatTime(timeLeft)}</div>
         </div>
         <button
           onClick={onClosePiP}
-          className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm hover:bg-stone-50"
+          className="flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-sm hover:bg-surface-hover"
         >
           <Undo2 size={13} /> {t('pomodoro.returnToPage')}
         </button>
@@ -69,7 +69,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
   return (
     <div
       key={flashKey}
-      className={`flex flex-col items-center rounded-3xl border border-stone-200 bg-white shadow-sm animate-phase-flash ${
+      className={`flex flex-col items-center rounded-3xl border border-border bg-surface shadow-sm animate-phase-flash ${
         variant === 'pip' ? 'gap-[clamp(0.5rem,3vmin,1rem)] p-[clamp(0.75rem,4vmin,1.5rem)]' : 'gap-4 p-6'
       }`}
     >
@@ -77,7 +77,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
         <div className="flex items-center gap-1.5">
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${meta.soft} ${meta.text}`}>{t(meta.labelKey)}</span>
           {activePreset && variant !== 'pip' && (
-            <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-500">
+            <span className="rounded-full bg-surface-sunken px-2.5 py-1 text-xs font-medium text-muted">
               {activePreset.name}
             </span>
           )}
@@ -86,7 +86,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           <div className="relative">
             <button
               onClick={() => setSettingsOpen((v) => !v)}
-              className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+              className="rounded-full p-1.5 text-muted hover:bg-surface-sunken hover:text-text"
               aria-label={t('pomodoro.settingsAria')}
             >
               <Settings size={16} />
@@ -99,12 +99,12 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
       </div>
 
       {linkedTask && variant !== 'pip' && (
-        <div className="flex w-full items-center justify-between gap-2 rounded-xl bg-stone-50 px-3 py-2 text-xs text-stone-500">
+        <div className="flex w-full items-center justify-between gap-2 rounded-xl bg-surface-hover px-3 py-2 text-xs text-muted">
           <span className="flex min-w-0 items-center gap-1.5">
-            <Target size={13} className="shrink-0 text-brand-500" />
+            <Target size={13} className="shrink-0 text-accent" />
             <span className="truncate">{linkedTask.text}</span>
           </span>
-          <button onClick={() => setActiveTask(null)} className="shrink-0 text-stone-400 hover:text-red-500">
+          <button onClick={() => setActiveTask(null)} className="shrink-0 text-muted hover:text-danger">
             <X size={13} />
           </button>
         </div>
@@ -115,7 +115,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
         style={variant === 'pip' ? undefined : { width: size, height: size }}
       >
         <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={RADIUS} fill="none" strokeWidth={8} className="stroke-stone-100" />
+          <circle cx={size / 2} cy={size / 2} r={RADIUS} fill="none" strokeWidth={8} className="stroke-surface-sunken" />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -129,7 +129,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           />
         </svg>
         <div
-          className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-stone-800 ${variant === 'pip' ? 'text-[clamp(0.85rem,7vmin,1.5rem)]' : 'text-3xl'}`}
+          className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-text ${variant === 'pip' ? 'text-[clamp(0.85rem,7vmin,1.5rem)]' : 'text-3xl'}`}
         >
           {formatTime(timeLeft)}
         </div>
@@ -140,7 +140,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           const mod = sessionsInCycle % settings.sessionsBeforeLongBreak;
           const filled = sessionsInCycle > 0 && mod === 0 ? settings.sessionsBeforeLongBreak : mod;
           return Array.from({ length: settings.sessionsBeforeLongBreak }).map((_, i) => (
-            <span key={i} className={`h-1.5 w-1.5 rounded-full ${i < filled ? 'bg-brand-500' : 'bg-stone-200'}`} />
+            <span key={i} className={`h-1.5 w-1.5 rounded-full ${i < filled ? 'bg-accent' : 'bg-surface-strong'}`} />
           ));
         })()}
       </div>
@@ -148,7 +148,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
       <div className={`flex items-center ${variant === 'pip' ? 'gap-1.5' : 'gap-2'}`}>
         <button
           onClick={toggle}
-          className={`flex items-center gap-1.5 rounded-full bg-brand-600 font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-95 ${
+          className={`flex items-center gap-1.5 rounded-full bg-primary font-semibold text-on-primary shadow-sm transition hover:bg-primary-hover active:scale-95 ${
             variant === 'pip' ? 'p-2.5 text-sm' : 'px-6 py-2 text-sm'
           }`}
         >
@@ -157,7 +157,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
         </button>
         <button
           onClick={reset}
-          className={`flex items-center gap-1.5 rounded-full bg-stone-100 font-medium text-stone-600 hover:bg-stone-200 ${
+          className={`flex items-center gap-1.5 rounded-full bg-surface-sunken font-medium text-muted hover:bg-surface-strong ${
             variant === 'pip' ? 'p-2.5 text-sm' : 'px-4 py-2 text-sm'
           }`}
         >
@@ -165,7 +165,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
         </button>
         <button
           onClick={skip}
-          className={`flex items-center gap-1.5 rounded-full bg-stone-100 font-medium text-stone-600 hover:bg-stone-200 ${
+          className={`flex items-center gap-1.5 rounded-full bg-surface-sunken font-medium text-muted hover:bg-surface-strong ${
             variant === 'pip' ? 'p-2.5 text-sm' : 'px-4 py-2 text-sm'
           }`}
         >
@@ -175,32 +175,32 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
 
       {variant === 'main' && (
         <>
-          <div className="grid w-full grid-cols-2 gap-2 border-t border-stone-100 pt-4 text-center">
+          <div className="grid w-full grid-cols-2 gap-2 border-t border-border-subtle pt-4 text-center">
             <div>
-              <div className="text-lg font-bold text-stone-800">{stats.todaySessions}</div>
-              <div className="text-xs text-stone-400">{t('pomodoro.todaySessions')}</div>
+              <div className="text-lg font-bold text-text">{stats.todaySessions}</div>
+              <div className="text-xs text-muted">{t('pomodoro.todaySessions')}</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-stone-800">
+              <div className="text-lg font-bold text-text">
                 {stats.todayFocusMinutes} {t('pomodoro.minutesSuffix')}
               </div>
-              <div className="text-xs text-stone-400">{t('pomodoro.todayFocusMinutes')}</div>
+              <div className="text-xs text-muted">{t('pomodoro.todayFocusMinutes')}</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-stone-800">{stats.totalSessions}</div>
-              <div className="text-xs text-stone-400">{t('pomodoro.totalSessions')}</div>
+              <div className="text-lg font-bold text-text">{stats.totalSessions}</div>
+              <div className="text-xs text-muted">{t('pomodoro.totalSessions')}</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-stone-800">
+              <div className="text-lg font-bold text-text">
                 {stats.totalFocusMinutes} {t('pomodoro.minutesSuffix')}
               </div>
-              <div className="text-xs text-stone-400">{t('pomodoro.totalFocusMinutes')}</div>
+              <div className="text-xs text-muted">{t('pomodoro.totalFocusMinutes')}</div>
             </div>
           </div>
           {pipSupported && (
             <button
               onClick={onOpenPiP}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-stone-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-900 active:scale-[0.98]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-inverse px-4 py-2.5 text-sm font-semibold text-on-inverse transition hover:bg-inverse/90 active:scale-[0.98]"
             >
               <PictureInPicture2 size={16} /> {t('pomodoro.openPip')}
             </button>

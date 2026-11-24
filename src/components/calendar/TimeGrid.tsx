@@ -72,13 +72,13 @@ function DayColumn({
     <div
       ref={setNodeRef}
       onClick={handleGridClick}
-      className={`relative border-r border-stone-200 ${fixedWidth ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'} ${
-        isOver ? 'bg-brand-50' : allDayEvent ? TAG_COLOR_META[allDayEvent.color].wash : ''
+      className={`relative border-r border-border ${fixedWidth ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'} ${
+        isOver ? 'bg-primary-soft' : allDayEvent ? TAG_COLOR_META[allDayEvent.color].wash : ''
       }`}
       style={{ height: 24 * HOUR_HEIGHT }}
     >
       {HOURS.map((h) => (
-        <div key={h} className="pointer-events-none border-b border-stone-200" style={{ height: HOUR_HEIGHT }} />
+        <div key={h} className="pointer-events-none border-b border-border" style={{ height: HOUR_HEIGHT }} />
       ))}
       {timedEvents.map((event) => (
         <EventBlock
@@ -125,11 +125,11 @@ export function TimeGrid({
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-stone-100">
+    <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border-subtle">
       {/* Single horizontal-scroll container spanning header+body keeps the day
           columns aligned while swiping sideways on narrow (multi-day) screens. */}
       <div className="flex flex-1 flex-col overflow-x-auto">
-        <div className="flex border-b border-stone-100">
+        <div className="flex border-b border-border-subtle">
           <div className="w-14 shrink-0" />
           {days.map((dateKey) => {
             const allDayItems = [
@@ -139,13 +139,13 @@ export function TimeGrid({
             return (
               <div
                 key={dateKey}
-                className={`border-l border-stone-200 px-1.5 py-1.5 ${fixedWidthColumns ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'}`}
+                className={`border-l border-border px-1.5 py-1.5 ${fixedWidthColumns ? 'w-27.5 shrink-0 md:w-auto md:flex-1 md:shrink' : 'flex-1'}`}
               >
-                <div className="mb-1 text-center text-xs font-medium text-stone-500">
+                <div className="mb-1 text-center text-xs font-medium text-muted">
                   {dayjs(dateKey).format('dd').toUpperCase()}{' '}
                   <span
                     className={`ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold ${
-                      dateKey === todayKey ? 'bg-brand-600 text-white' : 'text-stone-700'
+                      dateKey === todayKey ? 'bg-primary text-on-primary' : 'text-text'
                     }`}
                   >
                     {dayjs(dateKey).date()}
@@ -177,7 +177,7 @@ export function TimeGrid({
               {HOURS.map((h) => (
                 <div
                   key={h}
-                  className="border-b border-stone-200 pr-1.5 text-right text-[11px] text-stone-400"
+                  className="border-b border-border pr-1.5 text-right text-[11px] text-muted"
                   style={{ height: HOUR_HEIGHT }}
                 >
                   {h.toString().padStart(2, '0')}:00

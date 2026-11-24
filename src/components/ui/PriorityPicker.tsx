@@ -19,7 +19,7 @@ export function PriorityPicker({ value, onChange }: PriorityPickerProps) {
           onClick={() => onChange(p)}
           title={t(PRIORITY_META[p].labelKey)}
           className={`flex h-7 w-7 items-center justify-center rounded-full border transition ${
-            value === p ? 'border-brand-400 bg-brand-50' : 'border-transparent hover:bg-stone-100'
+            value === p ? 'border-ring bg-primary-soft' : 'border-transparent hover:bg-surface-sunken'
           }`}
         >
           <Flag className={PRIORITY_META[p].colorClass} size={15} fill={p === 'none' ? 'none' : 'currentColor'} />

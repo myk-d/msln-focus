@@ -95,18 +95,18 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
         <div className="flex items-center gap-2">
           <button
             onClick={onOpenSidebar}
-            className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600 md:hidden"
+            className="rounded-full p-1.5 text-muted hover:bg-surface-sunken hover:text-text md:hidden"
             aria-label={t('tasks.listsAria')}
           >
             <Menu size={18} />
           </button>
-          <h1 className="text-xl font-bold text-stone-800">{activeList.name}</h1>
+          <h1 className="text-xl font-bold text-text">{activeList.name}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setHideCompleted((v) => !v)}
             className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
-              hideCompleted ? 'bg-brand-100 text-brand-700' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+              hideCompleted ? 'bg-primary-soft text-primary' : 'bg-surface-sunken text-muted hover:bg-surface-strong'
             }`}
           >
             {hideCompleted ? <EyeOff size={13} /> : <Eye size={13} />}
@@ -115,7 +115,7 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
           {!isGrouped && (
             <button
               onClick={() => addSection(activeListId)}
-              className="flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200"
+              className="flex items-center gap-1 rounded-full bg-surface-sunken px-3 py-1 text-xs font-medium text-muted hover:bg-surface-strong"
             >
               <Plus size={13} /> {t('tasks.addSection')}
             </button>
@@ -138,9 +138,9 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
               onKeyDown={(e) => e.key === 'Enter' && commitQuickAdd()}
               onBlur={commitQuickAdd}
               placeholder={t('tasks.addTaskPlaceholder')}
-              className="flex-1 rounded-lg bg-transparent px-2 py-1.5 text-sm text-stone-500 outline-none placeholder:text-stone-400 hover:bg-stone-50 focus:bg-stone-50"
+              className="flex-1 rounded-lg bg-transparent px-2 py-1.5 text-sm text-muted outline-none placeholder:text-muted hover:bg-surface-hover focus:bg-surface-hover"
             />
-            <button onClick={commitQuickAdd} className="shrink-0 rounded-full p-1.5 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+            <button onClick={commitQuickAdd} className="shrink-0 rounded-full p-1.5 text-primary hover:bg-primary-soft" aria-label={t('tasks.save')}>
               <Plus size={15} />
             </button>
           </div>

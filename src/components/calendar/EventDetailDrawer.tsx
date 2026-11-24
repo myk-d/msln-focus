@@ -184,22 +184,22 @@ export function EventDetailDrawer({
   return (
     <>
       <div onClick={handleClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-stone-200 bg-white px-5 py-6 md:w-1/2 md:max-w-2xl">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-border bg-surface px-5 py-6 md:w-1/2 md:max-w-2xl">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
           {event ? t('calendar.event') : t('calendar.newEvent')}
         </h2>
         <div className="flex items-center gap-1">
           {event && (
             <button
               onClick={handleDelete}
-              className="rounded p-1 text-stone-400 hover:bg-red-50 hover:text-red-500"
+              className="rounded p-1 text-muted hover:bg-danger-soft hover:text-danger"
               aria-label={t('calendar.deleteEventAria')}
             >
               <Trash2 size={16} />
             </button>
           )}
-          <button onClick={handleClose} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+          <button onClick={handleClose} className="rounded p-1 text-muted hover:bg-surface-sunken hover:text-text">
             <X size={18} />
           </button>
         </div>
@@ -223,7 +223,7 @@ export function EventDetailDrawer({
 
       <div className="flex flex-col gap-4">
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.date')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.date')}</div>
           <div className="flex flex-wrap items-center gap-1.5">
             <DatePicker value={date} onChange={(d) => setDate(d ?? defaultDate)} />
             {(!isSeriesRelated || scope === 'all') && (
@@ -234,13 +234,13 @@ export function EventDetailDrawer({
 
         {isSeriesRelated && (
           <div>
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('recurrence.applyTo')}</div>
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('recurrence.applyTo')}</div>
             <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => setScope('this')}
                 className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium ${
-                  scope === 'this' ? 'bg-brand-600 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  scope === 'this' ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-muted hover:bg-surface-strong'
                 }`}
               >
                 {t('recurrence.scopeThis')}
@@ -249,7 +249,7 @@ export function EventDetailDrawer({
                 type="button"
                 onClick={() => setScope('all')}
                 className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium ${
-                  scope === 'all' ? 'bg-brand-600 text-white' : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                  scope === 'all' ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-muted hover:bg-surface-strong'
                 }`}
               >
                 {t('recurrence.scopeAll')}
@@ -259,7 +259,7 @@ export function EventDetailDrawer({
         )}
 
         <div className="flex items-center justify-between">
-          <span className="text-sm text-stone-600">{t('calendar.allDay')}</span>
+          <span className="text-sm text-muted">{t('calendar.allDay')}</span>
           <Switch checked={allDay} onChange={setAllDay} />
         </div>
 
@@ -279,7 +279,7 @@ export function EventDetailDrawer({
               }}
               className={`${inputClass} flex-1`}
             />
-            <span className="text-stone-400">–</span>
+            <span className="text-muted">–</span>
             <input
               type="time"
               value={endTime}
@@ -290,7 +290,7 @@ export function EventDetailDrawer({
         )}
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('calendar.location')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('calendar.location')}</div>
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
@@ -300,14 +300,14 @@ export function EventDetailDrawer({
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('calendar.color')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('calendar.color')}</div>
           <div className="flex items-center gap-2">
             {TAG_COLOR_ORDER.map((c) => (
               <button
                 key={c}
                 onClick={() => setColor(c)}
                 className={`h-6 w-6 rounded-full ${TAG_COLOR_META[c].dot} ${
-                  color === c ? 'ring-2 ring-offset-2 ring-stone-400' : ''
+                  color === c ? 'ring-2 ring-offset-2 ring-border-strong' : ''
                 }`}
                 aria-label={c}
               />
@@ -316,7 +316,7 @@ export function EventDetailDrawer({
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('calendar.reminder')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('calendar.reminder')}</div>
           <select
             value={reminderMinutes ?? ''}
             onChange={(e) => setReminderMinutes(e.target.value === '' ? null : Number(e.target.value))}
@@ -331,7 +331,7 @@ export function EventDetailDrawer({
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.description')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.description')}</div>
           <textarea
             ref={descriptionRef}
             value={description}
@@ -342,11 +342,11 @@ export function EventDetailDrawer({
           />
         </div>
 
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {error && <p className="text-xs text-danger">{error}</p>}
 
         <button
           onClick={handleSave}
-          className="rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-hover"
         >
           {event ? t('calendar.save') : t('calendar.create')}
         </button>

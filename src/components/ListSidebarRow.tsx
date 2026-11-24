@@ -49,9 +49,9 @@ export function ListSidebarRow({
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commitRename}
           onKeyDown={(e) => e.key === 'Enter' && commitRename()}
-          className="w-full flex-1 rounded-xl bg-white px-3 py-2 text-sm outline-none ring-1 ring-brand-400"
+          className="w-full flex-1 rounded-xl bg-surface px-3 py-2 text-sm outline-none ring-1 ring-ring"
         />
-        <button onClick={commitRename} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+        <button onClick={commitRename} className="shrink-0 rounded-full p-1 text-primary hover:bg-primary-soft" aria-label={t('tasks.save')}>
           <Check size={15} />
         </button>
       </div>
@@ -61,18 +61,18 @@ export function ListSidebarRow({
   return (
     <div
       className={`group flex items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
-        isActive ? 'bg-brand-100 text-brand-800 font-medium' : 'text-stone-600 hover:bg-stone-100'
+        isActive ? 'bg-primary-soft text-primary font-medium' : 'text-muted hover:bg-surface-sunken'
       }`}
     >
       <button onClick={onSelect} className="flex flex-1 items-center gap-1.5 truncate text-left">
         {list.name}
-        {list.isDefault && <Star size={11} className="shrink-0 fill-brand-400 text-brand-400" />}
+        {list.isDefault && <Star size={11} className="shrink-0 fill-accent text-accent" />}
       </button>
       <div className="relative flex items-center gap-1">
-        {taskCount > 0 && <span className="text-xs text-stone-400 md:group-hover:hidden">{taskCount}</span>}
+        {taskCount > 0 && <span className="text-xs text-muted md:group-hover:hidden">{taskCount}</span>}
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="rounded p-0.5 text-stone-400 hover:bg-stone-200 hover:text-stone-600 md:hidden md:group-hover:block"
+          className="rounded p-0.5 text-muted hover:bg-surface-strong hover:text-text md:hidden md:group-hover:block"
           aria-label={t('tasks.menuAria')}
         >
           <MoreHorizontal size={14} />
@@ -106,7 +106,7 @@ export function ListSidebarRow({
                   onDelete();
                   setMenuOpen(false);
                 }}
-                className={`${menuItemClass} text-red-500 hover:bg-red-50`}
+                className={`${menuItemClass} text-danger hover:bg-danger-soft`}
               >
                 <Trash2 size={14} /> {t('tasks.delete')}
               </button>

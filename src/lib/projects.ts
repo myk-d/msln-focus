@@ -11,33 +11,34 @@ export const SEVERITY_ORDER: Severity[] = ['1-critical', '2-high', '3-medium', '
 export const ASSIGNEE_ORDER: Assignee[] = ['me', 'claude', 'antigravity'];
 
 export const STATUS_META: Record<WorkItemStatus, { labelKey: string; dot: string }> = {
-  backlog: { labelKey: 'projects.status.backlog', dot: 'bg-stone-300' },
-  todo: { labelKey: 'projects.status.todo', dot: 'bg-sky-400' },
-  'in-progress': { labelKey: 'projects.status.inProgress', dot: 'bg-amber-400' },
-  'in-review': { labelKey: 'projects.status.inReview', dot: 'bg-violet-400' },
-  done: { labelKey: 'projects.status.done', dot: 'bg-emerald-500' },
-  cancelled: { labelKey: 'projects.status.cancelled', dot: 'bg-stone-400' },
+  backlog: { labelKey: 'projects.status.backlog', dot: 'bg-border-strong' },
+  todo: { labelKey: 'projects.status.todo', dot: 'bg-status-todo' },
+  'in-progress': { labelKey: 'projects.status.inProgress', dot: 'bg-status-progress' },
+  'in-review': { labelKey: 'projects.status.inReview', dot: 'bg-status-review' },
+  done: { labelKey: 'projects.status.done', dot: 'bg-success' },
+  cancelled: { labelKey: 'projects.status.cancelled', dot: 'bg-faint' },
 };
 
-// Colors follow Azure DevOps work item types (Epic orange, User Story blue, Task yellow, Bug red).
-export const TYPE_META: Record<WorkItemType, { labelKey: string; icon: LucideIcon; color: string; hex: string }> = {
-  epic: { labelKey: 'projects.type.epic', icon: Crown, color: 'text-[#FF7B00]', hex: '#FF7B00' },
-  story: { labelKey: 'projects.type.story', icon: BookOpen, color: 'text-[#009CCC]', hex: '#009CCC' },
-  task: { labelKey: 'projects.type.task', icon: SquareCheck, color: 'text-[#D9A800]', hex: '#F2CB1D' },
-  bug: { labelKey: 'projects.type.bug', icon: Bug, color: 'text-[#CC293D]', hex: '#CC293D' },
+// Type colours are Axo domain tokens (--color-type-*): amber epic, blue story, olive task, red bug.
+// `stripe` is the CSS colour for the card's left border.
+export const TYPE_META: Record<WorkItemType, { labelKey: string; icon: LucideIcon; color: string; stripe: string }> = {
+  epic: { labelKey: 'projects.type.epic', icon: Crown, color: 'text-type-epic', stripe: 'var(--color-type-epic)' },
+  story: { labelKey: 'projects.type.story', icon: BookOpen, color: 'text-type-story', stripe: 'var(--color-type-story)' },
+  task: { labelKey: 'projects.type.task', icon: SquareCheck, color: 'text-type-task', stripe: 'var(--color-type-task)' },
+  bug: { labelKey: 'projects.type.bug', icon: Bug, color: 'text-type-bug', stripe: 'var(--color-type-bug)' },
 };
 
 export const SEVERITY_META: Record<Severity, { labelKey: string; chip: string }> = {
-  '1-critical': { labelKey: 'projects.severity.critical', chip: 'bg-red-100 text-red-700' },
-  '2-high': { labelKey: 'projects.severity.high', chip: 'bg-orange-100 text-orange-700' },
-  '3-medium': { labelKey: 'projects.severity.medium', chip: 'bg-amber-100 text-amber-700' },
-  '4-low': { labelKey: 'projects.severity.low', chip: 'bg-stone-100 text-stone-600' },
+  '1-critical': { labelKey: 'projects.severity.critical', chip: 'bg-danger-soft text-danger' },
+  '2-high': { labelKey: 'projects.severity.high', chip: 'bg-accent-soft text-accent' },
+  '3-medium': { labelKey: 'projects.severity.medium', chip: 'bg-warning-soft text-warning' },
+  '4-low': { labelKey: 'projects.severity.low', chip: 'bg-surface-sunken text-muted' },
 };
 
 export const ASSIGNEE_META: Record<Assignee, { labelKey: string; initials: string; avatar: string }> = {
-  me: { labelKey: 'projects.author.me', initials: '', avatar: 'bg-brand-600 text-white' },
-  claude: { labelKey: 'projects.author.claude', initials: 'C', avatar: 'bg-[#D97757] text-white' },
-  antigravity: { labelKey: 'projects.author.antigravity', initials: 'AG', avatar: 'bg-sky-600 text-white' },
+  me: { labelKey: 'projects.author.me', initials: '', avatar: 'bg-primary text-on-primary' },
+  claude: { labelKey: 'projects.author.claude', initials: 'C', avatar: 'bg-avatar-claude text-white' },
+  antigravity: { labelKey: 'projects.author.antigravity', initials: 'AG', avatar: 'bg-avatar-agent text-white' },
 };
 
 const PRIORITY_RANK: Record<Priority, number> = { high: 0, medium: 1, low: 2, none: 3 };
