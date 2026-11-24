@@ -39,7 +39,25 @@
         ]
       },
       {
-        "source": "/@(index.html|sw.js|registerSW.js)",
+        "source": "/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/registerSW.js",
         "headers": [
           {
             "key": "Cache-Control",
@@ -57,7 +75,7 @@
         }
       },
       {
-        "regex": "^(?!/assets/|/api/).*",
+        "regex": "^/[^.]*$",
         "destination": "/index.html"
       }
     ]
