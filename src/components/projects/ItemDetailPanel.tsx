@@ -21,6 +21,8 @@ import {
 } from '../../lib/projects';
 import type { Project, Severity, WorkItem, WorkItemStatus, WorkItemType } from '../../types';
 import { AssigneeAvatar, AssigneePicker, ItemPicker, MarkdownField, TagInput } from './fields';
+import { StatusDot, TypeGlyph } from './glyphs';
+import { RoundCheck } from '../ui/RoundCheck';
 
 interface ItemDetailPanelProps {
   project: Project;
@@ -44,7 +46,7 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
 
   const [titleDraft, setTitleDraft] = useState(item.title);
   const titleRef = useAutoResizeTextarea(titleDraft);
-  const { icon: TypeIcon, color: typeColor, stripe } = TYPE_META[item.type];
+  const { stripe } = TYPE_META[item.type];
   const ref = itemRef(project, item);
   const tagSuggestions = [...new Set(projectItems.flatMap((i) => i.labels))].sort((a, b) => a.localeCompare(b));
 
@@ -68,23 +70,23 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/25 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col bg-surface shadow-2xl md:w-[min(1120px,92vw)]">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-border bg-surface-raised shadow-[0_12px_32px_rgb(0_0_0/0.12)] md:w-[min(1120px,92vw)]">
         {/* Header: type stripe, ID, title, assignee/state/tags — like the ADO work item form */}
         <div className="h-1 shrink-0" style={{ backgroundColor: stripe }} />
         <header className="shrink-0 border-b border-border px-5 pt-3 pb-3 md:px-7">
           <div className="flex items-center gap-2 text-xs">
-            <TypeIcon size={15} className={typeColor} />
-            <span className="font-semibold uppercase tracking-wide text-muted">{t(TYPE_META[item.type].labelKey)}</span>
-            <span className="font-mono text-muted">{ref}</span>
+            <TypeGlyph type={item.type} size={14} />
+            <span className="font-mono text-sm font-medium text-muted">{ref}</span>
+            <span className="rounded-md bg-surface-sunken px-2 py-0.5 font-semibold text-muted">{t(TYPE_META[item.type].labelKey)}</span>
             <button
               onClick={() => void handleDelete()}
-              className="ml-auto rounded p-1.5 text-muted hover:bg-danger-soft hover:text-danger"
+              className="ml-auto rounded-lg p-2.5 text-muted hover:bg-danger-soft hover:text-danger md:p-1.5"
               aria-label={t('projects.deleteItem')}
               title={t('projects.deleteItem')}
             >
               <Trash2 size={16} />
             </button>
-            <button onClick={onClose} className="rounded p-1.5 text-muted hover:bg-surface-sunken hover:text-text" aria-label={t('projects.close')}>
+            <button onClick={onClose} className="rounded-lg p-2.5 text-muted hover:bg-surface-sunken hover:text-text md:p-1.5" aria-label={t('projects.close')}>
               <X size={18} />
             </button>
           </div>
@@ -100,13 +102,13 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
                 e.currentTarget.blur();
               }
             }}
-            className="mt-1 w-full resize-none overflow-hidden rounded px-1 -mx-1 font-display text-xl font-semibold text-text outline-none hover:bg-surface-hover focus:bg-surface focus:ring-2 focus:ring-ring/30"
+            className="mt-1 w-full resize-none overflow-hidden rounded px-1 -mx-1 font-display text-2xl font-semibold leading-tight text-text md:text-[28px] md:leading-9 outline-none hover:bg-surface-hover focus:bg-surface focus:ring-2 focus:ring-ring/30"
           />
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
             <AssigneePicker value={item.assignee} photoURL={user?.photoURL} onChange={(assignee) => void updateItem(item.id, { assignee })} />
             <label className="flex items-center gap-2 text-sm">
               <span className="text-xs text-muted">{t('projects.field.status')}</span>
-              <span className={`h-2 w-2 rounded-full ${STATUS_META[item.status].dot}`} />
+              <StatusDot status={item.status} />
               <select
                 value={item.status}
                 onChange={(e) => void updateItem(item.id, { status: e.target.value as WorkItemStatus })}
@@ -271,7 +273,7 @@ function AcceptanceCriteria({ item, onChange }: { item: WorkItem; onChange: (ac:
       <ol className="flex flex-col">
         {item.acceptanceCriteria.map((c, idx) => (
           <li key={`${idx}-${c}`} className="group flex items-start gap-2 rounded-lg px-1 py-1 text-sm text-text hover:bg-surface-hover">
-            <span className="w-5 shrink-0 pt-0.5 text-right text-xs text-muted">{idx + 1}.</span>
+            <RoundCheck size={18} className="mt-0.5 text-success" />
             {editing === idx ? (
               <input
                 autoFocus
@@ -493,7 +495,7 @@ function LinkGroup({
                   {i.title}
                 </span>
               </button>
-              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_META[i.status].dot}`} title={t(STATUS_META[i.status].labelKey)} />
+              <span title={t(STATUS_META[i.status].labelKey)}><StatusDot status={i.status} size={6} /></span>
               <button
                 onClick={() => onUnlink(i)}
                 className="shrink-0 p-0.5 text-faint opacity-0 transition group-hover:opacity-100 hover:text-danger"
@@ -561,7 +563,7 @@ function Discussion({ itemId, store, photoURL }: { itemId: string; store: Projec
         [...comments].reverse().map((c) => (
           <div key={c.id} className="flex items-start gap-2">
             <AssigneeAvatar assignee={c.author} photoURL={photoURL} size={28} />
-            <div className={`flex-1 rounded-xl p-3 text-sm ${c.body.startsWith('WAITING:') ? 'bg-warning-soft ring-1 ring-warning/30' : 'bg-surface-hover'}`}>
+            <div className={`flex-1 rounded-xl p-3 text-sm ${c.body.startsWith('WAITING:') ? 'bg-warning-soft ring-1 ring-warning/30' : 'border border-border bg-surface'}`}>
               <div className="mb-1 flex items-center gap-2 text-xs text-muted">
                 <span className="font-medium text-muted">{t(`projects.author.${c.author}`)}</span>
                 <span>{fmt.format(c.createdAt)}</span>

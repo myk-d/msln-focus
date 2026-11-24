@@ -20,12 +20,14 @@ import {
   type KeyboardCoordinateGetter,
   type ScreenReaderInstructions,
 } from '@dnd-kit/core';
-import { ChevronsDownUp, ChevronsUpDown, FolderKanban, SearchX } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, SearchX } from 'lucide-react';
 import { BOARD_STATUSES, STATUS_META, buildTaskboard, hasActiveFilters, itemRef, type ItemFilters, type TaskboardRow } from '../../lib/projects';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { ItemCard, ItemCardOverlay } from './ItemCard';
 import { NewItemForm, NewItemButton } from './NewItemForm';
 import { StoryHeader } from './StoryHeader';
+import { StatusDot, StatusLabel } from './glyphs';
+import { Axl } from '../brand/Axl';
 import type { Project, WorkItem, WorkItemStatus } from '../../types';
 import type { NewItemInput } from '../../hooks/useProjectsStore';
 
@@ -87,7 +89,7 @@ export function ProjectBoard({ project, items, filters, onClearFilters, showCanc
         </div>
       ) : rows.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-          <FolderKanban size={36} className="text-faint" />
+          <Axl emotion="playful" width={120} />
           <p className="max-w-sm text-sm text-muted">{t('projects.board.empty')}</p>
           <NewItemButton project={project} items={items} types={['story', 'epic', 'task', 'bug']} label={t('projects.newItem.newStory')} onCreate={onCreate} />
         </div>
@@ -216,6 +218,8 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
   };
 
   const count = (status: WorkItemStatus) => rows.reduce((n, r) => n + r.byStatus[status].length, 0);
+  // A column with no cards at all shows the empty state once, in the first expanded row that has cells.
+  const firstOpenRow = rows.find((r) => !collapsed.has(r.key) && !(r.story && r.childCount === 0))?.key;
   const headCell = 'sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-bg px-3 py-2 text-sm font-medium text-muted';
 
   return (
@@ -233,9 +237,9 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
             <div className={`${headCell} left-0 z-30`}>{t('projects.board.storyColumn')}</div>
             {statuses.map((status) => (
               <div key={status} className={headCell}>
-                <span className={`h-2 w-2 rounded-full ${STATUS_META[status].dot}`} />
-                {t(STATUS_META[status].labelKey)}
-                <span className="ml-auto text-xs text-muted">{count(status)}</span>
+                <StatusDot status={status} />
+                <StatusLabel status={status} className="text-text" />
+                <span className="ml-auto font-mono text-xs text-muted">{count(status)}</span>
               </div>
             ))}
           </div>
@@ -253,12 +257,14 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
                 {isCollapsed ? (
                   <div className="border-b border-border" style={{ gridColumn: '2 / -1' }} />
                 ) : row.story && row.childCount === 0 ? (
-                  <div className="border-b border-border p-3 text-sm text-muted" style={{ gridColumn: '2 / -1' }}>
+                  <div className="flex items-center gap-3 border-b border-border p-3 text-sm text-muted" style={{ gridColumn: '2 / -1' }}>
+                    <Axl emotion="neutral" width={48} />
                     {t('projects.board.emptyStory')}
                   </div>
                 ) : (
                   statuses.map((status) => (
                     <DropCell key={status} rowKey={row.key} status={status}>
+                      {row.key === firstOpenRow && count(status) === 0 && <EmptyColumn />}
                       {row.byStatus[status].map((item) => (
                         <ItemCard key={item.id} item={item} project={project} allItems={allItems} showParent={!row.story} onSelect={onSelect} rowKey={row.key} />
                       ))}
@@ -272,6 +278,17 @@ function TaskboardGrid({ project, rows, statuses, allItems, collapsed, onToggle,
       </div>
       <DragOverlay>{activeItem && <ItemCardOverlay item={activeItem} project={project} allItems={allItems} showParent={!activeRow?.story} />}</DragOverlay>
     </DndContext>
+  );
+}
+
+// Empty column: axl. (neutral) with one short line, per the brand rules (empty states only).
+function EmptyColumn() {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-2xl border-[1.5px] border-dashed border-border-strong px-3 py-4 text-center">
+      <Axl emotion="neutral" width={80} />
+      <span className="text-sm font-bold text-text">{t('projects.board.emptyColumn')}</span>
+    </div>
   );
 }
 
@@ -309,12 +326,17 @@ function TaskboardStack({ project, rows, statuses, allItems, collapsed, onToggle
                   />
               {!isCollapsed && (
                 <div className="mt-3 flex flex-col gap-3">
-                  {row.story && row.childCount === 0 && <p className="text-sm text-muted">{t('projects.board.emptyStory')}</p>}
+                  {row.story && row.childCount === 0 && (
+                    <p className="flex items-center gap-3 text-sm text-muted">
+                      <Axl emotion="neutral" width={48} />
+                      {t('projects.board.emptyStory')}
+                    </p>
+                  )}
                   {groups.map((status) => (
                     <div key={status} className="flex flex-col gap-2">
                       <h3 className="flex items-center gap-2 text-xs font-medium text-muted">
-                        <span className={`h-2 w-2 rounded-full ${STATUS_META[status].dot}`} />
-                        {t(STATUS_META[status].labelKey)}
+                        <StatusDot status={status} />
+                        <StatusLabel status={status} />
                         <span className="text-muted">{row.byStatus[status].length}</span>
                       </h3>
                       {row.byStatus[status].map((item) => (

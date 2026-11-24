@@ -283,6 +283,7 @@ const en: Translations = {
       progress: '{{done}} of {{total}} done',
       empty: 'No items yet. Add your first story.',
       noResults: 'Nothing found',
+      emptyColumn: 'Quiet here',
       emptyStory: 'This story has no tasks yet',
     },
     dnd: {

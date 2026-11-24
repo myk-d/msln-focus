@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, FolderKanban, Plus, SearchX } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Plus, SearchX } from 'lucide-react';
 import { STATUS_META, TYPE_META, buildBacklog, hasActiveFilters, itemRef, type BacklogNode, type ItemFilters } from '../../lib/projects';
 import { useAuth } from '../../context/AuthContext';
 import { AssigneeAvatar } from './fields';
 import { NewItemButton, NewItemForm } from './NewItemForm';
+import { StatusDot, StatusLabel } from './glyphs';
+import { Axl } from '../brand/Axl';
 import type { Project, WorkItem, WorkItemType } from '../../types';
 import type { NewItemInput } from '../../hooks/useProjectsStore';
 
@@ -72,7 +74,7 @@ export function BacklogView({ project, items, filters, onClearFilters, showCance
       </div>
     ) : (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <FolderKanban size={36} className="text-faint" />
+        <Axl emotion="playful" width={120} />
         <p className="max-w-sm text-sm text-muted">{t('projects.backlog.empty')}</p>
         <NewItemButton project={project} items={items} types={['epic', 'story']} label={t('projects.backlog.newEpic')} onCreate={onCreate} />
       </div>
@@ -143,8 +145,8 @@ export function BacklogView({ project, items, filters, onClearFilters, showCance
                 {item && (
                   <>
                     <span className="flex shrink-0 items-center gap-1.5 text-[11px] text-muted" title={t(STATUS_META[item.status].labelKey)}>
-                      <span className={`h-2 w-2 rounded-full ${STATUS_META[item.status].dot}`} />
-                      <span className="hidden md:inline">{t(STATUS_META[item.status].labelKey)}</span>
+                      <StatusDot status={item.status} />
+                      <StatusLabel status={item.status} className="hidden md:inline" />
                     </span>
                     <span className="hidden shrink-0 sm:block">
                       <AssigneeAvatar assignee={item.assignee} photoURL={user?.photoURL} size={18} />
