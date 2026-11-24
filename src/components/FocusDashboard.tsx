@@ -39,13 +39,13 @@ export function FocusDashboard() {
   }, [location.pathname, t, i18n.language]);
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-canvas">
+    <div className="flex h-dvh w-full overflow-hidden bg-bg">
       <NavRail />
       <div className="flex-1 overflow-hidden pb-14 md:pb-0">
         <Suspense
           fallback={
             <div className="flex h-full w-full items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
             </div>
           }
         >

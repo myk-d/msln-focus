@@ -17,7 +17,7 @@ export function PomodoroSettingsPanel({ settings, onUpdate, onClose }: PomodoroS
   useClickOutside(ref, onClose);
 
   const field = (label: string, key: keyof PomodoroSettings, min: number, max: number) => (
-    <label className="flex items-center justify-between gap-2 py-1 text-sm text-stone-600">
+    <label className="flex items-center justify-between gap-2 py-1 text-sm text-muted">
       {label}
       <input
         type="number"
@@ -32,12 +32,12 @@ export function PomodoroSettingsPanel({ settings, onUpdate, onClose }: PomodoroS
 
   return (
     <div ref={ref} className={`${popoverClass} absolute right-0 top-10 z-30 w-64 p-3`}>
-      <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('pomodoro.durationMinutes')}</div>
+      <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">{t('pomodoro.durationMinutes')}</div>
       {field(t('pomodoro.focus'), 'focusMinutes', 1, 120)}
       {field(t('pomodoro.shortBreak'), 'shortBreakMinutes', 1, 60)}
       {field(t('pomodoro.longBreak'), 'longBreakMinutes', 1, 60)}
       {field(t('pomodoro.sessionsBeforeLong'), 'sessionsBeforeLongBreak', 1, 12)}
-      <div className="mt-2 flex items-center justify-between gap-2 border-t border-stone-100 pt-2 text-sm text-stone-600">
+      <div className="mt-2 flex items-center justify-between gap-2 border-t border-border-subtle pt-2 text-sm text-muted">
         {t('pomodoro.autoStartNext')}
         <Switch checked={settings.autoStartNext} onChange={(v) => onUpdate({ autoStartNext: v })} />
       </div>

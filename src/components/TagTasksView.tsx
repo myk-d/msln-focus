@@ -31,23 +31,23 @@ export function TagTasksView({ tagId, selectedTaskId, onSelectTask, onOpenSideba
       <div className="mb-4 flex items-center gap-2">
         <button
           onClick={onOpenSidebar}
-          className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600 md:hidden"
+          className="rounded-full p-1.5 text-muted hover:bg-surface-sunken hover:text-text md:hidden"
           aria-label={t('tasks.listsAria')}
         >
           <Menu size={18} />
         </button>
         <TagIcon size={18} className={TAG_COLOR_META[tag.color].text} />
-        <h1 className="text-xl font-bold text-stone-800">{tag.name}</h1>
+        <h1 className="text-xl font-bold text-text">{tag.name}</h1>
       </div>
 
       {groups.length === 0 ? (
-        <p className="mt-4 text-sm text-stone-400">{t('tasks.noTasksForTag')}</p>
+        <p className="mt-4 text-sm text-muted">{t('tasks.noTasksForTag')}</p>
       ) : (
         groups.map(({ list, tasks: listTasks }) => (
           <div key={list.id} className="mb-3">
             <div className="flex items-center gap-2 px-1 py-1">
-              <span className="text-sm font-semibold text-stone-700">{list.name}</span>
-              <span className="text-xs text-stone-400">{listTasks.length}</span>
+              <span className="text-sm font-semibold text-text">{list.name}</span>
+              <span className="text-xs text-muted">{listTasks.length}</span>
             </div>
             <div className="flex flex-col gap-2 px-1 py-1">
               {listTasks.map((task) => (

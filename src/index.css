@@ -1,18 +1,192 @@
 @import "tailwindcss";
 
+/* Axo design tokens (docs/product/brand, focus-rebrand.md §6). Light values live in @theme so
+   Tailwind generates bg-, text- and border- utilities that read the --color- variables; the dark values
+   below only redefine the variables, so every utility follows the active theme. */
 @theme {
-  --color-canvas: #f7f3ec;
-  --color-brand-50: #fdf3ee;
-  --color-brand-100: #fbe4d9;
-  --color-brand-200: #f5c7ae;
-  --color-brand-300: #eda47d;
-  --color-brand-400: #e37d50;
-  --color-brand-500: #e1552f;
-  --color-brand-600: #c9431f;
-  --color-brand-700: #a6371a;
-  --color-brand-800: #832c15;
-  --color-brand-900: #602012;
+  --color-bg: #F5F1E8;
+  --color-surface: #FFFDF8;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-sunken: #EDE8DD;
+  --color-surface-hover: #F7F3EA;
+  --color-surface-strong: #E3DDD0;
+  --color-border: #E3DDD0;
+  --color-border-subtle: #EEE9DF;
+  --color-border-strong: #CFC7B6;
+  --color-text: #1C1B18;
+  --color-muted: #655F55;
+  --color-faint: #8E877B;
+  --color-inverse: #1C1B18;
+  --color-on-inverse: #F5F1E8;
+  --color-primary: #1F3D2E;
+  --color-primary-hover: #2A5240;
+  --color-on-primary: #FFFFFF;
+  --color-primary-soft: #E3EDE6;
+  --color-accent: #B8451C;
+  --color-accent-soft: #F7E3D8;
+  --color-success: #2B661F;
+  --color-success-soft: #E2F2DC;
+  --color-warning: #8F5A00;
+  --color-warning-soft: #F6EBD3;
+  --color-danger: #B42318;
+  --color-danger-soft: #F8E1DE;
+  --color-info: #1F6F99;
+  --color-info-soft: #E1EEF5;
+  --color-ring: #2F5B8F;
+  --color-phase-focus: #B8451C;
+  --color-phase-short: #2B661F;
+  --color-phase-long: #2F5B8F;
+  --color-phase-long-soft: #E3EAF3;
+  --color-type-epic: #B25E00;
+  --color-type-story: #1F6F99;
+  --color-type-task: #8A7300;
+  --color-type-bug: #B42318;
+  --color-status-todo: #1F6F99;
+  --color-status-progress: #946300;
+  --color-status-review: #6B3FA0;
+  --color-avatar-claude: #D97757;
+  --color-avatar-agent: #0277B3;
+  --color-icon-spark: #F0895C;
+  --color-tag-rose: #B4234A;
+  --color-tag-rose-soft: #FBE4EA;
+  --color-tag-amber: #8F5A00;
+  --color-tag-amber-soft: #F6EBD3;
+  --color-tag-emerald: #2B661F;
+  --color-tag-emerald-soft: #E2F2DC;
+  --color-tag-sky: #1F6F99;
+  --color-tag-sky-soft: #E1EEF5;
+  --color-tag-violet: #6B3FA0;
+  --color-tag-violet-soft: #EEE6F7;
+  --color-tag-stone: #655F55;
+  --color-tag-stone-soft: #EDE8DD;
 }
+
+/* Dark theme: follows the OS unless the user picked a theme ([data-theme] on <html>, see useTheme). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #14130F;
+    --color-surface: #1E1C17;
+    --color-surface-raised: #26231D;
+    --color-surface-sunken: #191813;
+    --color-surface-hover: #24211C;
+    --color-surface-strong: #34302A;
+    --color-border: #34302A;
+    --color-border-subtle: #2A2722;
+    --color-border-strong: #4A453C;
+    --color-text: #EEE9DF;
+    --color-muted: #A69F92;
+    --color-faint: #6E685E;
+    --color-inverse: #EEE9DF;
+    --color-on-inverse: #1C1B18;
+    --color-primary: #A9D6B9;
+    --color-primary-hover: #BFE3CC;
+    --color-on-primary: #10241A;
+    --color-primary-soft: #22332A;
+    --color-accent: #F0895C;
+    --color-accent-soft: #3A2419;
+    --color-success: #8FD18A;
+    --color-success-soft: #1F3320;
+    --color-warning: #E6B65A;
+    --color-warning-soft: #382B14;
+    --color-danger: #F38A7E;
+    --color-danger-soft: #3A1E1B;
+    --color-info: #7CC3E8;
+    --color-info-soft: #182A33;
+    --color-ring: #9DBBE6;
+    --color-phase-focus: #F0895C;
+    --color-phase-short: #8FD18A;
+    --color-phase-long: #9DBBE6;
+    --color-phase-long-soft: #1D2633;
+    --color-type-epic: #F2A65A;
+    --color-type-story: #7CC3E8;
+    --color-type-task: #E2C64B;
+    --color-type-bug: #F38A7E;
+    --color-status-todo: #7CC3E8;
+    --color-status-progress: #E6B65A;
+    --color-status-review: #C3A6EC;
+    --color-avatar-claude: #D97757;
+    --color-avatar-agent: #38BDF8;
+    --color-icon-spark: #B8451C;
+    --color-tag-rose: #F28BA8;
+    --color-tag-rose-soft: #3A1C26;
+    --color-tag-amber: #E6B65A;
+    --color-tag-amber-soft: #382B14;
+    --color-tag-emerald: #8FD18A;
+    --color-tag-emerald-soft: #1F3320;
+    --color-tag-sky: #7CC3E8;
+    --color-tag-sky-soft: #182A33;
+    --color-tag-violet: #C3A6EC;
+    --color-tag-violet-soft: #2C2238;
+    --color-tag-stone: #A69F92;
+    --color-tag-stone-soft: #26231D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --color-bg: #14130F;
+  --color-surface: #1E1C17;
+  --color-surface-raised: #26231D;
+  --color-surface-sunken: #191813;
+  --color-surface-hover: #24211C;
+  --color-surface-strong: #34302A;
+  --color-border: #34302A;
+  --color-border-subtle: #2A2722;
+  --color-border-strong: #4A453C;
+  --color-text: #EEE9DF;
+  --color-muted: #A69F92;
+  --color-faint: #6E685E;
+  --color-inverse: #EEE9DF;
+  --color-on-inverse: #1C1B18;
+  --color-primary: #A9D6B9;
+  --color-primary-hover: #BFE3CC;
+  --color-on-primary: #10241A;
+  --color-primary-soft: #22332A;
+  --color-accent: #F0895C;
+  --color-accent-soft: #3A2419;
+  --color-success: #8FD18A;
+  --color-success-soft: #1F3320;
+  --color-warning: #E6B65A;
+  --color-warning-soft: #382B14;
+  --color-danger: #F38A7E;
+  --color-danger-soft: #3A1E1B;
+  --color-info: #7CC3E8;
+  --color-info-soft: #182A33;
+  --color-ring: #9DBBE6;
+  --color-phase-focus: #F0895C;
+  --color-phase-short: #8FD18A;
+  --color-phase-long: #9DBBE6;
+  --color-phase-long-soft: #1D2633;
+  --color-type-epic: #F2A65A;
+  --color-type-story: #7CC3E8;
+  --color-type-task: #E2C64B;
+  --color-type-bug: #F38A7E;
+  --color-status-todo: #7CC3E8;
+  --color-status-progress: #E6B65A;
+  --color-status-review: #C3A6EC;
+  --color-avatar-claude: #D97757;
+  --color-avatar-agent: #38BDF8;
+  --color-icon-spark: #B8451C;
+  --color-tag-rose: #F28BA8;
+  --color-tag-rose-soft: #3A1C26;
+  --color-tag-amber: #E6B65A;
+  --color-tag-amber-soft: #382B14;
+  --color-tag-emerald: #8FD18A;
+  --color-tag-emerald-soft: #1F3320;
+  --color-tag-sky: #7CC3E8;
+  --color-tag-sky-soft: #182A33;
+  --color-tag-violet: #C3A6EC;
+  --color-tag-violet-soft: #2C2238;
+  --color-tag-stone: #A69F92;
+  --color-tag-stone-soft: #26231D;
+  color-scheme: dark;
+}
+
+/* One focus indicator for every interactive element (buttons, links, cards, inputs). */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
 
 /* Safety net against any child (a popover positioned off past an edge, a long
    unbreakable string) widening the page horizontally on mobile — which also
@@ -25,7 +199,7 @@ body {
 }
 
 body {
-  @apply bg-canvas text-stone-800;
+  @apply bg-bg text-text;
 }
 
 /* Hide scrollbars everywhere — scrolling itself stays fully functional
@@ -43,7 +217,7 @@ body {
    a hidden bar leaves mouse users with no way to scroll horizontally. */
 .scrollbar-visible {
   scrollbar-width: thin;
-  scrollbar-color: #d6d3d1 transparent;
+  scrollbar-color: var(--color-border-strong) transparent;
   -ms-overflow-style: auto;
 }
 
@@ -54,7 +228,7 @@ body {
 }
 
 .scrollbar-visible::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
+  background: var(--color-border-strong);
   border-radius: 9999px;
 }
 
@@ -76,15 +250,21 @@ body {
 
 @keyframes phase-flash {
   0% {
-    box-shadow: 0 0 0 0 rgba(225, 85, 47, 0.45);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-phase-focus) 45%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 16px rgba(225, 85, 47, 0);
+    box-shadow: 0 0 0 16px color-mix(in srgb, var(--color-phase-focus) 0%, transparent);
   }
 }
 
 .animate-phase-flash {
   animation: phase-flash 900ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-phase-flash {
+    animation: none;
+  }
 }
 
 @keyframes popover-in {
@@ -143,7 +323,7 @@ body {
 
 /* Rendered markdown (projects module: descriptions, repro steps, comments). */
 .md-content {
-  @apply text-sm leading-relaxed text-stone-700;
+  @apply text-sm leading-relaxed text-text;
 }
 .md-content > * + * {
   @apply mt-2;
@@ -151,7 +331,7 @@ body {
 .md-content h1,
 .md-content h2,
 .md-content h3 {
-  @apply font-semibold text-stone-800;
+  @apply font-semibold text-text;
 }
 .md-content h1 { @apply text-lg; }
 .md-content h2 { @apply text-base; }
@@ -159,27 +339,27 @@ body {
 .md-content ol { @apply list-decimal pl-5; }
 .md-content a,
 .md-inline a {
-  @apply text-brand-700 underline;
+  @apply text-primary underline;
 }
 .md-content code,
 .md-inline code {
-  @apply rounded bg-stone-100 px-1 py-0.5 font-mono text-[12px];
+  @apply rounded bg-surface-sunken px-1 py-0.5 font-mono text-[12px];
 }
 .md-content pre {
-  @apply overflow-x-auto rounded-lg bg-stone-900 p-3 text-[12px] text-stone-100;
+  @apply overflow-x-auto rounded-lg bg-inverse p-3 text-[12px] text-on-inverse;
 }
 .md-content pre code {
   @apply bg-transparent p-0 text-inherit;
 }
 .md-content blockquote {
-  @apply border-l-2 border-stone-300 pl-3 text-stone-500;
+  @apply border-l-2 border-border-strong pl-3 text-muted;
 }
 .md-content table {
   @apply w-full border-collapse text-xs;
 }
 .md-content th,
 .md-content td {
-  @apply border border-stone-200 px-2 py-1 text-left;
+  @apply border border-border px-2 py-1 text-left;
 }
 .md-content input[type='checkbox'] {
   @apply mr-1.5 align-middle;

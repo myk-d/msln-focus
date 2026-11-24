@@ -17,7 +17,7 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
   const nonEmptyDays = days.filter((d) => events.some((e) => e.date === d) || tasks.some((t) => t.dueDate === d));
 
   if (nonEmptyDays.length === 0) {
-    return <p className="mt-4 text-sm text-stone-400">{t('calendar.noEventsInPeriod')}</p>;
+    return <p className="mt-4 text-sm text-muted">{t('calendar.noEventsInPeriod')}</p>;
   }
 
   return (
@@ -30,12 +30,12 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
             <div className="mb-1.5 flex items-center gap-2">
               <span
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
-                  dateKey === todayKey ? 'bg-brand-600 text-white' : 'text-stone-700'
+                  dateKey === todayKey ? 'bg-primary text-on-primary' : 'text-text'
                 }`}
               >
                 {dayjs(dateKey).date()}
               </span>
-              <span className="text-sm font-medium capitalize text-stone-600">
+              <span className="text-sm font-medium capitalize text-muted">
                 {dayjs(dateKey).format('dddd, D MMMM')}
               </span>
             </div>
@@ -56,7 +56,7 @@ export function AgendaView({ days, events, tasks, onSelectEvent, onSelectTask }:
                 <button
                   key={task.id}
                   onClick={() => onSelectTask(task.id)}
-                  className="flex items-center gap-2 rounded-lg bg-stone-100 px-2 py-1.5 text-left text-sm text-stone-600"
+                  className="flex items-center gap-2 rounded-lg bg-surface-sunken px-2 py-1.5 text-left text-sm text-muted"
                 >
                   <span className="w-12 shrink-0 text-xs opacity-70">{t('calendar.task')}</span>
                   <span className="truncate">{task.text}</span>

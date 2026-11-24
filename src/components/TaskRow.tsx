@@ -60,8 +60,8 @@ export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSel
     <div
       ref={setNodeRef}
       style={style}
-      className={`group rounded-xl border bg-white px-1 transition-colors hover:border-stone-200 ${
-        isSelected ? 'border-brand-300 bg-brand-50/40' : 'border-transparent'
+      className={`group rounded-xl border bg-surface px-1 transition-colors hover:border-border ${
+        isSelected ? 'border-primary/40 bg-primary-soft/40' : 'border-transparent'
       }`}
     >
       <div className="flex items-center gap-2.5 py-2.5">
@@ -69,7 +69,7 @@ export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSel
           {...attributes}
           {...listeners}
           style={{ touchAction: 'none' }}
-          className="cursor-grab text-stone-300 hover:text-stone-500 active:cursor-grabbing"
+          className="cursor-grab text-faint hover:text-muted active:cursor-grabbing"
           aria-label={t('tasks.dragAria')}
         >
           <GripVertical size={15} />
@@ -81,18 +81,18 @@ export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSel
 
         <button onClick={() => onSelect(task.id)} className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-1.5">
-            <span className={`text-sm ${task.completed ? 'text-stone-400 line-through' : 'text-stone-700'}`}>
+            <span className={`text-sm ${task.completed ? 'text-muted line-through' : 'text-text'}`}>
               {task.text}
             </span>
-            {task.pinned && <Pin size={12} className="shrink-0 rotate-45 text-stone-400" />}
+            {task.pinned && <Pin size={12} className="shrink-0 rotate-45 text-muted" />}
           </div>
 
           {(task.dueDate || task.tagIds.length > 0 || task.subtasks.length > 0 || task.description.trim()) && (
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
-              {task.description.trim() && <AlignLeft size={12} className="shrink-0 text-stone-400" aria-label={t('tasks.description')} />}
+              {task.description.trim() && <AlignLeft size={12} className="shrink-0 text-muted" aria-label={t('tasks.description')} />}
               {task.dueDate && (
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${dueOverdue ? 'bg-red-50 text-red-500' : 'bg-stone-100 text-stone-500'}`}
+                  className={`rounded-full px-2 py-0.5 text-xs ${dueOverdue ? 'bg-danger-soft text-danger' : 'bg-surface-sunken text-muted'}`}
                 >
                   {formatDueDate(task.dueDate)}
                 </span>
@@ -110,7 +110,7 @@ export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSel
                 );
               })}
               {task.subtasks.length > 0 && (
-                <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+                <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs text-muted">
                   {completedSubtasks}/{task.subtasks.length}
                 </span>
               )}
@@ -121,7 +121,7 @@ export const TaskRow = memo(function TaskRow({ task, lists, currentListId, isSel
         <div className="relative">
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            className="rounded px-1.5 py-1 text-stone-400 opacity-100 hover:bg-stone-100 hover:text-stone-600 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
+            className="rounded px-1.5 py-1 text-muted opacity-100 hover:bg-surface-sunken hover:text-text md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
           >
             <MoreHorizontal size={16} />
           </button>

@@ -36,8 +36,21 @@ export function useDocumentPiP() {
     try {
       const win = await window.documentPictureInPicture.requestWindow({ width: 260, height: 320 });
       copyStyles(win.document);
-      win.document.body.className = 'bg-stone-900 text-stone-50 antialiased';
-      win.addEventListener('pagehide', () => setPipWindow(null));
+      win.document.body.className = 'bg-bg text-text antialiased';
+      // Mirror the main window's theme choice (useTheme sets data-theme on <html>)
+      // and keep following it while the PiP window is open.
+      const syncTheme = () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        if (theme) win.document.documentElement.setAttribute('data-theme', theme);
+        else win.document.documentElement.removeAttribute('data-theme');
+      };
+      syncTheme();
+      const themeObserver = new MutationObserver(syncTheme);
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      win.addEventListener('pagehide', () => {
+        themeObserver.disconnect();
+        setPipWindow(null);
+      });
       setPipWindow(win);
     } catch (error) {
       console.error('Помилка PiP API:', error);

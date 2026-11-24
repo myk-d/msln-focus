@@ -20,7 +20,7 @@ export function EventChip({ label, time, color, allDay, onClick }: EventChipProp
       className={`flex w-full items-center gap-1 truncate rounded px-1.5 py-0.5 text-left text-[11px] font-medium transition ${
         color
           ? `${allDay ? TAG_COLOR_META[color].wash : TAG_COLOR_META[color].bg} ${TAG_COLOR_META[color].text} hover:opacity-80`
-          : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+          : 'bg-surface-sunken text-muted hover:bg-surface-strong'
       }`}
     >
       {time && <span className="shrink-0 opacity-70">{time}</span>}

@@ -42,7 +42,7 @@ function SubtaskRow({
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commitEdit}
           onKeyDown={(e) => e.key === 'Enter' && commitEdit()}
-          className="flex-1 rounded bg-stone-50 px-1 text-sm outline-none ring-1 ring-brand-400"
+          className="flex-1 rounded bg-surface-hover px-1 text-sm outline-none ring-1 ring-ring"
         />
       ) : (
         <button
@@ -50,12 +50,12 @@ function SubtaskRow({
             setDraft(subtask.text);
             setEditing(true);
           }}
-          className={`flex-1 truncate text-left text-sm ${subtask.completed ? 'text-stone-400 line-through' : 'text-stone-600'}`}
+          className={`flex-1 truncate text-left text-sm ${subtask.completed ? 'text-muted line-through' : 'text-muted'}`}
         >
           {subtask.text}
         </button>
       )}
-      <button onClick={onDelete} className="text-stone-300 hover:text-red-500 md:hidden md:group-hover:block">
+      <button onClick={onDelete} className="text-faint hover:text-danger md:hidden md:group-hover:block">
         <X size={13} />
       </button>
     </div>
@@ -97,9 +97,9 @@ export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
           onKeyDown={(e) => e.key === 'Enter' && commitNewSubtask()}
           onBlur={commitNewSubtask}
           placeholder={t('tasks.addSubtaskPlaceholder')}
-          className="flex-1 rounded bg-stone-50 px-1.5 py-1 text-sm outline-none placeholder:text-stone-400"
+          className="flex-1 rounded bg-surface-hover px-1.5 py-1 text-sm outline-none placeholder:text-muted"
         />
-        <button onClick={commitNewSubtask} className="shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50" aria-label={t('tasks.save')}>
+        <button onClick={commitNewSubtask} className="shrink-0 rounded-full p-1 text-primary hover:bg-primary-soft" aria-label={t('tasks.save')}>
           <Plus size={14} />
         </button>
       </div>

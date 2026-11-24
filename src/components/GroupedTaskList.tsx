@@ -21,8 +21,8 @@ export function GroupedTaskList({ groups, lists, currentListId, selectedTaskId, 
         <div key={group.key}>
           {group.label && (
             <div className="flex items-center gap-2 px-1 py-1">
-              <span className="text-sm font-semibold text-stone-700">{group.label}</span>
-              <span className="text-xs text-stone-400">{group.tasks.length}</span>
+              <span className="text-sm font-semibold text-text">{group.label}</span>
+              <span className="text-xs text-muted">{group.tasks.length}</span>
             </div>
           )}
           <div className="flex flex-col gap-2 px-1 py-1">

@@ -81,23 +81,23 @@ function DayCell({
   return (
     <div
       ref={setNodeRef}
-      className={`relative flex min-h-17.5 flex-col gap-1 border-b border-r border-stone-100 p-1 md:min-h-27.5 md:p-1.5 ${
+      className={`relative flex min-h-17.5 flex-col gap-1 border-b border-r border-border-subtle p-1 md:min-h-27.5 md:p-1.5 ${
         isOver
-          ? 'bg-brand-50'
+          ? 'bg-primary-soft'
           : allDayItem?.color
             ? TAG_COLOR_META[allDayItem.color].wash
             : isCurrentMonth
-              ? 'bg-white'
-              : 'bg-stone-50/50'
+              ? 'bg-surface'
+              : 'bg-surface-hover/50'
       }`}
     >
       <span
         className={`text-xs font-medium ${
           isToday
-            ? 'flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-white'
+            ? 'flex h-5 w-5 items-center justify-center rounded-full bg-primary text-on-primary'
             : isCurrentMonth
-              ? 'text-stone-600'
-              : 'text-stone-300'
+              ? 'text-text'
+              : 'text-muted'
         }`}
       >
         {dayjs(dateKey).date()}
@@ -112,7 +112,7 @@ function DayCell({
       {hidden.length > 0 && (
         <button
           onClick={onToggleOverflow}
-          className="mt-0.5 text-left text-[11px] font-medium text-stone-400 hover:text-stone-600"
+          className="mt-0.5 text-left text-[11px] font-medium text-muted hover:text-text"
         >
           {t('calendar.more', { count: hidden.length })}
         </button>
@@ -186,10 +186,10 @@ export function MonthView({ monthDates, cursorDateKey, events, tasks, onSelectEv
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden rounded-xl border-l border-t border-stone-100">
-      <div className="grid grid-cols-7 border-b border-stone-100 bg-stone-50/50">
+    <div className="flex flex-1 flex-col overflow-hidden rounded-xl border-l border-t border-border-subtle">
+      <div className="grid grid-cols-7 border-b border-border-subtle bg-surface-hover/50">
         {weekdays.map((day) => (
-          <div key={day} className="px-2 py-1.5 text-center text-xs font-semibold text-stone-400">
+          <div key={day} className="px-2 py-1.5 text-center text-xs font-semibold text-muted">
             {day}
           </div>
         ))}
