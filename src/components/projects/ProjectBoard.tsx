@@ -127,9 +127,9 @@ interface BoardViewProps {
   onCreate: (input: NewItemInput) => Promise<unknown>;
 }
 
-// Quick-add for a row: story preselected as parent ("No story": none), types task/bug.
+// Quick-add for a row: story preselected as parent ("No story": none), types task/bug, created in todo so it appears on the board.
 function RowAddForm({ row, project, items, onCreate, onClose }: { row: TaskboardRow; project: Project; items: WorkItem[]; onCreate: (input: NewItemInput) => Promise<unknown>; onClose: () => void }) {
-  return <NewItemForm project={project} items={items} allowedTypes={['task', 'bug']} defaultType="task" parentId={row.story?.id ?? null} onCreate={onCreate} onClose={onClose} />;
+  return <NewItemForm project={project} items={items} allowedTypes={['task', 'bug']} defaultType="task" parentId={row.story?.id ?? null} status="todo" onCreate={onCreate} onClose={onClose} />;
 }
 
 // Cell ids are `${rowKey}:${status}`; rowKey is a story id or 'none', so split on the last colon.
