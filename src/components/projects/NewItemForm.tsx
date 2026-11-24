@@ -21,7 +21,7 @@ interface NewItemFormProps {
   onClose: () => void;
 }
 
-// Quick-add: title + type + parent. Stays open after a successful submit, Enter submits, Escape cancels.
+// Quick-add: title + type + parent. Closes after a successful submit, Enter submits, Escape cancels.
 export function NewItemForm({ project, items, allowedTypes, defaultType, parentId, status = 'backlog', onCreate, onClose }: NewItemFormProps) {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
@@ -43,6 +43,7 @@ export function NewItemForm({ project, items, allowedTypes, defaultType, parentI
     try {
       await onCreate({ type, title: clean, status, parentId: parent });
       setTitle('');
+      onClose();
     } catch (err) {
       console.error('createItem', err);
       setError(true);
