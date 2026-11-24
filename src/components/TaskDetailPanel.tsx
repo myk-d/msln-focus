@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, MoreHorizontal, Pin, PinOff, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { usePomodoroActions } from '../context/PomodoroContext';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea';
 import { Checkbox } from './ui/Checkbox';
 import { PriorityPicker } from './ui/PriorityPicker';
@@ -45,7 +46,9 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   const { startForTask } = usePomodoroActions();
   const navigate = useNavigate();
   const currentListId = sections.find((s) => s.id === task.sectionId)?.listId ?? '';
+  const panelRef = useRef<HTMLElement>(null);
   useBodyScrollLock(true);
+  useFocusTrap(panelRef, { onEscape: onClose });
 
   const [titleDraft, setTitleDraft] = useState(task.text);
   const titleRef = useAutoResizeTextarea(titleDraft);
@@ -64,7 +67,14 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-border bg-surface md:w-1/2 md:max-w-2xl">
+      <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={task.text}
+        tabIndex={-1}
+        className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-border bg-surface outline-none md:w-1/2 md:max-w-2xl"
+      >
       {/* Header sits outside the scrolling body so its "..." popover menu can't
           get clipped — a scrollable ancestor clips absolutely-positioned
           descendants regardless of z-index, since setting overflow-y non-visible

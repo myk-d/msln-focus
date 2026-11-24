@@ -52,7 +52,10 @@ export function TagInput({ value, suggestions, onChange }: { value: string[]; su
               e.preventDefault();
               add(draft);
             }
-            if (e.key === 'Escape') setAdding(false);
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              setAdding(false);
+            }
             if (e.key === 'Backspace' && !draft && value.length) onChange(value.slice(0, -1));
           }}
           placeholder={t('projects.tagPlaceholder')}
@@ -201,7 +204,10 @@ export function MarkdownField({ value, placeholder, onSave }: { value: string; p
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) save();
-            if (e.key === 'Escape') setEditing(false);
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              setEditing(false);
+            }
           }}
           placeholder={placeholder}
           className="block w-full resize-none overflow-hidden bg-transparent p-3 font-mono text-[13px] text-text outline-none placeholder:font-sans placeholder:text-muted"
@@ -254,7 +260,12 @@ export function ItemPicker({
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => e.key === 'Escape' && onClose()}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              onClose();
+            }
+          }}
           placeholder={t('projects.searchItems', { key: project.key })}
           className="w-full py-1.5 text-sm outline-none"
         />
