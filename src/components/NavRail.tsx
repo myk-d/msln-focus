@@ -1,16 +1,18 @@
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Bell, BellOff, CalendarDays, FolderKanban, ListTodo, LoaderCircle, LogOut, Target, Timer, User } from 'lucide-react';
+import { Bell, BellOff, CalendarDays, FolderKanban, ListTodo, LoaderCircle, LogOut, Timer, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { menuItemClass, popoverClass } from '../lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { AxoIcon } from './brand/AxoIcon';
 
+// Rail item 60px wide on desktop; on the mobile tab bar each item fills its share and stays >= 44px tall.
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium transition md:w-full ${
+  `flex min-h-11 flex-1 flex-col items-center justify-center gap-1 rounded-[10px] px-1 py-1.5 text-[11px] font-semibold transition md:w-[60px] md:flex-none md:py-2 ${
     isActive ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-surface-sunken hover:text-text'
   }`;
 
@@ -69,7 +71,7 @@ function AccountMenu({ variant }: { variant: 'rail' | 'bar' }) {
       <button
         onClick={() => setOpen((v) => !v)}
         title={user.displayName ?? t('nav.account')}
-        className="flex h-9 w-9 items-center justify-center rounded-full transition hover:ring-2 hover:ring-border"
+        className="flex h-11 w-11 items-center justify-center rounded-full transition hover:ring-2 hover:ring-border"
       >
         {user.photoURL ? (
           <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full" />
@@ -131,13 +133,11 @@ export function NavRail() {
   return (
     <>
       {/* Desktop: vertical icon rail */}
-      <nav className="hidden h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-border bg-surface py-4 md:flex">
-        <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-on-primary">
-          <Target size={18} />
-        </div>
+      <nav className="hidden h-full w-[76px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-surface py-4 md:flex">
+        <AxoIcon size={40} className="mb-3.5 text-primary" />
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} className={navLinkClass}>
-            <Icon size={19} />
+            <Icon size={22} />
             {label}
           </NavLink>
         ))}
@@ -145,10 +145,10 @@ export function NavRail() {
       </nav>
 
       {/* Mobile: bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-surface py-1 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-1 border-t border-border bg-surface px-2 pt-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] md:hidden">
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} className={navLinkClass}>
-            <Icon size={19} />
+            <Icon size={22} />
             {label}
           </NavLink>
         ))}

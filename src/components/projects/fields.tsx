@@ -4,8 +4,9 @@ import { Plus, Search, Tag, User, X } from 'lucide-react';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAutoResizeTextarea } from '../../hooks/useAutoResizeTextarea';
 import { popoverClass, menuItemClass } from '../../lib/ui';
-import { ASSIGNEE_META, ASSIGNEE_ORDER, STATUS_META, TYPE_META, itemRef, renderMarkdown } from '../../lib/projects';
+import { ASSIGNEE_META, ASSIGNEE_ORDER, TYPE_META, itemRef, renderMarkdown } from '../../lib/projects';
 import type { Assignee, Project, WorkItem } from '../../types';
+import { StatusDot } from './glyphs';
 
 // ---------- Tags: chips + "add tag" with suggestions (like ADO) ----------
 
@@ -269,7 +270,7 @@ export function ItemPicker({
                 <Icon size={13} className={`shrink-0 ${color}`} />
                 <span className="shrink-0 font-mono text-xs text-muted">{itemRef(project, i)}</span>
                 <span className="truncate">{i.title}</span>
-                <span className={`ml-auto h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_META[i.status].dot}`} />
+                <span className="ml-auto"><StatusDot status={i.status} size={6} /></span>
               </button>
             );
           })

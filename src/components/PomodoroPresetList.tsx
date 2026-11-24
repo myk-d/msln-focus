@@ -153,9 +153,9 @@ export function PomodoroPresetList({
   };
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">{t('pomodoro.presets')}</h2>
+    <div className="w-full">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-bold text-text">{t('pomodoro.presets')}</h2>
         <button onClick={startAdd} className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover">
           <Plus size={14} /> {t('pomodoro.add')}
         </button>
@@ -171,7 +171,7 @@ export function PomodoroPresetList({
             <div
               key={preset.id}
               className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 transition ${
-                activePresetId === preset.id && isActive ? 'border-primary/40 bg-primary-soft' : 'border-border bg-surface'
+                activePresetId === preset.id && isActive ? 'border-transparent bg-primary-soft' : 'border-border bg-surface'
               }`}
             >
               {confirmingId === preset.id ? (

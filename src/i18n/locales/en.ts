@@ -167,6 +167,8 @@ const en: Translations = {
     heading: 'Pomodoro',
     subheading: 'Focus on one task at a time',
     returnToPage: 'Return to page',
+    sessionOf: 'Session {{current}} of {{total}}',
+    unlinkTask: 'Unlink task',
     settingsAria: 'Settings',
     pause: 'Pause',
     start: 'Start',
@@ -283,6 +285,7 @@ const en: Translations = {
       progress: '{{done}} of {{total}} done',
       empty: 'No items yet. Add your first story.',
       noResults: 'Nothing found',
+      emptyColumn: 'Quiet here',
       emptyStory: 'This story has no tasks yet',
     },
     dnd: {

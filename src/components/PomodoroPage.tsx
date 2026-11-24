@@ -9,13 +9,22 @@ export function PomodoroPage() {
     usePomodoroContext();
 
   return (
-    <div className="flex h-full flex-col items-center overflow-y-auto px-6 py-10">
-      <div className="mb-8 text-center">
+    <div className="flex h-full flex-col overflow-y-auto">
+      <header className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-border bg-surface px-5 py-4 md:px-8">
         <h1 className="font-display text-2xl font-semibold tracking-tight text-text">{t('pomodoro.heading')}</h1>
-        <p className="mt-1 text-sm text-muted">{t('pomodoro.subheading')}</p>
-      </div>
+        <p className="text-sm text-muted">{t('pomodoro.subheading')}</p>
+      </header>
 
-      <div className="flex w-full max-w-4xl flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
+      <div className="mx-auto grid w-full max-w-6xl flex-1 content-start gap-6 p-4 md:p-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="min-w-0">
+          {pipWindow ? (
+            <PomodoroTimer variant="placeholder" onClosePiP={closePiP} />
+          ) : (
+            <PomodoroTimer variant="main" pipSupported={isSupported} onOpenPiP={openPiP} />
+          )}
+        </div>
+
+        <aside className="self-start rounded-2xl border border-border bg-surface p-5">
         <PomodoroPresetList
           presets={presets}
           activePresetId={activePresetId}
@@ -25,14 +34,7 @@ export function PomodoroPage() {
           onUpdate={updatePreset}
           onDelete={deletePreset}
         />
-
-        <div className="w-full max-w-sm">
-          {pipWindow ? (
-            <PomodoroTimer variant="placeholder" onClosePiP={closePiP} />
-          ) : (
-            <PomodoroTimer variant="main" pipSupported={isSupported} onOpenPiP={openPiP} />
-          )}
-        </div>
+        </aside>
       </div>
     </div>
   );
