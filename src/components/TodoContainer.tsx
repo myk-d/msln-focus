@@ -100,7 +100,7 @@ export function TodoContainer({ selectedTaskId, onSelectTask, onOpenSidebar }: T
           >
             <Menu size={18} />
           </button>
-          <h1 className="text-xl font-bold text-text">{activeList.name}</h1>
+          <h1 className="font-display text-xl font-semibold text-text">{activeList.name}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button

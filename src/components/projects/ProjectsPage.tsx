@@ -121,7 +121,7 @@ export function ProjectsPage() {
                   </option>
                 ))}
               </select>
-              <h1 className="hidden text-lg font-semibold text-text md:block">
+              <h1 className="hidden font-display text-xl font-semibold text-text md:block">
                 <span className="mr-2 font-mono text-sm text-muted">{project.key}</span>
                 {project.name}
               </h1>

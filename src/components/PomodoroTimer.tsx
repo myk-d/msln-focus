@@ -54,7 +54,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
       <div className={`flex items-center justify-between rounded-2xl border border-border p-4 ${meta.soft}`}>
         <div>
           <div className={`text-xs font-medium ${meta.text}`}>{t(meta.labelKey)}</div>
-          <div className="font-mono text-2xl font-bold text-text">{formatTime(timeLeft)}</div>
+          <div className="font-mono text-2xl font-semibold tabular-nums text-text">{formatTime(timeLeft)}</div>
         </div>
         <button
           onClick={onClosePiP}
@@ -129,7 +129,7 @@ export function PomodoroTimer({ variant, pipSupported, onOpenPiP, onClosePiP }: 
           />
         </svg>
         <div
-          className={`absolute inset-0 flex items-center justify-center font-mono font-bold text-text ${variant === 'pip' ? 'text-[clamp(0.85rem,7vmin,1.5rem)]' : 'text-3xl'}`}
+          className={`absolute inset-0 flex items-center justify-center font-mono font-semibold tabular-nums text-text ${variant === 'pip' ? 'text-[clamp(0.85rem,7vmin,1.5rem)]' : 'text-3xl'}`}
         >
           {formatTime(timeLeft)}
         </div>
