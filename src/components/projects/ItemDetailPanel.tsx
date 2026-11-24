@@ -100,7 +100,7 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
                 e.currentTarget.blur();
               }
             }}
-            className="mt-1 w-full resize-none overflow-hidden rounded px-1 -mx-1 text-xl font-semibold text-text outline-none hover:bg-surface-hover focus:bg-surface focus:ring-2 focus:ring-ring/30"
+            className="mt-1 w-full resize-none overflow-hidden rounded px-1 -mx-1 font-display text-xl font-semibold text-text outline-none hover:bg-surface-hover focus:bg-surface focus:ring-2 focus:ring-ring/30"
           />
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
             <AssigneePicker value={item.assignee} photoURL={user?.photoURL} onChange={(assignee) => void updateItem(item.id, { assignee })} />

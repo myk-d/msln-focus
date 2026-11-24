@@ -37,7 +37,7 @@ export function TagTasksView({ tagId, selectedTaskId, onSelectTask, onOpenSideba
           <Menu size={18} />
         </button>
         <TagIcon size={18} className={TAG_COLOR_META[tag.color].text} />
-        <h1 className="text-xl font-bold text-text">{tag.name}</h1>
+        <h1 className="font-display text-xl font-semibold text-text">{tag.name}</h1>
       </div>
 
       {groups.length === 0 ? (

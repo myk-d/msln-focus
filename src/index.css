@@ -61,6 +61,14 @@
   --color-tag-stone-soft: #EDE8DD;
 }
 
+/* Type: Manrope for the UI, Literata only for headings at 20px and up (font-display),
+   IBM Plex Mono for refs, timer digits and code. */
+@theme {
+  --font-sans: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Literata Variable', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
 /* Dark theme: follows the OS unless the user picked a theme ([data-theme] on <html>, see useTheme). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {

@@ -48,7 +48,7 @@ export function WelcomePage() {
       <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-lg">
         <Timer size={28} />
       </div>
-      <h1 className="text-center text-3xl font-black tracking-tight text-text">Focus-Pocus</h1>
+      <h1 className="text-center font-display text-3xl font-semibold tracking-tight text-text">Focus-Pocus</h1>
       <p className="mt-2 max-w-md text-center text-sm text-muted">{t('welcome.tagline')}</p>
 
       <button

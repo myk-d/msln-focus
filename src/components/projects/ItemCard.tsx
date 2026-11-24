@@ -61,7 +61,7 @@ function ItemCardContent({ item, project, allItems, showParent }: Omit<ItemCardP
       <div className="flex items-start gap-1.5">
         <Icon size={14} className={`mt-0.5 shrink-0 ${color}`} />
         <p className="line-clamp-3 text-sm text-text">
-          <span className="mr-1.5 font-semibold text-muted">{item.number}</span>
+          <span className="mr-1.5 font-mono text-xs font-medium text-muted">{item.number}</span>
           {item.title}
         </p>
       </div>

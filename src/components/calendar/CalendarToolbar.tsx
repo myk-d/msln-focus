@@ -24,7 +24,7 @@ export function CalendarToolbar({ view, onSetView, title, onPrev, onNext, onToda
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-3">
-        <h1 className="text-xl font-bold capitalize text-text">{title}</h1>
+        <h1 className="font-display text-xl font-semibold capitalize text-text">{title}</h1>
         <div className="flex items-center gap-1">
           <button onClick={onPrev} className="rounded-full p-1.5 text-muted hover:bg-surface-sunken hover:text-text">
             <ChevronLeft size={16} />
