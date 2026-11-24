@@ -1,6 +1,6 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, GitBranch, GitPullRequest, Link2, Plus, Send, Trash2, X } from 'lucide-react';
+import { Check, Copy, ExternalLink, GitBranch, GitPullRequest, Link2, Plus, Send, Trash2, X } from 'lucide-react';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useAutoResizeTextarea } from '../../hooks/useAutoResizeTextarea';
@@ -49,9 +49,29 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
 
   const [titleDraft, setTitleDraft] = useState(item.title);
   const titleRef = useAutoResizeTextarea(titleDraft);
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { stripe } = TYPE_META[item.type];
   const ref = itemRef(project, item);
   const tagSuggestions = [...new Set(projectItems.flatMap((i) => i.labels))].sort((a, b) => a.localeCompare(b));
+
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    },
+    []
+  );
+
+  const handleCopyRef = async () => {
+    try {
+      await navigator.clipboard.writeText(ref);
+      setCopied(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
 
   const commitTitle = () => {
     const trimmed = titleDraft.trim();
@@ -87,6 +107,15 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
           <div className="flex items-center gap-2 text-xs">
             <TypeGlyph type={item.type} size={14} />
             <span className="font-mono text-sm font-medium text-muted">{ref}</span>
+            <button
+              type="button"
+              onClick={() => void handleCopyRef()}
+              className="rounded-md p-1 text-muted transition hover:bg-surface-sunken hover:text-text"
+              aria-label={t(copied ? 'projects.copiedRef' : 'projects.copyRef')}
+              title={t(copied ? 'projects.copiedRef' : 'projects.copyRef')}
+            >
+              {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
+            </button>
             <span className="rounded-md bg-surface-sunken px-2 py-0.5 font-semibold text-muted">{t(TYPE_META[item.type].labelKey)}</span>
             <button
               onClick={() => void handleDelete()}
