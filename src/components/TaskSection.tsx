@@ -119,19 +119,7 @@ export const TaskSection = memo(function TaskSection({
           ref={setNodeRef}
           className={`flex flex-col gap-2 rounded-xl px-1 py-1 transition ${isOver ? 'bg-primary-soft' : ''}`}
         >
-          <SortableContext items={visibleTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-            {visibleTasks.map((task) => (
-              <TaskRow
-                key={task.id}
-                task={task}
-                lists={lists}
-                currentListId={section.listId}
-                isSelected={task.id === selectedTaskId}
-                onSelect={onSelectTask}
-              />
-            ))}
-          </SortableContext>
-          <div className="mt-1 flex items-center gap-1">
+          <div className="mb-1 flex items-center gap-1">
             <input
               value={newTaskText}
               onChange={(e) => setNewTaskText(e.target.value)}
@@ -144,6 +132,18 @@ export const TaskSection = memo(function TaskSection({
               <Plus size={14} />
             </button>
           </div>
+          <SortableContext items={visibleTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+            {visibleTasks.map((task) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                lists={lists}
+                currentListId={section.listId}
+                isSelected={task.id === selectedTaskId}
+                onSelect={onSelectTask}
+              />
+            ))}
+          </SortableContext>
         </div>
       )}
     </div>
