@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Copy, ExternalLink, GitBranch, GitPullRequest, Link2, Plus, Send, Trash2, X } from 'lucide-react';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useAutoResizeTextarea } from '../../hooks/useAutoResizeTextarea';
 import { useItemComments, type ProjectsStore } from '../../hooks/useProjectsStore';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -42,7 +43,9 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
   const { user } = useAuth();
   const confirm = useConfirm();
   const { updateItem } = store;
+  const panelRef = useRef<HTMLElement>(null);
   useBodyScrollLock(true);
+  useFocusTrap(panelRef, { onEscape: onClose });
 
   const [titleDraft, setTitleDraft] = useState(item.title);
   const titleRef = useAutoResizeTextarea(titleDraft);
@@ -90,7 +93,14 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/25 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-border bg-surface-raised shadow-[0_12px_32px_rgb(0_0_0/0.12)] md:w-[min(1120px,92vw)]">
+      <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${ref}: ${item.title}`}
+        tabIndex={-1}
+        className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-border bg-surface-raised shadow-[0_12px_32px_rgb(0_0_0/0.12)] outline-none md:w-[min(1120px,92vw)]"
+      >
         {/* Header: type stripe, ID, title, assignee/state/tags — like the ADO work item form */}
         <div className="h-1 shrink-0" style={{ backgroundColor: stripe }} />
         <header className="shrink-0 border-b border-border px-5 pt-3 pb-3 md:px-7">
@@ -311,7 +321,10 @@ function AcceptanceCriteria({ item, onChange }: { item: WorkItem; onChange: (ac:
                 onBlur={() => commit(idx)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') commit(idx);
-                  if (e.key === 'Escape') setEditing(null);
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setEditing(null);
+                  }
                 }}
                 className="flex-1 rounded px-1 outline-none ring-2 ring-ring/30"
               />
@@ -463,7 +476,10 @@ function RelatedWork({
           onBlur={() => void createChild()}
           onKeyDown={(e) => {
             if (e.key === 'Enter') void createChild();
-            if (e.key === 'Escape') setNewChild(null);
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              setNewChild(null);
+            }
           }}
           placeholder={t('projects.newChildPlaceholder')}
           className={`${inputClass} py-1.5`}

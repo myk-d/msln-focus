@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStoreContext } from '../context/TaskStoreContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -22,8 +25,19 @@ function SubtaskRow({
   onUpdate: (text: string) => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(subtask.text);
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: subtask.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
 
   const commitEdit = () => {
     const trimmed = draft.trim();
@@ -33,7 +47,17 @@ function SubtaskRow({
   };
 
   return (
-    <div className="group flex items-center gap-2">
+    <div ref={setNodeRef} style={style} className="group flex items-center gap-2">
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        style={{ touchAction: 'none' }}
+        className="cursor-grab text-faint hover:text-muted active:cursor-grabbing"
+        aria-label={t('tasks.dragAria')}
+      >
+        <GripVertical size={14} />
+      </button>
       <Checkbox size="sm" checked={subtask.completed} onChange={onToggle} />
       {editing ? (
         <input
@@ -64,9 +88,14 @@ function SubtaskRow({
 
 export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
   const { t } = useTranslation();
-  const { addSubtask, updateSubtask, toggleSubtask, deleteSubtask } = useTaskStoreContext();
+  const { addSubtask, updateSubtask, toggleSubtask, deleteSubtask, reorderSubtasks } = useTaskStoreContext();
   const [newSubtask, setNewSubtask] = useState('');
   const confirm = useConfirm();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const commitNewSubtask = () => {
     if (newSubtask.trim()) addSubtask(taskId, newSubtask.trim());
@@ -79,17 +108,30 @@ export function SubtaskList({ taskId, subtasks }: SubtaskListProps) {
     }
   };
 
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const ids = subtasks.map((st) => st.id);
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+    reorderSubtasks(taskId, arrayMove(ids, oldIndex, newIndex));
+  };
+
   return (
     <div className="flex flex-col gap-1.5">
-      {subtasks.map((st) => (
-        <SubtaskRow
-          key={st.id}
-          subtask={st}
-          onToggle={() => toggleSubtask(taskId, st.id)}
-          onUpdate={(text) => updateSubtask(taskId, st.id, text)}
-          onDelete={() => handleDelete(st)}
-        />
-      ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={subtasks.map((st) => st.id)} strategy={verticalListSortingStrategy}>
+          {subtasks.map((st) => (
+            <SubtaskRow
+              key={st.id}
+              subtask={st}
+              onToggle={() => toggleSubtask(taskId, st.id)}
+              onUpdate={(text) => updateSubtask(taskId, st.id, text)}
+              onDelete={() => handleDelete(st)}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
       <div className="flex items-center gap-1">
         <input
           value={newSubtask}

@@ -148,29 +148,34 @@ export function useTaskStore() {
   const addTask = (sectionId: string, text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    const siblings = tasks.filter((t) => t.sectionId === sectionId);
     const now = Date.now();
-    setTasks((prev) => [
-      ...prev,
-      {
-        id: genId(),
-        sectionId,
-        text: trimmed,
-        description: '',
-        completed: false,
-        pinned: false,
-        priority: 'none',
-        dueDate: null,
-        recurrence: null,
-        recurrenceAnchorDate: null,
-        autoCompleteWithSubtasks: false,
-        tagIds: [],
-        subtasks: [],
-        order: nextOrder(siblings),
-        createdAt: now,
-        updatedAt: now,
-      },
-    ]);
+    // Place new unpinned tasks at the top of the section (below pinned tasks,
+    // which sortTasksBy always keeps first) with a single write.
+    setTasks((prev) => {
+      const siblings = prev.filter((t) => t.sectionId === sectionId);
+      const order = siblings.length === 0 ? 0 : Math.min(...siblings.map((t) => t.order)) - 1;
+      return [
+        ...prev,
+        {
+          id: genId(),
+          sectionId,
+          text: trimmed,
+          description: '',
+          completed: false,
+          pinned: false,
+          priority: 'none',
+          dueDate: null,
+          recurrence: null,
+          recurrenceAnchorDate: null,
+          autoCompleteWithSubtasks: false,
+          tagIds: [],
+          subtasks: [],
+          order,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ];
+    });
   };
 
   const updateTask = (id: string, patch: Partial<Task>) => {
@@ -312,6 +317,25 @@ export function useTaskStore() {
     );
   };
 
+  const reorderSubtasks = (taskId: string, orderedSubtaskIds: string[]) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const byId = new Map(t.subtasks.map((st) => [st.id, st]));
+        const reordered: Subtask[] = [];
+        for (const id of orderedSubtaskIds) {
+          const st = byId.get(id);
+          if (st) {
+            reordered.push(st);
+            byId.delete(id);
+          }
+        }
+        for (const remaining of byId.values()) reordered.push(remaining);
+        return { ...t, subtasks: reordered, updatedAt: Date.now() };
+      })
+    );
+  };
+
   // Toggling the switch on immediately syncs `completed` to the subtasks'
   // current state too, not just future changes.
   const setAutoCompleteWithSubtasks = (taskId: string, value: boolean) => {
@@ -411,6 +435,7 @@ export function useTaskStore() {
     updateSubtask,
     toggleSubtask,
     deleteSubtask,
+    reorderSubtasks,
     setAutoCompleteWithSubtasks,
     setPriority,
     setDueDate,
