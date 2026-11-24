@@ -35,7 +35,7 @@ export function FocusDashboard() {
       '/projects': t('nav.projects'),
     };
     const pageTitle = pageTitles[location.pathname];
-    document.title = pageTitle ? `${pageTitle} · Focus-Pocus` : 'Focus-Pocus';
+    document.title = pageTitle ? `${pageTitle} · Axo` : 'Axo';
   }, [location.pathname, t, i18n.language]);
 
   return (
