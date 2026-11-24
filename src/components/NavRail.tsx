@@ -10,7 +10,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium transition md:w-full ${
-    isActive ? 'bg-brand-100 text-brand-700' : 'text-stone-400 hover:bg-stone-100 hover:text-stone-600'
+    isActive ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-surface-sunken hover:text-text'
   }`;
 
 function useNotificationPermission() {
@@ -68,12 +68,12 @@ function AccountMenu({ variant }: { variant: 'rail' | 'bar' }) {
       <button
         onClick={() => setOpen((v) => !v)}
         title={user.displayName ?? t('nav.account')}
-        className="flex h-9 w-9 items-center justify-center rounded-full transition hover:ring-2 hover:ring-stone-200"
+        className="flex h-9 w-9 items-center justify-center rounded-full transition hover:ring-2 hover:ring-border"
       >
         {user.photoURL ? (
           <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full" />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-stone-500">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-strong text-muted">
             <User size={16} />
           </div>
         )}
@@ -87,22 +87,22 @@ function AccountMenu({ variant }: { variant: 'rail' | 'bar' }) {
         >
           {permission !== 'unsupported' && (
             <button onClick={request} className={menuItemClass}>
-              {permission === 'denied' ? <BellOff size={15} /> : <Bell size={15} className={permission === 'granted' ? 'text-brand-600' : ''} />}
+              {permission === 'denied' ? <BellOff size={15} /> : <Bell size={15} className={permission === 'granted' ? 'text-primary' : ''} />}
               {notificationsTitle}
             </button>
           )}
 
           <div className={`${menuItemClass} justify-between`}>
-            <span className="text-stone-500">{t('nav.language')}</span>
+            <span className="text-muted">{t('nav.language')}</span>
             <LanguageSwitcher />
           </div>
 
-          <div className="my-1 border-t border-stone-100" />
+          <div className="my-1 border-t border-border-subtle" />
 
           <button
             onClick={() => void handleSignOut()}
             disabled={pending}
-            className={`${menuItemClass} text-red-500 hover:bg-red-50 disabled:opacity-50`}
+            className={`${menuItemClass} text-danger hover:bg-danger-soft disabled:opacity-50`}
           >
             {pending ? <LoaderCircle size={15} className="animate-spin" /> : <LogOut size={15} />}
             {t('nav.signOut')}
@@ -125,8 +125,8 @@ export function NavRail() {
   return (
     <>
       {/* Desktop: vertical icon rail */}
-      <nav className="hidden h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-stone-200 bg-white py-4 md:flex">
-        <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
+      <nav className="hidden h-full w-16 shrink-0 flex-col items-center gap-2 border-r border-border bg-surface py-4 md:flex">
+        <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-on-primary">
           <Target size={18} />
         </div>
         {navItems.map(({ to, label, icon: Icon }) => (
@@ -139,7 +139,7 @@ export function NavRail() {
       </nav>
 
       {/* Mobile: bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-stone-200 bg-white py-1 md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-surface py-1 md:hidden">
         {navItems.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} className={navLinkClass}>
             <Icon size={19} />

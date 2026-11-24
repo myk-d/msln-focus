@@ -64,20 +64,20 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-stone-200 bg-white md:w-1/2 md:max-w-2xl">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col border-l border-border bg-surface md:w-1/2 md:max-w-2xl">
       {/* Header sits outside the scrolling body so its "..." popover menu can't
           get clipped — a scrollable ancestor clips absolutely-positioned
           descendants regardless of z-index, since setting overflow-y non-visible
           forces overflow-x to clip too. */}
       <div className="flex items-center justify-between px-5 pt-6">
         <div className="flex items-center gap-2">
-          <button onClick={() => togglePin(task.id)} className="text-stone-400 hover:text-stone-600" aria-label={t('tasks.pinAria')}>
-            {task.pinned ? <PinOff size={16} className="text-brand-600" /> : <Pin size={16} />}
+          <button onClick={() => togglePin(task.id)} className="text-muted hover:text-text" aria-label={t('tasks.pinAria')}>
+            {task.pinned ? <PinOff size={16} className="text-primary" /> : <Pin size={16} />}
           </button>
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+              className="rounded p-1 text-muted hover:bg-surface-sunken hover:text-text"
             >
               <MoreHorizontal size={18} />
             </button>
@@ -122,7 +122,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
             )}
           </div>
         </div>
-        <button onClick={onClose} className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600">
+        <button onClick={onClose} className="rounded p-1 text-muted hover:bg-surface-sunken hover:text-text">
           <X size={18} />
         </button>
       </div>
@@ -144,13 +144,13 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
               (e.target as HTMLTextAreaElement).blur();
             }
           }}
-          className={`flex-1 resize-none overflow-hidden border-none px-0 py-0 text-lg font-semibold text-stone-800 outline-none focus:ring-0 ${
-            task.completed ? 'text-stone-400 line-through' : ''
+          className={`flex-1 resize-none overflow-hidden border-none px-0 py-0 text-lg font-semibold text-text outline-none focus:ring-0 ${
+            task.completed ? 'text-muted line-through' : ''
           }`}
         />
         <button
           onClick={commitTitle}
-          className="mt-1 shrink-0 rounded-full p-1 text-brand-600 hover:bg-brand-50"
+          className="mt-1 shrink-0 rounded-full p-1 text-primary hover:bg-primary-soft"
           aria-label={t('tasks.save')}
         >
           <Check size={16} />
@@ -159,12 +159,12 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
 
       <div className="flex flex-col gap-4">
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.priority')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.priority')}</div>
           <PriorityPicker value={task.priority} onChange={(p) => setPriority(task.id, p)} />
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.date')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.date')}</div>
           <div className="flex flex-wrap items-center gap-1.5">
             <DatePicker value={task.dueDate} onChange={(d) => setDueDate(task.id, d)} />
             <RecurrencePicker
@@ -176,7 +176,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.tags')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.tags')}</div>
           <TagPicker
             selectedTagIds={task.tagIds}
             allTags={tags}
@@ -188,10 +188,10 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
 
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <div className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.subtasks')}</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.subtasks')}</div>
             {task.subtasks.length > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-stone-500">{t('tasks.autoCompleteWithSubtasks')}</span>
+                <span className="text-xs text-muted">{t('tasks.autoCompleteWithSubtasks')}</span>
                 <Switch
                   checked={task.autoCompleteWithSubtasks}
                   onChange={(v) => setAutoCompleteWithSubtasks(task.id, v)}
@@ -203,7 +203,7 @@ export function TaskDetailPanel({ task, lists, onClose }: TaskDetailPanelProps) 
         </div>
 
         <div>
-          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.description')}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.description')}</div>
           <textarea
             ref={descriptionRef}
             value={descriptionDraft}

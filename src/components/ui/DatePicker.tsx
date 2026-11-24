@@ -58,7 +58,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           setOpen((v) => !v);
         }}
         className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition ${
-          value ? 'bg-stone-100 text-stone-600 hover:bg-stone-200' : 'bg-stone-50 text-stone-400 hover:bg-stone-100'
+          value ? 'bg-surface-sunken text-muted hover:bg-surface-strong' : 'bg-surface-hover text-muted hover:bg-surface-sunken'
         }`}
       >
         <CalendarDays size={13} />
@@ -71,7 +71,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
               e.stopPropagation();
               onChange(null);
             }}
-            className="rounded-full p-0.5 hover:bg-stone-300/50"
+            className="rounded-full p-0.5 hover:bg-border-strong/50"
           >
             <X size={11} />
           </span>
@@ -84,14 +84,14 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
             <button
               type="button"
               onClick={() => pick(dayjs(today))}
-              className="rounded-full bg-stone-100 px-2 py-1 text-xs hover:bg-stone-200"
+              className="rounded-full bg-surface-sunken px-2 py-1 text-xs hover:bg-surface-strong"
             >
               {t('tasks.today')}
             </button>
             <button
               type="button"
               onClick={() => pick(dayjs(tomorrow))}
-              className="rounded-full bg-stone-100 px-2 py-1 text-xs hover:bg-stone-200"
+              className="rounded-full bg-surface-sunken px-2 py-1 text-xs hover:bg-surface-strong"
             >
               {t('tasks.tomorrow')}
             </button>
@@ -101,15 +101,15 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
             <button
               type="button"
               onClick={() => setViewMonth((m) => m.subtract(1, 'month'))}
-              className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+              className="rounded p-1 text-muted hover:bg-surface-sunken hover:text-text"
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="text-sm font-semibold capitalize text-stone-700">{viewMonth.format('MMMM YYYY')}</span>
+            <span className="text-sm font-semibold capitalize text-text">{viewMonth.format('MMMM YYYY')}</span>
             <button
               type="button"
               onClick={() => setViewMonth((m) => m.add(1, 'month'))}
-              className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+              className="rounded p-1 text-muted hover:bg-surface-sunken hover:text-text"
             >
               <ChevronRight size={16} />
             </button>
@@ -117,7 +117,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
 
           <div className="grid grid-cols-7 gap-y-1 text-center">
             {weekdays.map((w) => (
-              <span key={w} className="text-[11px] font-medium text-stone-400">
+              <span key={w} className="text-[11px] font-medium text-muted">
                 {w}
               </span>
             ))}
@@ -133,12 +133,12 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
                   onClick={() => pick(d)}
                   className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-xs transition ${
                     isSelected
-                      ? 'bg-brand-600 text-white'
+                      ? 'bg-primary text-on-primary'
                       : isToday
-                        ? 'border border-brand-400 text-brand-700'
+                        ? 'border border-ring text-primary'
                         : isCurrentMonth
-                          ? 'text-stone-700 hover:bg-stone-100'
-                          : 'text-stone-300 hover:bg-stone-50'
+                          ? 'text-text hover:bg-surface-sunken'
+                          : 'text-faint hover:bg-surface-hover'
                   }`}
                 >
                   {d.date()}

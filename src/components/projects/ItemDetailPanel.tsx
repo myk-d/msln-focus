@@ -33,7 +33,7 @@ interface ItemDetailPanelProps {
 
 type LinkKind = 'parent' | 'child' | 'predecessor' | 'related';
 
-const labelClass = 'text-[11px] font-semibold uppercase tracking-wide text-stone-500';
+const labelClass = 'text-[11px] font-semibold uppercase tracking-wide text-muted';
 
 export function ItemDetailPanel({ project, item, projectItems, store, onSelect, onClose }: ItemDetailPanelProps) {
   const { t } = useTranslation();
@@ -44,7 +44,7 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
 
   const [titleDraft, setTitleDraft] = useState(item.title);
   const titleRef = useAutoResizeTextarea(titleDraft);
-  const { icon: TypeIcon, color: typeColor, hex } = TYPE_META[item.type];
+  const { icon: TypeIcon, color: typeColor, stripe } = TYPE_META[item.type];
   const ref = itemRef(project, item);
   const tagSuggestions = [...new Set(projectItems.flatMap((i) => i.labels))].sort((a, b) => a.localeCompare(b));
 
@@ -68,23 +68,23 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
   return (
     <>
       <div onClick={onClose} className="animate-fade-in fixed inset-0 z-30 bg-black/25 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col bg-white shadow-2xl md:w-[min(1120px,92vw)]">
+      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col bg-surface shadow-2xl md:w-[min(1120px,92vw)]">
         {/* Header: type stripe, ID, title, assignee/state/tags — like the ADO work item form */}
-        <div className="h-1 shrink-0" style={{ backgroundColor: hex }} />
-        <header className="shrink-0 border-b border-stone-200 px-5 pt-3 pb-3 md:px-7">
+        <div className="h-1 shrink-0" style={{ backgroundColor: stripe }} />
+        <header className="shrink-0 border-b border-border px-5 pt-3 pb-3 md:px-7">
           <div className="flex items-center gap-2 text-xs">
             <TypeIcon size={15} className={typeColor} />
-            <span className="font-semibold uppercase tracking-wide text-stone-500">{t(TYPE_META[item.type].labelKey)}</span>
-            <span className="font-mono text-stone-400">{ref}</span>
+            <span className="font-semibold uppercase tracking-wide text-muted">{t(TYPE_META[item.type].labelKey)}</span>
+            <span className="font-mono text-muted">{ref}</span>
             <button
               onClick={() => void handleDelete()}
-              className="ml-auto rounded p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-500"
+              className="ml-auto rounded p-1.5 text-muted hover:bg-danger-soft hover:text-danger"
               aria-label={t('projects.deleteItem')}
               title={t('projects.deleteItem')}
             >
               <Trash2 size={16} />
             </button>
-            <button onClick={onClose} className="rounded p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600" aria-label={t('projects.close')}>
+            <button onClick={onClose} className="rounded p-1.5 text-muted hover:bg-surface-sunken hover:text-text" aria-label={t('projects.close')}>
               <X size={18} />
             </button>
           </div>
@@ -100,17 +100,17 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
                 e.currentTarget.blur();
               }
             }}
-            className="mt-1 w-full resize-none overflow-hidden rounded px-1 -mx-1 text-xl font-semibold text-stone-800 outline-none hover:bg-stone-50 focus:bg-white focus:ring-2 focus:ring-brand-100"
+            className="mt-1 w-full resize-none overflow-hidden rounded px-1 -mx-1 text-xl font-semibold text-text outline-none hover:bg-surface-hover focus:bg-surface focus:ring-2 focus:ring-ring/30"
           />
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
             <AssigneePicker value={item.assignee} photoURL={user?.photoURL} onChange={(assignee) => void updateItem(item.id, { assignee })} />
             <label className="flex items-center gap-2 text-sm">
-              <span className="text-xs text-stone-500">{t('projects.field.status')}</span>
+              <span className="text-xs text-muted">{t('projects.field.status')}</span>
               <span className={`h-2 w-2 rounded-full ${STATUS_META[item.status].dot}`} />
               <select
                 value={item.status}
                 onChange={(e) => void updateItem(item.id, { status: e.target.value as WorkItemStatus })}
-                className="rounded border border-transparent bg-transparent py-0.5 text-sm text-stone-700 hover:border-stone-200"
+                className="rounded border border-transparent bg-transparent py-0.5 text-sm text-text hover:border-border"
               >
                 {STATUS_ORDER.map((s) => (
                   <option key={s} value={s}>
@@ -194,13 +194,13 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
                 {item.branch || item.prUrl ? (
                   <div className="flex flex-col gap-2 text-sm">
                     {item.branch && (
-                      <span className="flex items-center gap-2 font-mono text-xs text-stone-600">
-                        <GitBranch size={14} className="shrink-0 text-stone-400" />
+                      <span className="flex items-center gap-2 font-mono text-xs text-muted">
+                        <GitBranch size={14} className="shrink-0 text-muted" />
                         <span className="truncate">{item.branch}</span>
                       </span>
                     )}
                     {item.prUrl && (
-                      <a href={item.prUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-violet-600 hover:underline">
+                      <a href={item.prUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-status-review hover:underline">
                         <GitPullRequest size={14} className="shrink-0" />
                         {t('projects.pullRequest')}
                         <ExternalLink size={11} />
@@ -208,7 +208,7 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-stone-400">{t('projects.noDevelopment')}</p>
+                  <p className="text-xs text-muted">{t('projects.noDevelopment')}</p>
                 )}
               </Card>
 
@@ -224,7 +224,7 @@ export function ItemDetailPanel({ project, item, projectItems, store, onSelect, 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className={`${labelClass} mb-2 border-b border-stone-100 pb-1.5`}>{title}</h3>
+      <h3 className={`${labelClass} mb-2 border-b border-border-subtle pb-1.5`}>{title}</h3>
       {children}
     </section>
   );
@@ -232,7 +232,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Card({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-stone-200 p-3">
+    <section className="rounded-xl border border-border p-3">
       <div className="mb-2 flex items-center">
         <h3 className={labelClass}>{title}</h3>
         <div className="ml-auto">{action}</div>
@@ -245,7 +245,7 @@ function Card({ title, action, children }: { title: string; action?: ReactNode; 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-xs text-stone-500">{label}</span>
+      <span className="text-xs text-muted">{label}</span>
       {children}
     </label>
   );
@@ -270,8 +270,8 @@ function AcceptanceCriteria({ item, onChange }: { item: WorkItem; onChange: (ac:
     <div>
       <ol className="flex flex-col">
         {item.acceptanceCriteria.map((c, idx) => (
-          <li key={`${idx}-${c}`} className="group flex items-start gap-2 rounded-lg px-1 py-1 text-sm text-stone-700 hover:bg-stone-50">
-            <span className="w-5 shrink-0 pt-0.5 text-right text-xs text-stone-400">{idx + 1}.</span>
+          <li key={`${idx}-${c}`} className="group flex items-start gap-2 rounded-lg px-1 py-1 text-sm text-text hover:bg-surface-hover">
+            <span className="w-5 shrink-0 pt-0.5 text-right text-xs text-muted">{idx + 1}.</span>
             {editing === idx ? (
               <input
                 autoFocus
@@ -282,7 +282,7 @@ function AcceptanceCriteria({ item, onChange }: { item: WorkItem; onChange: (ac:
                   if (e.key === 'Enter') commit(idx);
                   if (e.key === 'Escape') setEditing(null);
                 }}
-                className="flex-1 rounded px-1 outline-none ring-2 ring-brand-100"
+                className="flex-1 rounded px-1 outline-none ring-2 ring-ring/30"
               />
             ) : (
               <span
@@ -296,7 +296,7 @@ function AcceptanceCriteria({ item, onChange }: { item: WorkItem; onChange: (ac:
             )}
             <button
               onClick={() => onChange(item.acceptanceCriteria.filter((_, i) => i !== idx))}
-              className="p-0.5 text-stone-300 opacity-0 transition group-hover:opacity-100 hover:text-red-500"
+              className="p-0.5 text-faint opacity-0 transition group-hover:opacity-100 hover:text-danger"
               aria-label={t('projects.removeCriterion')}
             >
               <X size={14} />
@@ -314,7 +314,7 @@ function AcceptanceCriteria({ item, onChange }: { item: WorkItem; onChange: (ac:
           }
         }}
         placeholder={t('projects.addCriterion')}
-        className="mt-1 ml-8 w-[calc(100%-2rem)] rounded-lg px-2 py-1 text-sm outline-none placeholder:text-stone-400 focus:ring-2 focus:ring-brand-100"
+        className="mt-1 ml-8 w-[calc(100%-2rem)] rounded-lg px-2 py-1 text-sm outline-none placeholder:text-muted focus:ring-2 focus:ring-ring/30"
       />
     </div>
   );
@@ -382,7 +382,7 @@ function RelatedWork({
       title={t('projects.relatedWork')}
       action={
         <div className="relative">
-          <button onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-brand-700 hover:bg-brand-50">
+          <button onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-primary hover:bg-primary-soft">
             <Link2 size={13} />
             {t('projects.addLink')}
           </button>
@@ -444,7 +444,7 @@ function RelatedWork({
       <LinkGroup title={t('projects.link.successor')} project={project} items={successors} onOpen={onSelect} onUnlink={(i) => unlink('successor', i)} />
       <LinkGroup title={t('projects.link.related')} project={project} items={related} onOpen={onSelect} onUnlink={(i) => unlink('related', i)} />
       {!parent && !children.length && !predecessors.length && !successors.length && !related.length && newChild === null && (
-        <p className="text-xs text-stone-400">{t('projects.noLinks')}</p>
+        <p className="text-xs text-muted">{t('projects.noLinks')}</p>
       )}
     </Card>
   );
@@ -470,12 +470,12 @@ function LinkGroup({
   const done = items.filter((i) => i.status === 'done').length;
   return (
     <div>
-      <div className="mb-1 flex items-center gap-2 text-xs text-stone-500">
+      <div className="mb-1 flex items-center gap-2 text-xs text-muted">
         {title} ({items.length})
         {progress && (
           <span className="ml-auto flex items-center gap-1.5">
-            <span className="h-1 w-14 overflow-hidden rounded-full bg-stone-200">
-              <span className="block h-full bg-emerald-500" style={{ width: `${(done / items.length) * 100}%` }} />
+            <span className="h-1 w-14 overflow-hidden rounded-full bg-surface-strong">
+              <span className="block h-full bg-success" style={{ width: `${(done / items.length) * 100}%` }} />
             </span>
             {done}/{items.length}
           </span>
@@ -485,18 +485,18 @@ function LinkGroup({
         {items.map((i) => {
           const { icon: Icon, color } = TYPE_META[i.type];
           return (
-            <li key={i.id} className="group flex items-center gap-1.5 rounded px-1 py-1 text-sm hover:bg-stone-50">
+            <li key={i.id} className="group flex items-center gap-1.5 rounded px-1 py-1 text-sm hover:bg-surface-hover">
               <Icon size={13} className={`shrink-0 ${color}`} />
               <button onClick={() => onOpen(i.id)} className="flex min-w-0 flex-1 items-center gap-1.5 text-left">
-                <span className="shrink-0 font-mono text-xs text-stone-400">{itemRef(project, i)}</span>
-                <span className={`truncate text-stone-700 hover:underline ${i.status === 'done' || i.status === 'cancelled' ? 'line-through opacity-60' : ''}`}>
+                <span className="shrink-0 font-mono text-xs text-muted">{itemRef(project, i)}</span>
+                <span className={`truncate text-text hover:underline ${i.status === 'done' || i.status === 'cancelled' ? 'line-through opacity-60' : ''}`}>
                   {i.title}
                 </span>
               </button>
               <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_META[i.status].dot}`} title={t(STATUS_META[i.status].labelKey)} />
               <button
                 onClick={() => onUnlink(i)}
-                className="shrink-0 p-0.5 text-stone-300 opacity-0 transition group-hover:opacity-100 hover:text-red-500"
+                className="shrink-0 p-0.5 text-faint opacity-0 transition group-hover:opacity-100 hover:text-danger"
                 aria-label={t('projects.removeLink')}
               >
                 <X size={13} />
@@ -547,7 +547,7 @@ function Discussion({ itemId, store, photoURL }: { itemId: string; store: Projec
             <button
               onClick={() => void send()}
               disabled={pending}
-              className="flex items-center gap-1.5 self-end rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-40"
+              className="flex items-center gap-1.5 self-end rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-on-primary hover:bg-primary-hover disabled:opacity-40"
             >
               <Send size={13} />
               {t('projects.send')}
@@ -555,15 +555,15 @@ function Discussion({ itemId, store, photoURL }: { itemId: string; store: Projec
           )}
         </div>
       </div>
-      {comments && comments.length === 0 && <p className="text-sm text-stone-400">{t('projects.noComments')}</p>}
+      {comments && comments.length === 0 && <p className="text-sm text-muted">{t('projects.noComments')}</p>}
       {/* Newest first, like ADO Discussion */}
       {comments &&
         [...comments].reverse().map((c) => (
           <div key={c.id} className="flex items-start gap-2">
             <AssigneeAvatar assignee={c.author} photoURL={photoURL} size={28} />
-            <div className={`flex-1 rounded-xl p-3 text-sm ${c.body.startsWith('WAITING:') ? 'bg-amber-50 ring-1 ring-amber-200' : 'bg-stone-50'}`}>
-              <div className="mb-1 flex items-center gap-2 text-xs text-stone-400">
-                <span className="font-medium text-stone-600">{t(`projects.author.${c.author}`)}</span>
+            <div className={`flex-1 rounded-xl p-3 text-sm ${c.body.startsWith('WAITING:') ? 'bg-warning-soft ring-1 ring-warning/30' : 'bg-surface-hover'}`}>
+              <div className="mb-1 flex items-center gap-2 text-xs text-muted">
+                <span className="font-medium text-muted">{t(`projects.author.${c.author}`)}</span>
                 <span>{fmt.format(c.createdAt)}</span>
               </div>
               <div className="md-content" dangerouslySetInnerHTML={{ __html: renderMarkdown(c.body) }} />

@@ -13,7 +13,7 @@ interface EventBlockProps {
 }
 
 const resizeHandleClass =
-  'absolute left-1/2 h-3 w-3 -translate-x-1/2 touch-none cursor-ns-resize rounded-full border-2 border-white bg-stone-700/80 shadow';
+  'absolute left-1/2 h-3 w-3 -translate-x-1/2 touch-none cursor-ns-resize rounded-full border-2 border-surface bg-inverse/80 shadow';
 
 // Drag (move) goes through @dnd-kit like the rest of the app's drag-and-drop.
 // Resize is a raw pointer listener instead — dnd-kit models drag-to-a-droppable,

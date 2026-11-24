@@ -18,7 +18,7 @@ interface ProjectToolbarProps {
   onToggleCancelled: () => void;
 }
 
-const selectClass = 'rounded-lg border border-stone-200 bg-white px-2 py-1 text-xs text-stone-700 outline-none focus:border-brand-400';
+const selectClass = 'rounded-lg border border-border bg-surface px-2 py-1 text-xs text-text outline-none focus:border-ring';
 
 function isTypingTarget(el: EventTarget | null): boolean {
   if (!(el instanceof HTMLElement)) return false;
@@ -84,7 +84,7 @@ export function ProjectToolbar({ project, epics, filters, onChange, onClear, sho
   return (
     <div className="relative flex w-full flex-wrap items-center gap-2 md:w-auto">
       <div className="relative w-full md:w-auto">
-        <Search size={13} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-stone-400" />
+        <Search size={13} className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted" />
         <input
           ref={searchRef}
           value={filters.query}
@@ -97,7 +97,7 @@ export function ProjectToolbar({ project, epics, filters, onChange, onClear, sho
           }}
           placeholder={t(isDesktop ? 'projects.search.placeholder' : 'projects.search.placeholderShort')}
           aria-label={t('projects.search.label')}
-          className="w-full rounded-lg md:w-44 border border-stone-200 bg-white py-1 pl-7 pr-2 text-xs outline-none focus:border-brand-400"
+          className="w-full rounded-lg md:w-44 border border-border bg-surface py-1 pl-7 pr-2 text-xs outline-none focus:border-ring"
         />
       </div>
       {isDesktop ? (
@@ -107,22 +107,22 @@ export function ProjectToolbar({ project, epics, filters, onChange, onClear, sho
           <button
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-2 py-1 text-xs text-stone-600"
+            className="flex items-center gap-1 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-muted"
           >
             <SlidersHorizontal size={13} />
             {t('projects.filter.filters')}
-            {count > 0 && <span className="rounded-full bg-brand-600 px-1.5 text-[10px] text-white">{count}</span>}
+            {count > 0 && <span className="rounded-full bg-primary px-1.5 text-[10px] text-on-primary">{count}</span>}
           </button>
           {open && <div className={`${popoverClass} absolute left-0 top-full z-40 mt-1 flex w-60 max-w-full flex-col gap-2 p-3`}>{selects}</div>}
         </div>
       )}
       {hasActiveFilters(filters) && (
-        <button onClick={onClear} className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-brand-700 hover:bg-brand-50">
+        <button onClick={onClear} className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-primary hover:bg-primary-soft">
           <X size={12} />
           {t('projects.filter.clear')}
         </button>
       )}
-      <button onClick={onToggleCancelled} className="rounded-full px-2.5 py-1 text-xs text-stone-500 transition hover:bg-stone-100">
+      <button onClick={onToggleCancelled} className="rounded-full px-2.5 py-1 text-xs text-muted transition hover:bg-surface-sunken">
         {showCancelled ? t('projects.hideCancelled') : t('projects.showCancelled')}
       </button>
     </div>

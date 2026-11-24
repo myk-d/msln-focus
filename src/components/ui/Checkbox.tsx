@@ -15,10 +15,10 @@ export function Checkbox({ checked, onChange, size = 'md' }: CheckboxProps) {
       aria-checked={checked}
       onClick={onChange}
       className={`flex ${dims} shrink-0 items-center justify-center rounded-full border-2 transition ${
-        checked ? 'border-brand-600 bg-brand-600' : 'border-stone-300 bg-white hover:border-brand-400'
+        checked ? 'border-primary bg-primary' : 'border-border-strong bg-surface hover:border-ring'
       }`}
     >
-      {checked && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+      {checked && <Check className="h-3 w-3 text-on-primary" strokeWidth={3} />}
     </button>
   );
 }

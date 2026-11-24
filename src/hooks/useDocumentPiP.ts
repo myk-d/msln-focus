@@ -36,7 +36,7 @@ export function useDocumentPiP() {
     try {
       const win = await window.documentPictureInPicture.requestWindow({ width: 260, height: 320 });
       copyStyles(win.document);
-      win.document.body.className = 'bg-stone-900 text-stone-50 antialiased';
+      win.document.body.className = 'bg-bg text-text antialiased';
       win.addEventListener('pagehide', () => setPipWindow(null));
       setPipWindow(win);
     } catch (error) {

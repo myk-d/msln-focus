@@ -11,8 +11,8 @@ export function PomodoroPage() {
   return (
     <div className="flex h-full flex-col items-center overflow-y-auto px-6 py-10">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-black tracking-tight text-stone-900">{t('pomodoro.heading')}</h1>
-        <p className="mt-1 text-sm text-stone-500">{t('pomodoro.subheading')}</p>
+        <h1 className="text-2xl font-black tracking-tight text-text">{t('pomodoro.heading')}</h1>
+        <p className="mt-1 text-sm text-muted">{t('pomodoro.subheading')}</p>
       </div>
 
       <div className="flex w-full max-w-4xl flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">

@@ -27,7 +27,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200"
+        className="flex items-center gap-1.5 rounded-full bg-surface-sunken px-3 py-1 text-xs font-medium text-muted hover:bg-surface-strong"
       >
         <ListFilter size={13} /> {t('tasks.filters')}
       </button>
@@ -40,7 +40,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
               className={`${menuItemClass} justify-between`}
             >
               <span>{t('tasks.groupBy')}</span>
-              <span className="flex items-center gap-1 text-stone-400">
+              <span className="flex items-center gap-1 text-muted">
                 {t(GROUP_BY_META[groupBy].labelKey)} <span>›</span>
               </span>
             </button>
@@ -57,7 +57,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
                     className={`${menuItemClass} justify-between`}
                   >
                     {t(GROUP_BY_META[option].labelKey)}
-                    {groupBy === option && <Check size={14} className="text-brand-600" />}
+                    {groupBy === option && <Check size={14} className="text-primary" />}
                   </button>
                 ))}
               </div>
@@ -70,7 +70,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
               className={`${menuItemClass} justify-between`}
             >
               <span>{t('tasks.sortBy')}</span>
-              <span className="flex items-center gap-1 text-stone-400">
+              <span className="flex items-center gap-1 text-muted">
                 {t(SORT_BY_META[sortBy].labelKey)} <span>›</span>
               </span>
             </button>
@@ -87,7 +87,7 @@ export function FilterMenu({ groupBy, sortBy, onSetGroupBy, onSetSortBy }: Filte
                     className={`${menuItemClass} justify-between`}
                   >
                     {t(SORT_BY_META[option].labelKey)}
-                    {sortBy === option && <Check size={14} className="text-brand-600" />}
+                    {sortBy === option && <Check size={14} className="text-primary" />}
                   </button>
                 ))}
               </div>

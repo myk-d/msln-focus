@@ -75,18 +75,18 @@ export function TaskContextMenu({
 
   return (
     <div className={`${popoverClass} absolute top-8 z-20 w-64 p-2 text-sm ${align === 'left' ? 'left-0' : 'right-0'}`} ref={ref}>
-      <div className="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.priority')}</div>
+      <div className="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.priority')}</div>
       <div className="px-2 pb-2">
         <PriorityPicker value={task.priority} onChange={onSetPriority} />
       </div>
 
-      <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.date')}</div>
+      <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.date')}</div>
       <div className="flex flex-wrap items-center gap-1.5 px-2 pb-2">
         <DatePicker value={task.dueDate} onChange={onSetDueDate} />
         <RecurrencePicker value={task.recurrence} anchorDate={task.dueDate} onChange={onSetRecurrence} />
       </div>
 
-      <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-stone-400">{t('tasks.tags')}</div>
+      <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-muted">{t('tasks.tags')}</div>
       <div className="px-2 pb-2">
         <TagPicker
           selectedTagIds={task.tagIds}
@@ -97,7 +97,7 @@ export function TaskContextMenu({
         />
       </div>
 
-      <div className="my-1 border-t border-stone-100" />
+      <div className="my-1 border-t border-border-subtle" />
 
       <button onClick={onRunFocus} className={menuItemClass}>
         <Target size={15} /> {t('tasks.runFocus')}
@@ -117,7 +117,7 @@ export function TaskContextMenu({
           <span className="flex items-center gap-2">
             <FolderInput size={15} /> {t('tasks.moveTo')}
           </span>
-          <span className="text-stone-400">›</span>
+          <span className="text-muted">›</span>
         </button>
         {showMoveTo && (
           <div className={`${popoverClass} absolute left-0 top-full mt-1 w-44 p-1`}>
@@ -128,7 +128,7 @@ export function TaskContextMenu({
                 className={`${menuItemClass} justify-between`}
               >
                 {list.name}
-                {list.id === currentListId && <span className="text-brand-500">✓</span>}
+                {list.id === currentListId && <span className="text-accent">✓</span>}
               </button>
             ))}
           </div>
@@ -139,9 +139,9 @@ export function TaskContextMenu({
         <Copy size={15} /> {t('tasks.duplicate')}
       </button>
 
-      <div className="my-1 border-t border-stone-100" />
+      <div className="my-1 border-t border-border-subtle" />
 
-      <button onClick={handleDelete} className={`${menuItemClass} text-red-500 hover:bg-red-50`}>
+      <button onClick={handleDelete} className={`${menuItemClass} text-danger hover:bg-danger-soft`}>
         <Trash2 size={15} /> {t('tasks.delete')}
       </button>
     </div>

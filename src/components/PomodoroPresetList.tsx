@@ -47,7 +47,7 @@ function PresetForm({
 }) {
   const { t } = useTranslation();
   const numberField = (label: string, key: keyof Omit<PresetFormValue, 'name' | 'autoStartNext'>, min: number, max: number) => (
-    <label className="flex items-center justify-between gap-2 text-xs text-stone-500">
+    <label className="flex items-center justify-between gap-2 text-xs text-muted">
       {label}
       <input
         type="number"
@@ -61,7 +61,7 @@ function PresetForm({
   );
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-stone-200 bg-stone-50 p-3">
+    <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface-hover p-3">
       <input
         autoFocus
         value={value.name}
@@ -75,18 +75,18 @@ function PresetForm({
         {numberField(t('pomodoro.longBreakMinutesField'), 'longBreakMinutes', 1, 60)}
         {numberField(t('pomodoro.sessionsBeforeLongField'), 'sessionsBeforeLongBreak', 1, 12)}
       </div>
-      <div className="flex items-center justify-between gap-2 border-t border-stone-200 pt-2 text-xs text-stone-500">
+      <div className="flex items-center justify-between gap-2 border-t border-border pt-2 text-xs text-muted">
         {t('pomodoro.autoStartNext')}
         <Switch checked={value.autoStartNext} onChange={(v) => onChange({ ...value, autoStartNext: v })} />
       </div>
       <div className="flex justify-end gap-2 pt-1">
-        <button onClick={onCancel} className="rounded-full px-3 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200">
+        <button onClick={onCancel} className="rounded-full px-3 py-1 text-xs font-medium text-muted hover:bg-surface-strong">
           {t('pomodoro.cancel')}
         </button>
         <button
           onClick={onSave}
           disabled={!value.name.trim()}
-          className="rounded-full bg-brand-600 px-3 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t('pomodoro.save')}
         </button>
@@ -155,8 +155,8 @@ export function PomodoroPresetList({
   return (
     <div className="w-full max-w-sm">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-400">{t('pomodoro.presets')}</h2>
-        <button onClick={startAdd} className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">{t('pomodoro.presets')}</h2>
+        <button onClick={startAdd} className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover">
           <Plus size={14} /> {t('pomodoro.add')}
         </button>
       </div>
@@ -171,25 +171,25 @@ export function PomodoroPresetList({
             <div
               key={preset.id}
               className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 transition ${
-                activePresetId === preset.id && isActive ? 'border-brand-300 bg-brand-50' : 'border-stone-200 bg-white'
+                activePresetId === preset.id && isActive ? 'border-primary/40 bg-primary-soft' : 'border-border bg-surface'
               }`}
             >
               {confirmingId === preset.id ? (
                 <div className="flex w-full items-center justify-between gap-2">
-                  <span className="text-xs text-stone-500">{t('pomodoro.stopAndStart')}</span>
+                  <span className="text-xs text-muted">{t('pomodoro.stopAndStart')}</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         onRun(preset.id);
                         setConfirmingId(null);
                       }}
-                      className="flex items-center gap-1 rounded-full bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700"
+                      className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-on-primary hover:bg-primary-hover"
                     >
                       <Check size={12} /> {t('pomodoro.yes')}
                     </button>
                     <button
                       onClick={() => setConfirmingId(null)}
-                      className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-500 hover:bg-stone-200"
+                      className="rounded-full bg-surface-sunken px-2.5 py-1 text-xs font-medium text-muted hover:bg-surface-strong"
                     >
                       <X size={12} />
                     </button>
@@ -198,8 +198,8 @@ export function PomodoroPresetList({
               ) : (
                 <>
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-stone-700">{preset.name}</div>
-                    <div className="text-xs text-stone-400">
+                    <div className="truncate text-sm font-medium text-text">{preset.name}</div>
+                    <div className="text-xs text-muted">
                       {t('pomodoro.presetSummary', {
                         focus: preset.focusMinutes,
                         shortBreak: preset.shortBreakMinutes,
@@ -211,19 +211,19 @@ export function PomodoroPresetList({
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       onClick={() => handleRunClick(preset.id)}
-                      className="flex items-center gap-1 rounded-full bg-brand-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-brand-700"
+                      className="flex items-center gap-1 rounded-full bg-primary px-2.5 py-1.5 text-xs font-medium text-on-primary hover:bg-primary-hover"
                     >
                       <Play size={12} fill="currentColor" /> {t('pomodoro.start')}
                     </button>
                     <button
                       onClick={() => startEdit(preset)}
-                      className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-600"
+                      className="rounded-full p-1.5 text-muted hover:bg-surface-sunken hover:text-text"
                     >
                       <Pencil size={14} />
                     </button>
                     <button
                       onClick={() => handleDeleteClick(preset)}
-                      className="rounded-full p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-500"
+                      className="rounded-full p-1.5 text-muted hover:bg-danger-soft hover:text-danger"
                     >
                       <Trash2 size={14} />
                     </button>

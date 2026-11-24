@@ -82,7 +82,7 @@ export function NewItemForm({ project, items, allowedTypes, defaultType, parentI
         <button
           type="submit"
           disabled={busy || !cleanTitle(title)}
-          className="rounded-xl bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-50"
+          className="rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
         >
           {t('projects.add')}
         </button>
@@ -103,7 +103,7 @@ export function NewItemForm({ project, items, allowedTypes, defaultType, parentI
         </select>
       )}
       {error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-xs text-danger">
           {t('projects.newItem.error')}
         </p>
       )}
@@ -132,7 +132,7 @@ export function NewItemButton({ project, items, types, label, onCreate, classNam
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex items-center gap-1 rounded-xl bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-700"
+        className="flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-on-primary transition hover:bg-primary-hover"
       >
         <Plus size={15} />
         {label}

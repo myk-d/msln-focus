@@ -77,7 +77,7 @@ export function ProjectsPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/40 border-t-primary" />
       </div>
     );
   }
@@ -87,17 +87,17 @@ export function ProjectsPage() {
   return (
     <div className="flex h-full">
       {/* Desktop: project list */}
-      <aside className="hidden w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-stone-200 bg-white/60 p-3 md:flex">
-        <h2 className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-stone-400">{t('projects.title')}</h2>
+      <aside className="hidden w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-surface/60 p-3 md:flex">
+        <h2 className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('projects.title')}</h2>
         {sortedProjects.map((p) => (
           <button
             key={p.id}
             onClick={() => selectProject(p.id)}
             className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition ${
-              p.id === project?.id ? 'bg-brand-100 text-brand-700' : 'text-stone-600 hover:bg-stone-100'
+              p.id === project?.id ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-surface-sunken'
             }`}
           >
-            <span className="font-mono text-xs text-stone-400">{p.key}</span>
+            <span className="font-mono text-xs text-muted">{p.key}</span>
             <span className="truncate">{p.name}</span>
           </button>
         ))}
@@ -107,12 +107,12 @@ export function ProjectsPage() {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col">
         {project ? (
           <>
-            <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-stone-200 px-4 py-3 md:px-6">
+            <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border px-4 py-3 md:px-6">
               {/* Mobile: project picker */}
               <select
                 value={project.id}
                 onChange={(e) => selectProject(e.target.value)}
-                className="rounded-lg border border-stone-200 bg-white px-2 py-1 text-sm md:hidden"
+                className="rounded-lg border border-border bg-surface px-2 py-1 text-sm md:hidden"
                 aria-label={t('projects.selectProject')}
               >
                 {sortedProjects.map((p) => (
@@ -121,8 +121,8 @@ export function ProjectsPage() {
                   </option>
                 ))}
               </select>
-              <h1 className="hidden text-lg font-semibold text-stone-800 md:block">
-                <span className="mr-2 font-mono text-sm text-stone-400">{project.key}</span>
+              <h1 className="hidden text-lg font-semibold text-text md:block">
+                <span className="mr-2 font-mono text-sm text-muted">{project.key}</span>
                 {project.name}
               </h1>
               {project.repo && (
@@ -130,20 +130,20 @@ export function ProjectsPage() {
                   href={project.repo}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600"
+                  className="flex items-center gap-1 text-xs text-muted hover:text-text"
                 >
                   <ExternalLink size={13} />
                   {t('projects.repo')}
                 </a>
               )}
-              <div role="radiogroup" aria-label={t('projects.view.label')} className="flex rounded-lg border border-stone-200 bg-white p-0.5 text-xs">
+              <div role="radiogroup" aria-label={t('projects.view.label')} className="flex rounded-lg border border-border bg-surface p-0.5 text-xs">
                 {(['board', 'backlog'] as const).map((v) => (
                   <button
                     key={v}
                     role="radio"
                     aria-checked={view === v}
                     onClick={() => setView(v)}
-                    className={`min-h-9 rounded-md px-3 py-1 transition md:min-h-0 md:px-2.5 ${view === v ? 'bg-brand-100 text-brand-700' : 'text-stone-500 hover:bg-stone-100'}`}
+                    className={`min-h-9 rounded-md px-3 py-1 transition md:min-h-0 md:px-2.5 ${view === v ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-surface-sunken'}`}
                   >
                     {t(`projects.view.${v}`)}
                   </button>
@@ -192,9 +192,9 @@ export function ProjectsPage() {
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-            <FolderKanban size={36} className="text-stone-300" />
-            <p className="text-stone-600">{t('projects.empty')}</p>
-            <p className="max-w-sm text-sm text-stone-400">{t('projects.emptyHint')}</p>
+            <FolderKanban size={36} className="text-faint" />
+            <p className="text-muted">{t('projects.empty')}</p>
+            <p className="max-w-sm text-sm text-muted">{t('projects.emptyHint')}</p>
             <div className="w-full max-w-xs md:hidden">
               <NewProjectForm existingKeys={[]} onCreate={store.createProject} onCreated={(p) => selectProject(p.id)} />
             </div>

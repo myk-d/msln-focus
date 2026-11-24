@@ -39,23 +39,25 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {children}
       {options && (
         <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="animate-popover-in w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-5 shadow-xl">
+          <div className="animate-popover-in w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl">
             <div className="mb-2 flex items-center gap-2">
-              {options.danger !== false && <AlertTriangle size={18} className="shrink-0 text-red-500" />}
-              <h2 className="text-base font-semibold text-stone-800">{options.title}</h2>
+              {options.danger !== false && <AlertTriangle size={18} className="shrink-0 text-danger" />}
+              <h2 className="text-base font-semibold text-text">{options.title}</h2>
             </div>
-            {options.message && <p className="mb-4 text-sm text-stone-500">{options.message}</p>}
+            {options.message && <p className="mb-4 text-sm text-muted">{options.message}</p>}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => settle(false)}
-                className="rounded-full px-4 py-1.5 text-sm font-medium text-stone-500 hover:bg-stone-100"
+                className="rounded-full px-4 py-1.5 text-sm font-medium text-muted hover:bg-surface-sunken"
               >
                 {options.cancelLabel ?? t('confirm.defaultCancel')}
               </button>
               <button
                 onClick={() => settle(true)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium text-white ${
-                  options.danger !== false ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-600 hover:bg-brand-700'
+                className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+                  options.danger !== false
+                    ? 'bg-danger text-surface-raised hover:bg-danger/90'
+                    : 'bg-primary text-on-primary hover:bg-primary-hover'
                 }`}
               >
                 {options.confirmLabel ?? t('confirm.defaultConfirm')}
