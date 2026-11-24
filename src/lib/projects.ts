@@ -4,8 +4,8 @@ import DOMPurify from 'dompurify';
 import type { Assignee, Priority, Project, Severity, WorkItem, WorkItemStatus, WorkItemType } from '../types';
 
 export const STATUS_ORDER: WorkItemStatus[] = ['backlog', 'todo', 'in-progress', 'in-review', 'done', 'cancelled'];
-// Board columns; `cancelled` is shown only on demand.
-export const BOARD_STATUSES: WorkItemStatus[] = ['backlog', 'todo', 'in-progress', 'in-review', 'done'];
+// Board columns; `backlog` lives in BacklogView and `cancelled` is shown only on demand.
+export const BOARD_STATUSES: WorkItemStatus[] = ['todo', 'in-progress', 'in-review', 'done'];
 export const TYPE_ORDER: WorkItemType[] = ['story', 'task', 'bug', 'epic'];
 export const SEVERITY_ORDER: Severity[] = ['1-critical', '2-high', '3-medium', '4-low'];
 export const ASSIGNEE_ORDER: Assignee[] = ['me', 'claude', 'antigravity'];
@@ -152,6 +152,7 @@ export function buildTaskboard(items: WorkItem[], project: Pick<Project, 'key'> 
     const counted = children.filter((c) => c.status !== 'cancelled');
     for (const c of sortItems(children)) {
       if (!childFilter(c)) continue;
+      if (c.status === 'backlog') continue;
       if (c.status === 'cancelled' && !showCancelled) continue;
       byStatus[c.status].push(c);
     }
