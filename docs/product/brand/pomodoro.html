@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Axo · Помодоро</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Manrope:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/brand.css">
+<link rel="icon" href="assets/axo-icon.svg">
+</head>
+<body>
+<div class="page">
+<nav class="site-nav" aria-label="Бренд Axo"><a class="brand" href="index.html"><img src="assets/axo-icon.svg" width="28" height="28" alt="">Axo brand</a><a class="nl" href="index.html">Огляд</a><a class="nl" href="foundations.html">Основи</a><a class="nl" href="logo.html">Логотип і axl.</a><a class="nl" href="pomodoro.html" aria-current="page">Помодоро</a><a class="nl" href="board.html">Дошка</a><a class="nl" href="detail.html">Деталі задачі</a><a class="nl" href="landing-uk.html">Лендінг UK</a><a class="nl" href="landing-en.html">Лендінг EN</a></nav>
+<section class="top"><div><div class="eyebrow">FOC-42 · Бренд Axo · v1.0 · 24 листопада 2026</div><h1>Помодоро</h1><p>Таймер прив’язаний до задачі AXO-17; праворуч пресети, статистика дня та PiP-вікно в справжньому розмірі.</p></div></section>
+<section class="group" id="pomodoro"><header><h2>Помодоро</h2><p></p></header><div class="row"><div class="frame w-d"><div class="frame-label"><b>Pomodoro — desktop</b><span>1440 × 900 · light</span></div><div class="ab-wrap"><div class="ab " data-w="1440" id="d"></div></div></div><div class="frame w-m"><div class="frame-label"><b>Pomodoro — mobile</b><span>390 × 844</span></div><div class="ab-wrap"><div class="ab m" data-w="390" id="m"></div></div></div></div></section>
+<nav class="pager" aria-label="Сторінки"><a href="logo.html"><span>← Назад</span>Логотип і axl.</a><a href="board.html" style="text-align:right"><span>Далі →</span>Дошка</a></nav>
+</div>
+<script src="assets/brand.js"></script>
+<script>
+pomoDesktop(document.getElementById('d'));pomoMobile(document.getElementById('m'));
+AxoFit();
+</script>
+</body>
+</html>
