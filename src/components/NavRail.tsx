@@ -7,6 +7,7 @@ import { useConfirm } from '../context/ConfirmContext';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { menuItemClass, popoverClass } from '../lib/ui';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-medium transition md:w-full ${
@@ -95,6 +96,11 @@ function AccountMenu({ variant }: { variant: 'rail' | 'bar' }) {
           <div className={`${menuItemClass} justify-between`}>
             <span className="text-muted">{t('nav.language')}</span>
             <LanguageSwitcher />
+          </div>
+
+          <div className={`${menuItemClass} justify-between hover:bg-transparent`}>
+            <span className="text-muted">{t('nav.theme')}</span>
+            <ThemeSwitcher />
           </div>
 
           <div className="my-1 border-t border-border-subtle" />

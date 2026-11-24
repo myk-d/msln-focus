@@ -138,7 +138,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
                         ? 'border border-ring text-primary'
                         : isCurrentMonth
                           ? 'text-text hover:bg-surface-sunken'
-                          : 'text-faint hover:bg-surface-hover'
+                          : 'text-muted hover:bg-surface-hover'
                   }`}
                 >
                   {d.date()}

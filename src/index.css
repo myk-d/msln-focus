@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Axo design tokens (docs/product/brand, focus-rebrand.md §6). Light values live in @theme so
-   Tailwind generates bg-*/text-*/border-* utilities that read var(--color-*); the dark values
+   Tailwind generates bg-, text- and border- utilities that read the --color- variables; the dark values
    below only redefine the variables, so every utility follows the active theme. */
 @theme {
   --color-bg: #F5F1E8;

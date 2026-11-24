@@ -14,6 +14,10 @@ const en: Translations = {
     signOut: 'Sign out',
     account: 'Account',
     language: 'Language',
+    theme: 'Theme',
+    themeSystem: 'System',
+    themeLight: 'Light',
+    themeDark: 'Dark',
   },
   welcome: {
     tagline: 'Tasks, calendar, and a Pomodoro timer — in one app, synced with your Google account.',

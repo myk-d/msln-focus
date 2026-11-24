@@ -96,8 +96,8 @@ function DayCell({
           isToday
             ? 'flex h-5 w-5 items-center justify-center rounded-full bg-primary text-on-primary'
             : isCurrentMonth
-              ? 'text-muted'
-              : 'text-faint'
+              ? 'text-text'
+              : 'text-muted'
         }`}
       >
         {dayjs(dateKey).date()}
