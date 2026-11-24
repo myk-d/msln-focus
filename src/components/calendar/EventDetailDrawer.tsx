@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '../ui/DatePicker';
@@ -6,6 +6,7 @@ import { RecurrencePicker } from '../ui/RecurrencePicker';
 import { Switch } from '../ui/Switch';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { useAutoResizeTextarea } from '../../hooks/useAutoResizeTextarea';
 import { inputClass } from '../../lib/ui';
 import { TAG_COLOR_META, TAG_COLOR_ORDER, minutesToTime, timeToMinutes } from '../../lib/utils';
@@ -61,6 +62,7 @@ export function EventDetailDrawer({
   const [scope, setScope] = useState<RecurrenceScope>('this');
   const [error, setError] = useState('');
   const confirm = useConfirm();
+  const panelRef = useRef<HTMLElement>(null);
   useBodyScrollLock(true);
 
   // True for a series master (opened via a virtual occurrence, which carries
@@ -170,6 +172,11 @@ export function EventDetailDrawer({
     }
   };
 
+  useFocusTrap(panelRef, {
+    onEscape: () => void handleClose(),
+    initialFocusRef: titleRef,
+  });
+
   const handleDelete = async () => {
     if (!event) return;
     const effectiveScope: RecurrenceScope = isSeriesRelated ? scope : 'this';
@@ -184,7 +191,14 @@ export function EventDetailDrawer({
   return (
     <>
       <div onClick={handleClose} className="animate-fade-in fixed inset-0 z-30 bg-black/20 backdrop-blur-sm" />
-      <aside className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-border bg-surface px-5 py-6 md:w-1/2 md:max-w-2xl">
+      <aside
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={event ? event.title : t('calendar.newEvent')}
+        tabIndex={-1}
+        className="animate-slide-in-right fixed inset-y-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-border bg-surface px-5 py-6 outline-none md:w-1/2 md:max-w-2xl"
+      >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
           {event ? t('calendar.event') : t('calendar.newEvent')}
@@ -208,7 +222,6 @@ export function EventDetailDrawer({
       <textarea
         ref={titleRef}
         rows={1}
-        autoFocus
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => {

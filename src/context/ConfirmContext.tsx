@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ConfirmOptions {
   title: string;
@@ -20,6 +21,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const [options, setOptions] = useState<ConfirmOptions | null>(null);
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const confirm = useCallback<ConfirmFn>((next) => {
     return new Promise((resolve) => {
@@ -34,12 +36,21 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     setOptions(null);
   };
 
+  useFocusTrap(dialogRef, { active: Boolean(options), onEscape: () => settle(false) });
+
   return (
     <ConfirmContext.Provider value={confirm}>
       {children}
       {options && (
         <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="animate-popover-in w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl">
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={options.title}
+            tabIndex={-1}
+            className="animate-popover-in w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl outline-none"
+          >
             <div className="mb-2 flex items-center gap-2">
               {options.danger !== false && <AlertTriangle size={18} className="shrink-0 text-danger" />}
               <h2 className="text-base font-semibold text-text">{options.title}</h2>
